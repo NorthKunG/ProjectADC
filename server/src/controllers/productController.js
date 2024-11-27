@@ -34,6 +34,7 @@ const createProduct = async (req, res) => {
             status: 'error',
             message: error.message
         });
+        return;
     }
 };
 
@@ -50,6 +51,7 @@ const getProductById = async (req, res) => {
             status: 'error',
             message: error.message
         });
+        return
     }
 };
 
@@ -84,6 +86,7 @@ const updateProduct = async (req, res) => {
             status: 'error',
             message: error.message
         });
+        return;
     }
 };
 
