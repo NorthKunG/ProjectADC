@@ -17,6 +17,11 @@ const cartItemSchema = new mongoose.Schema({
 
 // Cart schema
 const cartSchema = mongoose.Schema({
+    userId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User', 
+        required: true 
+    },
     items: [cartItemSchema],
     totalPrice: {
         type: Number,
@@ -25,4 +30,4 @@ const cartSchema = mongoose.Schema({
 });
 
 // Export a model
-module.exports = mongoose.Schema('Cart', cartSchema);
+module.exports = mongoose.model('Cart', cartSchema);
