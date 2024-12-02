@@ -11,13 +11,22 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Email is required'],
         unique: true,
-        lowercase: true
+        trim: true,
+        match: [/.+\@.+\..+/, 'Please fill a valid email address']
     },
     password: {
         type: String,
-        required: [true, 'Password is required'],
-        trim: true
+        required: [true, 'Password is required']
     },
+    phoneNumber: {
+        type: String,
+        required: [true, 'Phone number is required'],
+        match: [/^(\+?\d{1,3})?\d{10}$/, 'Invalid phone number format']
+    },
+    address: [{
+        type: String,
+        required: [true, 'Address is required']
+    }],
     role: {
         type: String,
         enum: ['user', 'admin'],
