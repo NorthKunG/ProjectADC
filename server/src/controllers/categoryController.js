@@ -1,5 +1,7 @@
+// Require a category model
 const Category = require('../models/categoryModel');
 
+// Get all category
 const getCategories = async (req, res) => {
     try {
         const categories = await Category.find();
@@ -17,6 +19,7 @@ const getCategories = async (req, res) => {
     }
 };
 
+// Create a new category
 const createCategory = async (req, res) => {
     try {
         const createCategory = await Category.create(req.body);
@@ -33,6 +36,7 @@ const createCategory = async (req, res) => {
     }
 };
 
+// Get a category by id
 const getCategoryById = async (req, res) => {
     try {
         const category = await Category.findById(req.params.id);
@@ -49,6 +53,7 @@ const getCategoryById = async (req, res) => {
     }
 };
 
+// Delete a category by id
 const deleteCategory = async (req, res) => {
     try {
         const deleteCategory = await Category.findByIdAndDelete(req.params.id);
@@ -65,6 +70,7 @@ const deleteCategory = async (req, res) => {
     }
 };
 
+// Update a category by id
 const updateCategory = async (req, res) => {
     try {
         const updateCategory = await Category.findByIdAndUpdate(req.params.id, req.body);
@@ -82,6 +88,7 @@ const updateCategory = async (req, res) => {
     }
 };
 
+// Export an api
 module.exports = {
     getCategories,
     createCategory,

@@ -4,7 +4,7 @@ const productController = require('../controllers/productController');
 const cache = require('../middleware/cache');
 const auth = require('../middleware/auth');
 
-router.get('/', cache(300), productController.getProducts);
+router.get('/', productController.getProducts);
 router.post('/', auth, productController.createProduct);
 router.get('/:id', productController.getProductById);
 router.delete('/:id', productController.deleteProduct);
