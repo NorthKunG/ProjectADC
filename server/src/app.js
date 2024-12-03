@@ -9,6 +9,9 @@ const authRoutes = require('./routes/authRoutes');
 // Require a cart routes
 const cartRoutes = require('./routes/cartRoutes');
 
+// Require an order routes
+const orderRoutes = require('./routes/orderRoutes');
+
 const app = express();
 
 app.use(cors());
@@ -20,6 +23,9 @@ app.use('/api/auth', authRoutes);
 
 // Use api cart
 app.use('/api/carts', cartRoutes);
+
+// Use api order
+app.use('/api/orders', orderRoutes);
 
 app.use((err, req, res, next) => {
     req.status(err.status || 500).json({
