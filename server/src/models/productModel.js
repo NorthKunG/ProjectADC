@@ -13,11 +13,17 @@ const productSchema = new mongoose.Schema({
     },
     category: {
         type: mongoose.Schema.Types.ObjectId,
+        required: [true, 'Category is required'],
         ref: 'Category'
     },
-    inStock: {
-        type: Boolean,
-        default: true
+    distributor: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: [true, 'Distributor is required'],
+        ref: 'Distributor'
+    },
+    image: {
+        type: String,
+        required: false
     }
 }, {
     timestamps: true

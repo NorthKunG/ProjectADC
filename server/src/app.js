@@ -12,10 +12,14 @@ const cartRoutes = require('./routes/cartRoutes');
 // Require an order routes
 const orderRoutes = require('./routes/orderRoutes');
 
+// Require a distributor routes
+const distributorRoutes = require('./routes/distributorRoutes');
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -26,6 +30,9 @@ app.use('/api/carts', cartRoutes);
 
 // Use api order
 app.use('/api/orders', orderRoutes);
+
+// Use api distributor
+app.use('/api/distributors', distributorRoutes);
 
 app.use((err, req, res, next) => {
     req.status(err.status || 500).json({
