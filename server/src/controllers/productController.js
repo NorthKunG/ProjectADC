@@ -8,7 +8,7 @@ const multer = require('multer');
 const path = require('path');
 
 // Require a product model
-const Product  = require('../models/productModel');
+const Product = require('../models/productModel');
 
 const uploadDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -61,6 +61,27 @@ const getProducts = async (req, res) => {
         });
     }
 };
+
+// Get products by category
+const getProductByCategory = async (req, res) => {
+    const { categoryId } = req.params;
+
+    try {
+        const products = await Product.find({ category: categoryId })
+            .populate('category')
+            .populate('distributor')
+            .sort('-createAt');
+        return res.status(200).json({
+            status: 'success',
+            products
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'error',
+            message: error.message
+        });
+    }
+}
 
 // Create a new product
 const createProduct = async (req, res) => {
@@ -152,11 +173,34 @@ const updateProduct = async (req, res) => {
     }
 };
 
+// Search product by name
+const searchProduct = async (req, res) => {
+    const { q } = req.query;
+
+    try {
+        const results = await Product.find({
+            name: { $regex: q, $options: 'i' }
+        });
+
+        return res.status(200).json({
+            status: 'success',
+            results
+        });
+    } catch (error) {
+        return res.status(400).json({
+            status: 'error',
+            message: error.message
+        });
+    }
+};
+
 // Exports an api
 module.exports = {
     getProducts,
     createProduct,
     getProductById,
     deleteProduct,
-    updateProduct
+    updateProduct,
+    searchProduct,
+    getProductByCategory
 }
