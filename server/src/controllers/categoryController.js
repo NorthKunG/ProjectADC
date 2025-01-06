@@ -1,6 +1,9 @@
 // Require a category model
 const Category = require('../models/categoryModel');
 
+// Require a subcategory model
+const Subcategory = require('../models/subcategoryModel');
+
 // Get all category
 const getCategories = async (req, res) => {
     try {
@@ -25,7 +28,8 @@ const createCategory = async (req, res) => {
         const createCategory = await Category.create(req.body);
         res.status(200).json({
             status: 'success',
-            message: 'Create a new category successfully'
+            message: 'Create a new category successfully',
+            createCategory
         });
         return;
     } catch (error) {
@@ -88,11 +92,42 @@ const updateCategory = async (req, res) => {
     }
 };
 
+// Add subcategory 
+const addSubcategory = async (req, res) => {
+    const { name, categoryId } = req.body; // รับข้อมูล name และ categoryId จาก request body
+
+    try {
+        // ตรวจสอบว่ามี Category อยู่ในระบบหรือไม่
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+
+        // สร้าง Subcategory ใหม่
+        const subcategory = new Subcategory({
+            name: name,
+            category: categoryId
+        });
+
+        // บันทึก Subcategory ใหม่
+        await subcategory.save();
+
+        return res.status(201).json({
+            message: 'Subcategory added successfully',
+            subcategory
+        });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+
 // Export an api
 module.exports = {
     getCategories,
     createCategory,
     getCategoryById,
     deleteCategory,
-    updateCategory
+    updateCategory,
+    addSubcategory
 }
