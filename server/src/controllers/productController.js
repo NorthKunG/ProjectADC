@@ -47,10 +47,10 @@ const getProducts = async (req, res) => {
     try {
         // เรียกดูข้อมูลสินค้าทั้งหมด
         const products = await Product.find().populate('category').populate('subcategory');
-        return res.status(200).json(
-            { count: products.length },
+        return res.status(200).json({
+            count: products.length,
             products
-        );
+        });
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
@@ -396,6 +396,82 @@ const filterProduct = async (req, res) => {
     } catch (error) {
         return res.status(400).json({ message: error.message });
     }
+};
+
+// ระบบเปรียบเทียบสินค้า
+const compareProduct = async (req, res) => {
+    // รับข้อมูล product1, product2, จาก request query
+    const { name1, name2 } = req.query;
+
+    try {
+        // ตรวจสอบว่าเป็นสินค้าตัวเดียวกันหรือไม่
+        if (name1 === name2) {
+            return res.status(400).json({ message: 'คุณไม่สามารถเปรียบเทียบสินค้าตัวเดียวกันได้' });
+        }
+
+        // ตรวจสอบว่ามีสินค้าชิ้นนี้หรือไม่
+        const product1 = await Product.findOne({ name: name1 });
+        if (!product1) {
+            return res.status(404).json({ message: `ไม่พบสินค้าชิ้นนี้ '${name1}'` });
+        }
+
+        // ตรวจสอบว่ามีสินค้าชิ้นนี้หริอไม่
+        const product2 = await Product.findOne({ name: name2 });
+        if (!product2) {
+            return res.status(404).json({ message: `ไม่พบสินค้าชิ้นนี้ '${name2}'` });
+        }
+
+        // ตรวจสอบว่าสินค้าชิ้นที่ 1 กับสินค้าชิ้นที่ 2 อยู่ใน Catetgory เดียวกันหรือไม่
+        if (!product1.category.equals(product2.category)) {
+            return res.status(400).json({ message: 'สินค้าทั้ง 2 ชิ้นไม่ได้อยู่ในหมวดหมู่เดียวกันจึงไม่สามารถเปรียบเทียบกันได้' });
+        }
+
+        // ตรวจสอบว่าสินค้าชิ้นที่ 1 กับสินค้าชิ้นที่ 2 อยู่ใน Subcategory เดียวกันหรือไม่
+        if (!product1.subcategory.equals(product2.subcategory)) {
+            return res.status(400).json({ message: 'สินค้าทั้ง 2 ชิ้นไม่ได้อยู่ในประเภทเดียวกันจึงไม่สามารถเปรียบเทียบกันได้' });
+        }
+
+        // ตรวจสอบว่าสินค้าทั้ง 2 ตัวมีจำนวน features เท่ากันหรือไม่
+        if (product1.features.length !== product2.features.length) {
+            return res.status(400).json({ message: 'Features ของสินค้าทั้ง 2 ไม่เท่ากันจึงไม่สามารถเปรียบเทียบกันได้' });
+        }
+
+        // ตรวจสอบว่าชื่อ features ของสินค้าทั้ง 2 เหมือนกันหรือไม่
+        for (let i = 0; i < Math.max(product1.features.length, product2.features.length); i++) {
+            // แทนค่า feature สินค้าทั้ง 2
+            const feature1 = product1.features[i];
+            const feature2 = product2.features[i];
+
+            // ตรวจสอบว่าฟีเจอร์ทั้งสองมีค่าอยู่
+            if (!feature1 || !feature2 || feature1['name'] !== feature2['name']) {
+                return res.status(400).json({ message: 'Features ของสินค้าทั้ง 2 ไม่เหมือนกันจึงไม่สามารถเปรียบเทียบกันได้' });
+            }
+        }
+
+        // เก็บรายการความแตกต่างทั้งหมด
+        const differences = [];
+
+        // ตรวจสอบว่ามีสินค้าทั้ง 2 ต่างกันอย่างไรบ้าง
+        for (let i = 0; i < Math.max(product1.features.length, product2.features.length); i++) {
+            // แทนค่า feature สินค้าทั้ง 2
+            const feature1 = product1.features[i];
+            const feature2 = product2.features[i];
+
+            // ตรวจสอบว่าฟีเจอร์ทั้งสองมีค่าอยู่
+            if (!feature1 || !feature2 || feature1['description'] !== feature2['description']) {
+                differences.push({
+                    feature1: feature1,
+                    feature2: feature2
+                });
+            }
+        }
+        return res.status(200).json({
+            message: 'Features ของสินค้าทั้ง 2 มีความแตกต่างกัน',
+            differences: differences
+        });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
 }
 
 // Exports an api
@@ -406,5 +482,6 @@ module.exports = {
     deleteProduct,
     updateProduct,
     searchProductByName,
-    filterProduct
+    filterProduct,
+    compareProduct
 }
