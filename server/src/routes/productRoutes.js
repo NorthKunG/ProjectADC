@@ -5,11 +5,10 @@ const cache = require('../middleware/cache');
 const auth = require('../middleware/auth');
 
 router.get('/', productController.getProducts);
-router.post('/', /* auth ,*/ productController.createProduct);
-router.get('/search', productController.searchProduct);
-router.get('/:id', productController.getProductById);
+router.post('/', /* auth ,*/ productController.addProduct);
+router.get('/search', productController.searchProductByName);
+router.get('/filter', productController.filterProduct);
+router.get('/:id', productController.getProduct);
 router.delete('/:id', productController.deleteProduct);
 router.put('/:id', productController.updateProduct);
-router.get('/spec/:categoryId', productController.getSpecs);
-
 module.exports = router;

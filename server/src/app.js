@@ -39,6 +39,10 @@ app.use('/api/orders', orderRoutes);
 // Use api distributor
 app.use('/api/distributors', distributorRoutes);
 
+// ดึง API subcategory
+const subcategoryRoutes = require('./routes/subcategoryRoutes');
+app.use('/subcategories', subcategoryRoutes);
+
 app.use((err, req, res, next) => {
     req.status(err.status || 500).json({
         message: err || 'เกิดข้อผิดพลาด'
