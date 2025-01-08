@@ -1,19 +1,16 @@
-// Require an express
-const express = require('express');
-
-// Pull router function from express
-const router = express.Router();
-
-// Require a middleware auth
-const auth = require('../middleware/auth');
-
-// Require a distributor controller
+// ดึงตัวควบคุม Distributor จากไฟล์ distributorController.js
 const distributorController = require('../controllers/distributorController');
 
-// Routers
-router.get('/', distributorController.getDistributors);
-router.post('/', distributorController.createDistributor);
-router.get('/:id', distributorController.getDistributorById);
+// ดึง Dependencies จาก package
+const express = require('express');
+const router = express.Router();
 
-// Export a route
+// เชื่อมต่อเส้นทาง (Path) กับ ตัวควบคุม (Controller)
+router.get('/', distributorController.getDistributors);
+router.post('/', distributorController.addDistributor);
+router.get('/:id', distributorController.getDistributor);
+router.delete('/:id', distributorController.deleteDistributor);
+router.put('/:id', distributorController.updateDistributor);
+
+// ส่งออก Module
 module.exports = router;

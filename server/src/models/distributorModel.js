@@ -1,7 +1,7 @@
-// Require a mongoose
+// ดึง Dependencies จาก package
 const mongoose = require('mongoose');
 
-// Distributor schema
+// Schema ผู้จัดจำหน่าย (Distributor)
 const distributorSchema = new mongoose.Schema({
     name: {
         type: String,

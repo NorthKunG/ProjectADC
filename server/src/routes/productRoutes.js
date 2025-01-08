@@ -12,4 +12,6 @@ router.get('/compare', productController.compareProduct);
 router.get('/:id', productController.getProduct);
 router.delete('/:id', productController.deleteProduct);
 router.put('/:id', productController.updateProduct);
+router.post('/upload', productController.uploadFile);
+
 module.exports = router;

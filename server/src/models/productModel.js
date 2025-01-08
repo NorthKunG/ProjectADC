@@ -33,6 +33,11 @@ const productSchema = new mongoose.Schema({
             message: 'Subcategory does not belong to the selected Category'
         }
     },
+    distributor: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: [true, 'Product distributor is required.'],
+        ref: 'Distributor'
+    },
     features: [{
         name: {
             type: String,
