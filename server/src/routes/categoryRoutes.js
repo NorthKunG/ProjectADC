@@ -5,10 +5,9 @@ const cache = require('../middleware/cache');
 const auth = require('../middleware/auth');
 
 router.get('/', categoryController.getCategories);
-router.post('/', categoryController.createCategory);
-router.get('/:id', categoryController.getCategoryById);
+router.post('/', categoryController.addCategory);
+router.get('/:id', categoryController.getCategory);
 router.delete('/:id', categoryController.deleteCategory);
 router.put('/:id', categoryController.updateCategory);
-router.post('/subcategory', categoryController.addSubcategory);
-
+router.post('/uploadFile', categoryController.uploadFile);
 module.exports = router;

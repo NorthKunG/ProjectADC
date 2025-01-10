@@ -12,6 +12,7 @@ router.get('/:id', subcategory.getSubcategory);
 router.post('/', subcategory.addSubcategory);
 router.delete('/:id', subcategory.deleteSubcategory);
 router.put('/:id', subcategory.updateSubcategory);
+router.post('/uploadFile', subcategory.uploadFile);
 
 // ส่งออก Module
 module.exports = router;

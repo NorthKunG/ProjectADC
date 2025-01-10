@@ -15,7 +15,7 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// ตั้งค่าการอัพโหลดรูปสินค้า
+// ตั้งค่าการอัพโหลดไฟล์สินค้า
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         // กำหนดโฟลเดอร์ที่ใช้เก็บรูปสินค้า
@@ -688,29 +688,29 @@ const compareProduct = async (req, res) => {
     }
 };
 
-// การจัดการการอัปโหลดไฟล์ .txt
-const uploadTxt = multer({
+// การจัดการการอัปโหลดไฟล์ .json
+const uploadJson = multer({
     storage,
     fileFilter: (req, file, cb) => {
-        if (file.mimetype === 'text/plain') {
+        if (file.mimetype === 'application/json') {
             cb(null, true);
         } else {
-            cb(new Error('Only .txt files are allowed'), false);
+            cb(new Error('Only .json files are allowed'), false);
         }
     }
 }).single('file');
 
-// ระบบอัพโหลดข้อมูลผ่านไฟล์ .txt
+// ระบบอัพโหลดข้อมูลผ่านไฟล์ .json
 const uploadFile = async (req, res) => {
     // ใช้ multer สำหรับการอัปโหลดไฟล์
-    uploadTxt(req, res, async (error) => {
+    uploadJson(req, res, async (error) => {
         if (error) {
             return res.status(404).json({ message: 'ระบบเกิดข้อผิดพลาด' });
         }
 
         // ตรวจสอบว่ามีไฟล์ที่อัปโหลดมาหรือไม่
         if (!req.file) {
-            return res.status(400).json({ message: 'กรุณาอัปโหลดไฟล์ .txt' });
+            return res.status(400).json({ message: 'กรุณาอัปโหลดไฟล์ .json' });
         }
 
         // รับข้อมูลไฟล์จาก request file
@@ -719,28 +719,57 @@ const uploadFile = async (req, res) => {
         try {
             // อ่านไฟล์
             const fileContent = fs.readFileSync(filePath, 'utf8');
+
             // แปลงข้อมูลให้เป็น JSON
-            const data = JSON.parse(fileContent);
+            const parsedData = JSON.parse(fileContent);
+
             // ตรวจสอบข้อมูลในไฟล์ (optional)
-            if (!Array.isArray(data) || data.length === 0) {
+            if (!Array.isArray(parsedData) || parsedData.length === 0) {
+                // ลบไฟล์ออกเมื่อข้อมูลไม่ถูกต้อง
+                fs.unlinkSync(filePath);
                 return res.status(400).json({ message: 'ไฟล์ไม่มีข้อมูลสินค้า หรือรูปแบบข้อมูลไม่ถูกต้อง' });
             }
 
-            // เพิ่มข้อมูลลง Database
-            const products = data.map(item => ({
-                ...item
-            }));
+            // ดึงข้อมูลจาก Database
+            const existingProducts = await Product.find({}, { name: 1 });
+            const existingNames = existingProducts.map(product => product.name);
 
-            // บันทึกลงใน Database
-            const insertProducts = await Product.insertMany(products);
+            // ตรวจสอบข้อมูลที่ซ้ำกัน
+            const duplicateEntries = [];
+            const newEntries = [];
+            parsedData.forEach(item => {
+                if (existingNames.includes(item.name)) {
+                    duplicateEntries.push(item.name);
+                } else {
+                    newEntries.push(item);
+                }
+            });
+
+            // ตรวจสอบว่าข้อมูลทั้งหมดซ้ำกับใน Database
+            if (newEntries.length === 0) {
+                // ลบไฟล์หลังใช้งาน
+                fs.unlinkSync(filePath);
+                return res.status(400).json({ message: 'ข้อมูลสินค้าของคุณทั้งหมดมีอยู่ในระบบแล้ว' });
+            }
+
+            // นำเข้าข้อมูลใหม่ทั้งหมด
+            const addedProducts = await Product.insertMany(newEntries);
 
             // ลบไฟล์หลังใช้งาน
             fs.unlinkSync(filePath);
+
             return res.status(200).json({
                 message: 'เพิ่มสินค้าลงในระบบแล้ว',
-                products
+                addedProducts,
+                duplicateEntries,
+                totalAdded: addedProducts.length,
+                totalDuplicates: duplicateEntries.length
             });
         } catch (error) {
+            // ลบไฟล์กรณีเกิดข้อผิดพลาด
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
             return res.status(400).json({ message: error.message });
         }
     });

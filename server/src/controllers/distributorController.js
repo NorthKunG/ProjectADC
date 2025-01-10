@@ -1,3 +1,8 @@
+// ดึง Dependencies จาก package
+const fs = require('fs');
+const multer = require('multer');
+const path = require('path');
+
 // ดึงโมเดลที่เกี่ยวข้องสินค้าจากโฟลเดอร์ models
 const Distributor = require('../models/distributorModel');
 
@@ -154,6 +159,111 @@ const updateDistributor = async (req, res) => {
     }
 };
 
+// สร้าเส้นทางไปยังโฟลเดอร์ uploads
+const uploadDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// ตั้งค่าการอัพโหลดไฟล์
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        // กำหนดโฟลเดอร์ที่ใช้เก็บไฟล์
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        // สร้างชื่อไฟล์ที่ไม่ซ้ำกันโดยใช้ไทม์สแตมป์และตัวเลขสุ่ม
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, `${uniqueSuffix}${path.extname(file.originalname)}`);
+    }
+});
+
+// การจัดการการอัปโหลดไฟล์ .json
+const uploadJson = multer({
+    storage,
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'application/json') {
+            cb(null, true);
+        } else {
+            cb(new Error('Only .json files are allowed'), false);
+        }
+    }
+}).single('file');
+
+// ระบบอัพโหลดข้อมูลผ่านไฟล์ .json
+const uploadFile = async (req, res) => {
+    // ใช้ multer สำหรับการอัปโหลดไฟล์
+    uploadJson(req, res, async (error) => {
+        if (error) {
+            return res.status(404).json({ message: 'ระบบเกิดข้อผิดพลาด' });
+        }
+
+        // ตรวจสอบว่ามีไฟล์ที่อัปโหลดมาหรือไม่
+        if (!req.file) {
+            return res.status(400).json({ message: 'กรุณาอัปโหลดไฟล์ .json' });
+        }
+
+        // รับข้อมูลไฟล์จาก request file
+        const filePath = req.file.path;
+
+        try {
+            // อ่านไฟล์
+            const fileContent = fs.readFileSync(filePath, 'utf8');
+
+            // แปลงข้อมูลจาก JSON string เป็น object/array
+            const parsedData = JSON.parse(fileContent);
+
+            // ตรวจสอบข้อมูลในไฟล์ (optional)
+            if (!Array.isArray(parsedData) || parsedData.length === 0) {
+                // ลบไฟล์ออกเมื่อข้อมูลไม่ถูกต้อง
+                fs.unlinkSync(filePath);
+                return res.status(400).json({ message: 'ไฟล์ไม่มีข้อมูลผู้จัดจำหน่ายหรือรูปแบบข้อมูลไม่ถูกต้อง' });
+            }
+
+            // ดึงข้อมูลจาก Database
+            const existingDistributors = await Distributor.find({}, { name: 1 }); // ดึงเฉพาะชื่อผู้จัดจำหน่าย
+            const existingNames = existingDistributors.map(distributor => distributor.name);
+
+            // ตรวจสอบข้อมูลที่ซ้ำกัน
+            const duplicateEntries = [];
+            const newEntries = [];
+            parsedData.forEach(item => {
+                if (existingNames.includes(item.name)) {
+                    duplicateEntries.push(item.name);
+                } else {
+                    newEntries.push(item);
+                }
+            });
+
+            // ตรวจสอบว่าข้อมูลทั้งหมดซ้ำกับใน Database
+            if (newEntries.length === 0) {
+                // ลบไฟล์หลังใช้งาน
+                fs.unlinkSync(filePath);
+                return res.status(400).json({ message: 'ข้อมูลผู้จัดจำหน่ายของคุณทั้งหมดมีอยู่ในระบบแล้ว' });
+            }
+
+            // นำเข้าข้อมูลใหม่ทั้งหมด
+            const addedDistributors = await Distributor.insertMany(newEntries);
+
+            // ลบไฟล์หลังใช้งาน
+            fs.unlinkSync(filePath);
+
+            return res.status(200).json({
+                message: 'เพิ่มผู้จัดจำหน่ายสินค้าลงในระบบแล้ว',
+                addedDistributors,
+                duplicateEntries,
+                totalAdded: addedDistributors.length,
+                totalDuplicates: duplicateEntries.length
+            });
+        } catch (error) {
+            // ลบไฟล์กรณีเกิดข้อผิดพลาด
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+            return res.status(400).json({ message: error.message });
+        }
+    });
+};
 
 // ส่งออก Module
 module.exports = {
@@ -161,5 +271,6 @@ module.exports = {
     addDistributor,
     getDistributor,
     deleteDistributor,
-    updateDistributor
+    updateDistributor,
+    uploadFile
 }

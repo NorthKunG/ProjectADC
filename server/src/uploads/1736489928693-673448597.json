@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Distributor A",
+        "email": "distributorP@gmail.com",
+        "address": "addressA",
+        "contactNumber": "011-111-1111"
+    },
+    {
+        "name": "Distributor B",
+        "email": "distributorP@gmail.com",
+        "address": "addressB",
+        "contactNumber": "022-222-2222"
+    }
+]

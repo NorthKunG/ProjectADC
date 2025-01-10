@@ -1,0 +1,89 @@
+[
+    {
+        "name": "Product 1",
+        "price": 9000,
+        "category" : "6780993d13b0e5b45731a618",
+        "subcategory": "67809a0f4c933bb035f9e571",
+        "distributor": "677e69a304cd9dbd7453d07d",
+        "features": [
+            {
+                "name": "Feature 1",
+                "description": "Description 1"
+            },
+            {
+                "name": "Feature 2",
+                "description": "Description 2"
+            },
+            {
+                "name": "Feature 3",
+                "description": "Description 3"
+            },
+            {
+                "name": "Feature 4",
+                "description": "Description 4"
+            },
+            {
+                "name": "Feature 5",
+                "description": "Description 5"
+            }
+        ]
+    },
+    {
+        "name": "Product 2",
+        "price": 9500,
+        "category" : "6780993d13b0e5b45731a618",
+        "subcategory": "67809a1e4c933bb035f9e575",
+        "distributor": "677e69b204cd9dbd7453d080",
+        "features": [
+            {
+                "name": "Feature 1",
+                "description": "Description 1"
+            },
+            {
+                "name": "Feature 2",
+                "description": "Description 2"
+            },
+            {
+                "name": "Feature 3",
+                "description": "Description 3"
+            },
+            {
+                "name": "Feature 4",
+                "description": "Description 4"
+            },
+            {
+                "name": "Feature 5",
+                "description": "Description 5"
+            }
+        ]
+    },
+    {
+        "name": "Product 3",
+        "price": 9800,
+        "category" : "6780993d13b0e5b45731a618",
+        "subcategory": "67809a1e4c933bb035f9e575",
+        "distributor": "677e69b204cd9dbd7453d080",
+        "features": [
+            {
+                "name": "Feature 1",
+                "description": "Description 1"
+            },
+            {
+                "name": "Feature 2",
+                "description": "Description 2"
+            },
+            {
+                "name": "Feature 3",
+                "description": "Description 3"
+            },
+            {
+                "name": "Feature 4",
+                "description": "Description 4"
+            },
+            {
+                "name": "Feature 5",
+                "description": "Description 5"
+            }
+        ]
+    }
+]
