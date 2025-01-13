@@ -10,6 +10,10 @@ const productSchema = new mongoose.Schema({
         required: [true, 'Product name is required.'],
         tirm: true
     },
+    ict: {
+        type: String,
+        required: [true, 'ICT is required.']
+    },
     price: {
         type: Number,
         required: [true, 'Product price is required.'],
@@ -47,13 +51,15 @@ const productSchema = new mongoose.Schema({
         description: {
             type: String,
             required: [true, 'Feature descrition is required.'],
-            tirm: true
+            trim: true
         }
     }],
-    image: {
-        type: String,
-        trim: true
-    }
+    images: [{
+        fileName: {
+            type: String,
+            trim: true
+        }
+    }]
 });
 
 module.exports = mongoose.model('Product', productSchema);

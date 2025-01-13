@@ -41,7 +41,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
     storage,
     fileFilter
-}).single('image');
+}).array('images', 4);
 
 // ดูข้อมูลสินค้าทั้งหมด
 const getProducts = async (req, res) => {
@@ -65,8 +65,8 @@ const addProduct = async (req, res) => {
             return res.status(404).json({ message: 'ระบบเกิดข้อผิดพลาด' });
         }
 
-        // รับข้อมูล name, price categoryId, subcategoryId, distributorId และ features จาก request body
-        const { name, price, categoryId, subcategoryId, distributorId, features } = req.body;
+        // รับข้อมูล name, price, ict, categoryId, subcategoryId, distributorId และ features จาก request body
+        const { name, price, ict, categoryId, subcategoryId, distributorId, features } = req.body;
 
         try {
             // ตรวจสอบว่ามีการใส่ชื่อสินค้าหรือไม่
@@ -78,6 +78,11 @@ const addProduct = async (req, res) => {
             const product = await Product.findOne({ name: name });
             if (product) {
                 return res.status(400).json({ message: 'สินค้าชิ้นนี้มีอยู่ในระบบแล้ว' });
+            }
+
+            // ตรวจสอบว่าระบุว่าอยู่ในมาตรฐาน ICT หรือไม่
+            if (!ict || ict === "") {
+                return res.status(400).json({ message: 'โปรดระบุว่าสินค้าชิ้นนี้อยู่ในมาตรฐาน ICT หรือไม่' });
             }
 
             // ตรวจสอบว่ามีการใส่ Category ของสินค้าหรือไม่
@@ -119,19 +124,20 @@ const addProduct = async (req, res) => {
             }
 
             // ตรวจสอบว่ามีการอัพโหลดไฟล์รูปภาพสินค้าหรือไม่
-            if (req.file) {
+            if (req.files && req.files.length > 0) {
                 // รับข้อมูล fileName จาก request file
-                const fileName = req.file.filename;
+                const fileNames = req.files.map(file => ({ fileName: file.filename }));
 
                 // เพิ่มสินค้าใหม่ลงในระบบ
                 const addProduct = new Product({
                     name,
+                    ict,
                     price,
                     category: categoryId,
                     subcategory: subcategoryId,
                     distributor: distributorId,
                     features,
-                    image: fileName
+                    images: fileNames
                 });
 
                 // บันทึกสินค้า
