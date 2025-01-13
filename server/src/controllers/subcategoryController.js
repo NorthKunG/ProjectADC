@@ -225,6 +225,11 @@ const uploadFile = async (req, res) => {
             const categories = await Category.find({}, { _id: 1 });
             const categoryId = categories.map(category => category._id.toString());
 
+            // ตรวจสอบข้อมูลว่ามี name หรือ category ที่ไม่มีหรือว่าง
+            const emptyDatas = [];
+            const emptyNames = [];
+            const emptyCategories = [];
+
             // ตรวจสอบ Category ที่ไม่มีอยู่ระบบ
             const invalidCategories = [];
 
@@ -232,28 +237,34 @@ const uploadFile = async (req, res) => {
             const duplicateEntries = [];
             const newEntries = [];
             parsedData.forEach(item => {
-                if (!categoryId.includes(item.category)) {
-                    // ถ้า category ไม่มีในระบบ
+                // ตรวจสอบว่ามีการใส่ข้อมูลหรือไม่
+                if (!item.name && !item.category || !item.name && !item.category === "" || item.name === ""
+                    && !item.category || item.name === "" && item.category === "") {
+                    emptyDatas.push(item);
+                }
+                // ตรวจสอบว่ามีการใส่ข้อมูล name หรือไม่
+                else if (!item.name || item.name === "") {
+                    emptyNames.push(item);
+                }
+                // ตรวจสอบว่ามีการใส่ข้อมูล category หรือไม่
+                else if (!item.category || item.category === "") {
+                    emptyCategories.push(item);
+                }
+                // ตรวจสอบว่ามีข้อมูล category ในระบบหรือไม่
+                else if (!categoryId.includes(item.category)) {
                     invalidCategories.push(item);
-                } else if (existingNames.includes(item.name)) {
-                    // ถ้า Subcategory ซ้ำ
+                }
+                // ตรวจสอบว่าข้อมูลที่ใส่มามีซ้ำกับในระบบหรือไม่
+                else if (existingNames.includes(item.name)) {
                     duplicateEntries.push(item.name);
-                } else {
-                    // ถ้าเป็นข้อมูลที่ถูกต้อง
+                }
+                // ดำเนินการตามปกติ
+                else {
                     newEntries.push(item);
                 }
             });
 
-            // ตรวจสอบว่าข้อมูลที่ Category ไม่มี Database
-            if (invalidCategories.length > 0) {
-                return res.status(400).json({
-                    message: 'ข้อมูลหมวดหมู่ของคุณไม่ถูกต้อง',
-                    invalidCategories,
-                    invalidCategoriesTotal: invalidCategories.length
-                });
-            }
-
-            // ตรวจสอบว่าข้อมูลทั้งหมดซ้ำกับใน Database
+            // ตรวจสอบว่าข้อมูลทั้งหมดซ้ำกับในระบบหรือไม่
             if (newEntries.length === 0) {
                 // ลบไฟล์หลังใช้งาน
                 fs.unlinkSync(filePath);
@@ -268,10 +279,18 @@ const uploadFile = async (req, res) => {
 
             return res.status(200).json({
                 message: 'เพิ่มข้อมูลประเภทลงในระบบ',
+                totalAdded: `มีข้อมูลที่ถูกเพิ่มเข้าไปจำนวน: ${addedSubcategories.length} ตัว`,
                 addedSubcategories,
+                totalDuplicates: `มีข้อมูลที่ซ้ำกับในระบบจำนวน: ${duplicateEntries.length} ตัว`,
                 duplicateEntries,
-                totalAdded: addedSubcategories.length,
-                totalDuplicates: duplicateEntries.length
+                totalEmptyDatas: `มีข้อมูลว่างจำนวน: ${emptyDatas.length} ตัว`,
+                emptyDatas,
+                totalEmptyNames: `มีข้อมูลที่ไม่ได้ใส่ name จำนวน: ${emptyNames.length} ตัว`,
+                emptyNames,
+                totalEmptyCategories: `มีข้อมูลที่ไม่ได้ใส่ category จำนวน: ${emptyCategories.length} ตัว`,
+                emptyCategories,
+                totalInvlidCategories: `มีข้อมูลที่ระบุ category ที่ไม่พบในระบบจำนวน: ${invalidCategories.length} ตัว`,
+                invalidCategories
             });
         } catch (error) {
             // ลบไฟล์กรณีเกิดข้อผิดพลาด

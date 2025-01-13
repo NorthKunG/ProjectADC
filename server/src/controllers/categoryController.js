@@ -186,13 +186,23 @@ const uploadFile = async (req, res) => {
             const existingCategories = await Category.find({}, { name: 1 }); // ดึงเฉพาะชื่อหมวดหมู่
             const existingNames = existingCategories.map(category => category.name);
 
+            // ตรวจสอบว่ามีข้อมูลหรือไม่
+            const emptyNames = [];
+
             // ตรวจสอบข้อมูลที่ซ้ำกัน
             const duplicateEntries = [];
             const newEntries = [];
             parsedData.forEach(item => {
-                if (existingNames.includes(item.name)) {
+                // ตรวจสอบว่ามีการใส่ข้อมูลหรือไม่
+                if (!item.name || item.name === "") {
+                    emptyNames.push(item);
+                }
+                // ตรวจสอบว่ามีข้อมูลซ้ำหรือไม่
+                else if (existingNames.includes(item.name)) {
                     duplicateEntries.push(item.name);
-                } else {
+                } 
+                // ดำเนินการตามปกติ
+                else {
                     newEntries.push(item);
                 }
             });
@@ -212,10 +222,12 @@ const uploadFile = async (req, res) => {
 
             return res.status(200).json({
                 message: 'เพิ่มหมวดหมู่สินค้าลงในระบบแล้ว',
+                totalAdded: `มีข้อมูลที่ถูกเพิ่มเข้าไปจำนวน: ${addedCategories.length} ตัว`,
                 addedCategories,
+                totalDuplicates: `มีข้อมูลที่ซ้ำกับในระบบจำนวน: ${duplicateEntries.length} ตัว`,
                 duplicateEntries,
-                totalAdded: addedCategories.length,
-                totalDuplicates: duplicateEntries.length
+                totalEmptyDatas: `มีข้อมูลว่างจำนวน: ${emptyNames.length} ตัว`,
+                emptyNames
             });
         } catch (error) {
             // ลบไฟล์กรณีเกิดข้อผิดพลาด

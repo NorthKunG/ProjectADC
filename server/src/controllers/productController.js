@@ -17,7 +17,7 @@ if (!fs.existsSync(uploadDir)) {
 
 // ตั้งค่าการอัพโหลดไฟล์สินค้า
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
+    destiation: (req, file, cb) => {
         // กำหนดโฟลเดอร์ที่ใช้เก็บรูปสินค้า
         cb(null, uploadDir);
     },
@@ -730,17 +730,45 @@ const uploadFile = async (req, res) => {
                 return res.status(400).json({ message: 'ไฟล์ไม่มีข้อมูลสินค้า หรือรูปแบบข้อมูลไม่ถูกต้อง' });
             }
 
-            // ดึงข้อมูลจาก Database
+            // ดึงข้อมูล Name จาก Database
             const existingProducts = await Product.find({}, { name: 1 });
             const existingNames = existingProducts.map(product => product.name);
+
+            // ดึงข้อมูล Category จาก Database
+            const categories = await Category.find({}, { _id: 1 });
+            const categoryId = categories.map(category => category._id.toString());
+
+            // ดึงข้อมูล Subcategory จาก Database
+            const subcategories = await Subcategory.find({}, { _id: 1 });
+            const subcategoryId = subcategories.map(subcategory => subcategory._id.toString());
+
+            // ดึงข้อมูล Distributor จาก Database
+            const distributors = await Distributor.find({}, { _id: 1 });
+            const distributorId = distributors.map(distributor => distributor._id.toString());
+
+            // ตรวจสอบว่ามีการใส่ข้อมูลหรือไม่
+            const emptyDatas = [];
 
             // ตรวจสอบข้อมูลที่ซ้ำกัน
             const duplicateEntries = [];
             const newEntries = [];
+            const invalidDatas = [];
             parsedData.forEach(item => {
-                if (existingNames.includes(item.name)) {
-                    duplicateEntries.push(item.name);
-                } else {
+                // ตรวจสอบว่ามีการใส่ข้อมูลหรือไม่
+                if (!item.name || !item.price || !item.category || !item.subcategory || !item.distributor) {
+                    emptyDatas.push(item)
+                }
+                // ตรวจสอบว่ามีข้อมูลซ้ำหรือไม่
+                else if (existingNames.includes(item.name)) {
+                    duplicateEntries.push(item);
+                }
+                // ตรวจสอบว่ามีข้อมูลในระบบหรือไม่
+                else if (!categoryId.includes(item.category) || !subcategoryId.includes(item.subcategory ||
+                    !distributorId.includes(item.distributor))) {
+                    invalidDatas.push(item);
+                }
+                // ดำเนินการตามปกติ
+                else {
                     newEntries.push(item);
                 }
             });
@@ -760,10 +788,13 @@ const uploadFile = async (req, res) => {
 
             return res.status(200).json({
                 message: 'เพิ่มสินค้าลงในระบบแล้ว',
+                totalAdded: `มีข้อมูลที่ถูกเพิ่มเข้าไปจำนวน: ${newEntries.length} ตัว`,
                 addedProducts,
+                totalDuplicateEntries: `มีข้อมูลที่ซ้ำกับในระบบจำนวน: ${duplicateEntries.length} ตัว`,
                 duplicateEntries,
-                totalAdded: addedProducts.length,
-                totalDuplicates: duplicateEntries.length
+                totalEmptyDatas: `มีข้อมูลที่ใส่ข้อมูลไม่ครบจำนวน: ${emptyDatas.length} ตัว`,
+                emptyDatas,
+                totalInvalidData: `มีข้อมูลที่ไม่ถูกต้องจำนวน: ${invalidDatas.length} ตัว`
             });
         } catch (error) {
             // ลบไฟล์กรณีเกิดข้อผิดพลาด
