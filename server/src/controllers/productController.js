@@ -33,7 +33,8 @@ const fileFilter = (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
         cb(null, true);
     } else {
-        cb(new Error('Only image files are allowed!'), false);
+        // cb(new Error('อนุญาติให้ใช้งานเฉพาะไฟล์รูปภาพเท่านั้น!'), false);
+        return res.status(400).json({ message: 'อนุญาติให้ใช้งานเฉพาะไฟล์รูปภาพเท่านั้น!' });
     }
 };
 
@@ -83,6 +84,11 @@ const addProduct = async (req, res) => {
             // ตรวจสอบว่าระบุว่าอยู่ในมาตรฐาน ICT หรือไม่
             if (!ict || ict === "") {
                 return res.status(400).json({ message: 'โปรดระบุว่าสินค้าชิ้นนี้อยู่ในมาตรฐาน ICT หรือไม่' });
+            }
+
+            // ตรวจสอบว่าระบุข้อมูลถูกต้องหรือไม่
+            if (ict != "Yes" || ict != "No") {
+                return res.status(400).json({ message: 'คุณระบุการกำหนดมาตรฐาน ICT ไม่ถูต้อง' });
             }
 
             // ตรวจสอบว่ามีการใส่ Category ของสินค้าหรือไม่
@@ -326,7 +332,7 @@ const searchProductByName = async (req, res) => {
 // กรองสินค้าผ่าน ราคา, Category และ Subcategory
 const filterProduct = async (req, res) => {
     // รับข้อมูล price, categoryId และ subcategoryId จาก request body
-    const { minPrice, maxPrice, categoryId, subcategoryId, distributorId } = req.query;
+    const { minPrice, maxPrice, ict, categoryId, subcategoryId, distributorId } = req.query;
 
     try {
         // กรองสินค้าที่อยู่ระหว่างราคาต่ำที่สุดและราคาสูงสุด
@@ -613,6 +619,159 @@ const filterProduct = async (req, res) => {
                 products
             });
         }
+
+        // กรองสินค้าที่มีการระบุมาตรฐาน ICT โดยไม่สนหมวดหมู่ ประเภท และผู่จัดจำหน่าย
+        if (ict === "Yes" && !categoryId && !subcategoryId && !distributorId) {
+            // ตรวจสอบว่ามีสินค้าหรือไม่
+            const products = await Product.find({
+                ict: ict
+            }).populate('category').populate('subcategory').populate('distributor');
+            if (products.length === 0) {
+                return res.status(404).json({ message: 'ไม่สินค้าที่คุณค้นหา' });
+            }
+            return res.status(200).json({
+                count: products.length,
+                products
+            });
+        }
+
+        // กรองสินค้าที่มีการระบุมาตรฐาน ICT และอยู่ในหมวดหมู่เดียวกัน
+        if (ict === "Yes" && categoryId && !subcategoryId && !distributorId) {
+            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
+            const category = await Category.findById(categoryId);
+            if (!category) {
+                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
+            }
+
+            // ตรวจสอบว่ามีสินค้าหรือไม่
+            const products = await Product.find({
+                ict: ict,
+                category: categoryId
+            }).populate('category').populate('subcategory').populate('distributor');
+            if (products.length === 0) {
+                return res.status(404).json({ message: 'ไม่สินค้าที่คุณค้นหา' });
+            }
+            return res.status(200).json({
+                count: products.length,
+                products
+            });
+        }
+
+        // กรองสินค้าที่มีการระบุมาตรฐาน ICT และอยู่ในหมวดหมู่และประเภทเดียวกัน
+        if (ict === "Yes" && categoryId && subcategoryId && !distributorId) {
+            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
+            const category = await Category.findById(categoryId);
+            if (!category) {
+                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
+            }
+
+            // ตรวจสอบว่ามี Subcategory นี้ในระบบหรือไม่
+            const subcategory = await Subcategory.findById(subcategoryId);
+            if (!subcategory) {
+                return res.status(404).json({ message: 'ไม่พบ Subcategory นี้ในระบบ' });
+            }
+
+            // ตรวจสอบว่ามีสินค้าหรือไม่
+            const products = await Product.find({
+                ict: ict,
+                category: categoryId,
+                subcategory: subcategoryId
+            }).populate('category').populate('subcategory').populate('distributor');
+            if (products.length === 0) {
+                return res.status(404).json({ message: 'ไม่สินค้าที่คุณค้นหา' });
+            }
+            return res.status(200).json({
+                count: products.length,
+                products
+            });
+        }
+
+        // กรองสินค้าที่มีการระบุมาตรฐาน ICT และอยู่ในหมวดหมู่ ประเภทและผู้จัดจำหน่ายเดียวกัน
+        if (ict === "Yes" && categoryId && subcategoryId && distributorId) {
+            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
+            const category = await Category.findById(categoryId);
+            if (!category) {
+                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
+            }
+
+            // ตรวจสอบว่ามี Subcategory นี้ในระบบหรือไม่
+            const subcategory = await Subcategory.findById(subcategoryId);
+            if (!subcategory) {
+                return res.status(404).json({ message: 'ไม่พบ Subcategory นี้ในระบบ' });
+            }
+
+            // ตรวจสอบว่ามีผู้จัดหน่ายรายนี้ในระบบหรือไม่
+            const distributor = await Distributor.findById(distributorId);
+            if (!distributor) {
+                return res.status(404).json({ message: 'ไม่พบผู้จัดหน่ายรายนี้ในระบบ' });
+            }
+
+            // ตรวจสอบว่ามีสินค้าหรือไม่
+            const products = await Product.find({
+                ict: ict,
+                category: categoryId,
+                subcategory: subcategoryId,
+                distributor: distributorId
+            }).populate('category').populate('subcategory').populate('distributor');
+            if (products.length === 0) {
+                return res.status(404).json({ message: 'ไม่สินค้าที่คุณค้นหา' });
+            }
+            return res.status(200).json({
+                count: products.length,
+                products
+            });
+        }
+
+        // กรองสินค้าที่มีการระบุมาตรฐาน ICT และอยู่ในหมวดหมู่และผู้จัดจำหน่ายเดียวกัน
+        if (ict === "Yes" && categoryId && !subcategoryId && distributorId) {
+            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
+            const category = await Category.findById(categoryId);
+            if (!category) {
+                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
+            }
+
+            // ตรวจสอบว่ามีผู้จัดหน่ายรายนี้ในระบบหรือไม่
+            const distributor = await Distributor.findById(distributorId);
+            if (!distributor) {
+                return res.status(404).json({ message: 'ไม่พบผู้จัดหน่ายรายนี้ในระบบ' });
+            }
+
+            // ตรวจสอบว่ามีสินค้าหรือไม่
+            const products = await Product.find({
+                ict: ict,
+                category: categoryId,
+                distributor: distributorId
+            }).populate('category').populate('subcategory').populate('distributor');
+            if (products.length === 0) {
+                return res.status(404).json({ message: 'ไม่สินค้าที่คุณค้นหา' });
+            }
+            return res.status(200).json({
+                count: products.length,
+                products
+            });
+        }
+
+        // กรองสินค้าที่มีการระบุมาตรฐาน ICT และผู้จัดจำหน่ายเดียวกัน
+        if (ict === "Yes" && !categoryId && !subcategoryId && distributorId) {
+            // ตรวจสอบว่ามีผู้จัดหน่ายรายนี้ในระบบหรือไม่
+            const distributor = await Distributor.findById(distributorId);
+            if (!distributor) {
+                return res.status(404).json({ message: 'ไม่พบผู้จัดหน่ายรายนี้ในระบบ' });
+            }
+
+            // ตรวจสอบว่ามีสินค้าหรือไม่
+            const products = await Product.find({
+                ict: ict,
+                distributor: distributorId
+            }).populate('category').populate('subcategory').populate('distributor');
+            if (products.length === 0) {
+                return res.status(404).json({ message: 'ไม่สินค้าที่คุณค้นหา' });
+            }
+            return res.status(200).json({
+                count: products.length,
+                products
+            });
+        }
     } catch (error) {
         return res.status(400).json({ message: error.message });
     }
@@ -701,7 +860,8 @@ const uploadJson = multer({
         if (file.mimetype === 'application/json') {
             cb(null, true);
         } else {
-            cb(new Error('Only .json files are allowed'), false);
+            // cb(new Error('Only .json files are allowed'), false);
+            return res.status(400).json({ message: 'อนุญาตเฉพาะไฟล์ .json เท่านั้น' });
         }
     }
 }).single('file');
@@ -761,17 +921,18 @@ const uploadFile = async (req, res) => {
             const invalidDatas = [];
             parsedData.forEach(item => {
                 // ตรวจสอบว่ามีการใส่ข้อมูลหรือไม่
-                if (!item.name || !item.price || !item.category || !item.subcategory || !item.distributor) {
-                    emptyDatas.push(item)
+                if (!item.name || !item.category || !item.subcategory || !item.distributor) {
+                    console.log(item.name, item.price, item.category, item.subcategory, item.distributor);
+                    emptyDatas.push(item.name)
                 }
                 // ตรวจสอบว่ามีข้อมูลซ้ำหรือไม่
                 else if (existingNames.includes(item.name)) {
-                    duplicateEntries.push(item);
+                    duplicateEntries.push(item.name);
                 }
                 // ตรวจสอบว่ามีข้อมูลในระบบหรือไม่
-                else if (!categoryId.includes(item.category) || !subcategoryId.includes(item.subcategory ||
-                    !distributorId.includes(item.distributor))) {
-                    invalidDatas.push(item);
+                else if (!categoryId.includes(item.category) || !subcategoryId.includes(item.subcategory) ||
+                    !distributorId.includes(item.distributor)) {
+                    invalidDatas.push(item.name);
                 }
                 // ดำเนินการตามปกติ
                 else {
