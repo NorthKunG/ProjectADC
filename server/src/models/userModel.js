@@ -23,10 +23,6 @@ const userSchema = new mongoose.Schema({
         required: [true, 'Phone number is required'],
         match: [/^(\+?\d{1,3})?\d{10}$/, 'Invalid phone number format']
     },
-    address: [{
-        type: String,
-        required: [true, 'Address is required']
-    }],
     role: {
         type: String,
         enum: ['user', 'admin'],

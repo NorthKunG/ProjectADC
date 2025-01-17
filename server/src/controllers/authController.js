@@ -7,10 +7,6 @@ const User = require('../models/userModel');
 // Login
 const login = async (req, res) => {
     try {
-        const data = JSON.parse(req.body.data);
-        return res.json({
-            email: data
-        });
         // const { email, password } = req.body;
         // const user = await User.findOne({ email });
         // if (!user || !(await user.matchPassword(password))) {

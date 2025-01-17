@@ -225,10 +225,8 @@ const uploadFile = async (req, res) => {
             const categories = await Category.find({}, { _id: 1 });
             const categoryId = categories.map(category => category._id.toString());
 
-            // ตรวจสอบข้อมูลว่ามี name หรือ category ที่ไม่มีหรือว่าง
+            // ตรวจสอบข้อมูลว่าที่ว่างหรือไม่
             const emptyDatas = [];
-            const emptyNames = [];
-            const emptyCategories = [];
 
             // ตรวจสอบ Category ที่ไม่มีอยู่ระบบ
             const invalidCategories = [];
@@ -238,17 +236,8 @@ const uploadFile = async (req, res) => {
             const newEntries = [];
             parsedData.forEach(item => {
                 // ตรวจสอบว่ามีการใส่ข้อมูลหรือไม่
-                if (!item.name && !item.category || !item.name && !item.category === "" || item.name === ""
-                    && !item.category || item.name === "" && item.category === "") {
+                if (!item.name || !item.categoryId) {
                     emptyDatas.push(item);
-                }
-                // ตรวจสอบว่ามีการใส่ข้อมูล name หรือไม่
-                else if (!item.name || item.name === "") {
-                    emptyNames.push(item);
-                }
-                // ตรวจสอบว่ามีการใส่ข้อมูล category หรือไม่
-                else if (!item.category || item.category === "") {
-                    emptyCategories.push(item);
                 }
                 // ตรวจสอบว่ามีข้อมูล category ในระบบหรือไม่
                 else if (!categoryId.includes(item.category)) {
@@ -285,10 +274,6 @@ const uploadFile = async (req, res) => {
                 duplicateEntries,
                 totalEmptyDatas: `มีข้อมูลว่างจำนวน: ${emptyDatas.length} ตัว`,
                 emptyDatas,
-                totalEmptyNames: `มีข้อมูลที่ไม่ได้ใส่ name จำนวน: ${emptyNames.length} ตัว`,
-                emptyNames,
-                totalEmptyCategories: `มีข้อมูลที่ไม่ได้ใส่ category จำนวน: ${emptyCategories.length} ตัว`,
-                emptyCategories,
                 totalInvlidCategories: `มีข้อมูลที่ระบุ category ที่ไม่พบในระบบจำนวน: ${invalidCategories.length} ตัว`,
                 invalidCategories
             });

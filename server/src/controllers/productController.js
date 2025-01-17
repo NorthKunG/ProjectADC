@@ -921,8 +921,7 @@ const uploadFile = async (req, res) => {
             const invalidDatas = [];
             parsedData.forEach(item => {
                 // ตรวจสอบว่ามีการใส่ข้อมูลหรือไม่
-                if (!item.name || !item.category || !item.subcategory || !item.distributor) {
-                    console.log(item.name, item.price, item.category, item.subcategory, item.distributor);
+                if (!item.name || !item.ict || !item.category || !item.subcategory || !item.distributor) {
                     emptyDatas.push(item.name)
                 }
                 // ตรวจสอบว่ามีข้อมูลซ้ำหรือไม่
