@@ -43,6 +43,10 @@ app.use('/api/distributors', distributorRoutes);
 const subcategoryRoutes = require('./routes/subcategoryRoutes');
 app.use('/subcategories', subcategoryRoutes);
 
+// ดึง API contact
+const contactRoutes = require('./routes/contactRoutes');
+app.use('/api/contact', contactRoutes);
+
 app.use((err, req, res, next) => {
     req.status(err.status || 500).json({
         message: err || 'เกิดข้อผิดพลาด'
