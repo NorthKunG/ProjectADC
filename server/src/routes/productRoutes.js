@@ -9,6 +9,7 @@ router.post('/', /* auth ,*/ productController.addProduct);
 router.get('/search', productController.searchProductByName);
 router.get('/filter', productController.filterProduct);
 router.get('/compare', productController.compareProduct);
+router.get('/noICT', productController.getProductNoIct);
 router.get('/:id', productController.getProduct);
 router.delete('/:id', productController.deleteProduct);
 router.put('/:id', productController.updateProduct);

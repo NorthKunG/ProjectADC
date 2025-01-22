@@ -30,6 +30,10 @@ const promotionSchema = new mongoose.Schema({
         type: String,
         required: false,
         trim: true
+    },
+    poster: {
+        type: String,
+        required: [true, 'Promotion poster is required.']
     }
 });
 

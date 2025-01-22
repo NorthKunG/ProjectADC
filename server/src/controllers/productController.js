@@ -205,6 +205,25 @@ const getProduct = async (req, res) => {
     }
 }
 
+// แสดงสินค้าที่ไม่ติดมาตรฐาน ICT
+const getProductNoIct = async (req ,res) => {
+    try {
+        // เรียกดูข้อมูลสินค้าไม่ติดมาตรฐาน ICT
+        const products = await Product.find({ ict: false });
+        
+        // ตรวจสอบว่ามีสินค้าหรือไม่
+        if (products.length === 0) {
+            return res.status(500).json({ message: 'ไม่พบสินค้าในระบบ' });
+        }
+        return res.status(200).json({
+            count: products.length,
+            products
+        });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
 // ลบสินค้า
 const deleteProduct = async (req, res) => {
     // รับข้อมูล id จาก request params
@@ -1003,6 +1022,7 @@ module.exports = {
     getProducts,
     addProduct,
     getProduct,
+    getProductNoIct,
     deleteProduct,
     updateProduct,
     searchProductByName,
