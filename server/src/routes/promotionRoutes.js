@@ -11,8 +11,9 @@ const auth = require('../middleware/auth');
 const promotionController = require('../controllers/promotionController');
 
 // Routers
-router.post('/', auth, promotionController.addedPromotion);
+router.post('/', promotionController.addedPromotion);
 router.get('/', auth, promotionController.getPromotions);
+router.get('/:id', promotionController.getPromontion);
 router.delete('/:id', auth, promotionController.deletePromotion);
 router.put('/:id', auth, promotionController.updatePromotion);
 router.post('/:id', auth, promotionController.addProductToPromotion);

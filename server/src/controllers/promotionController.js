@@ -129,6 +129,24 @@ const getPromotions = async (req, res) => {
     }
 };
 
+// แสดงรายละเอียดโปรโมชั่นโดยใช้ Id
+const getPromontion = async (req, res) => {
+    // รับข้อมูล Id จาก request params
+    const { id } = req.params;
+
+    try {
+        // เรียกดูข้อมูลโปรโมชั่น
+        const promotion = await Promotion.findById(id);
+        // ตรวจสอบว่ามีโปรโมชั่นนี้หรือไม่
+        if (!promotion) {
+            return res.status(400).json({ message: 'ไม่พบโปรโมชั่นนี้' });
+        }
+        return res.status(200).json(promotion);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
 // ลบโปรโมชั่น
 const deletePromotion = async (req, res) => {
     // รับข้อมูล id จาก request params
@@ -298,6 +316,7 @@ const addProductToPromotion = async (req, res) => {
 module.exports = {
     addedPromotion,
     getPromotions,
+    getPromontion,
     deletePromotion,
     updatePromotion,
     addProductToPromotion
