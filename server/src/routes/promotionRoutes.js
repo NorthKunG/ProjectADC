@@ -7,12 +7,12 @@ const router = express.Router();
 // Require a middleware auth
 const auth = require('../middleware/auth');
 
-// Require a order controller
-const orderController = require('../controllers/orderController');
+// Require a promotion controller
+const promotionController = require('../controllers/promotionController');
 
 // Routers
-router.post('/new', auth, orderController.newOrder);
-router.get('/', auth, orderController.getOrder);
+router.post('/', auth, promotionController.addedPromotion);
+router.get('/', auth, promotionController.getPromotions);
 
 // Export a route
 module.exports = router;

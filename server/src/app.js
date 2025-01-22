@@ -13,8 +13,8 @@ const authRoutes = require('./routes/authRoutes');
 // Require a cart routes
 const cartRoutes = require('./routes/cartRoutes');
 
-// Require an order routes
-const orderRoutes = require('./routes/orderRoutes');
+// Require a promotion routes
+const promotionRoutes = require('./routes/promotionRoutes');
 
 // Require a distributor routes
 const distributorRoutes = require('./routes/distributorRoutes');
@@ -33,8 +33,8 @@ app.use('/api/auth', authRoutes);
 // Use api cart
 app.use('/api/carts', cartRoutes);
 
-// Use api order
-app.use('/api/orders', orderRoutes);
+// Use api promotion
+app.use('/api/promotions', promotionRoutes);
 
 // Use api distributor
 app.use('/api/distributors', distributorRoutes);

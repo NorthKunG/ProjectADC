@@ -56,7 +56,6 @@ const addItem = async (req, res) => {
             cart.items.push({ productId, quantity });
         }
 
-        cart.totalPrice += product.price * quantity;
         await cart.save();
 
         res.status(200).json({
