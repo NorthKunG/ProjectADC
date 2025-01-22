@@ -12,30 +12,8 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// ตั้งค่าการอัพโหลดไฟล์
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        // กำหนดโฟลเดอร์ที่ใช้เก็บไฟล์
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        // สร้างชื่อไฟล์ที่ไม่ซ้ำกันโดยใช้ไทม์สแตมป์และตัวเลขสุ่ม
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, `${uniqueSuffix}${path.extname(file.originalname)}`);
-    }
-});
-
-// การจัดการการอัปโหลดไฟล์ .json
-const uploadJson = multer({
-    storage,
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype === 'application/json') {
-            cb(null, true);
-        } else {
-            cb(new Error('Only .json files are allowed'), false);
-        }
-    }
-}).single('file');
+// การตั้งค่า Multer เพื่อเก็บไฟล์ในหน่วยความจำ
+const upload = multer({ storage: multer.memoryStorage() }).single('file');
 
 // ดูข้อมูลหมวดหมู่สินค้าทั้งหมด
 const getCategories = async (req, res) => {
@@ -152,55 +130,53 @@ const updateCategory = async (req, res) => {
     }
 };
 
-// ระบบอัพโหลดข้อมูลผ่านไฟล์ .json
+// ระบบอัปโหลดข้อมูลผ่านไฟล์ .json
 const uploadFile = async (req, res) => {
     // ใช้ multer สำหรับการอัปโหลดไฟล์
-    uploadJson(req, res, async (error) => {
+    upload(req, res, async (error) => {
         if (error) {
             return res.status(404).json({ message: 'ระบบเกิดข้อผิดพลาด' });
         }
 
-        // ตรวจสอบว่ามีไฟล์ที่อัปโหลดมาหรือไม่
+        // ตรวจสอบว่าไฟล์ถูกส่งมาหรือไม่
         if (!req.file) {
-            return res.status(400).json({ message: 'กรุณาอัปโหลดไฟล์ .txt' });
+            return res.status(400).json({ message: 'กรุณาอัปโหลดไฟล์ .json' });
         }
 
-        // รับข้อมูลไฟล์จาก request file
-        const filePath = req.file.path;
+        // ตรวจสอบประเภทของไฟล์
+        if (req.file.mimetype !== 'application/json') {
+            return res.status(400).json({ message: 'อนุญาตเฉพาะไฟล์ .json เท่านั้น' });
+        }
 
         try {
-            // อ่านไฟล์
-            const fileContent = fs.readFileSync(filePath, 'utf8');
+            // อ่านข้อมูลจากไฟล์ในหน่วยความจำ
+            const fileContent = req.file.buffer.toString('utf-8');
 
-            // แปลงข้อมูลจาก JSON string เป็น object/array
+            // แปลงข้อมูลให้เป็น JSON
             const parsedData = JSON.parse(fileContent);
 
             // ตรวจสอบข้อมูลในไฟล์ (optional)
             if (!Array.isArray(parsedData) || parsedData.length === 0) {
-                // ลบไฟล์ออกเมื่อข้อมูลไม่ถูกต้อง
-                fs.unlinkSync(filePath);
-                return res.status(400).json({ message: 'ไฟล์ไม่มีข้อมูลหมวดหมู่สินค้าหรือรูปแบบข้อมูลไม่ถูกต้อง' });
+                return res.status(400).json({ message: 'ไฟล์ไม่มีข้อมูลสินค้า หรือรูปแบบข้อมูลไม่ถูกต้อง' });
             }
 
-            // ดึงข้อมูลจาก Database
-            const existingCategories = await Category.find({}, { name: 1 }); // ดึงเฉพาะชื่อหมวดหมู่
-            const existingNames = existingCategories.map(category => category.name);
+            // ดึงข้อมูลหมวดหมู่จากฐานข้อมูล
+            const existingCategories = await Category.find({}, { name: 1 });
+            const existingName = existingCategories.map(category => category.name);
 
-            // ตรวจสอบว่ามีข้อมูลหรือไม่
-            const emptyNames = [];
-
-            // ตรวจสอบข้อมูลที่ซ้ำกัน
+            // ตรวจสอบความถูกต้องของข้อมูล
+            const emptyDatas = [];
             const duplicateEntries = [];
             const newEntries = [];
             parsedData.forEach(item => {
                 // ตรวจสอบว่ามีการใส่ข้อมูลหรือไม่
-                if (!item.name || item.name === "") {
-                    emptyNames.push(item);
+                if (!item.name) {
+                    emptyDatas.push(item);
                 }
-                // ตรวจสอบว่ามีข้อมูลซ้ำหรือไม่
-                else if (existingNames.includes(item.name)) {
-                    duplicateEntries.push(item.name);
-                } 
+                // ตรวจสอบว่ามีชื่อหมวดหมู่สินค้าซ้ำหรือไม่
+                else if (existingName.includes(item.name)) {
+                    duplicateEntries.push(item);
+                }
                 // ดำเนินการตามปกติ
                 else {
                     newEntries.push(item);
@@ -209,31 +185,23 @@ const uploadFile = async (req, res) => {
 
             // ตรวจสอบว่าข้อมูลทั้งหมดซ้ำกับใน Database
             if (newEntries.length === 0) {
-                // ลบไฟล์หลังใช้งาน
-                fs.unlinkSync(filePath);
-                return res.status(400).json({ message: 'ข้อมูลหมวดหมู่ของคุณทั้งหมดมีอยู่ในระบบแล้ว' });
+                return res.status(400).json({ message: 'ข้อมูลหมวดหมู่สินค้าของคุณทั้งหมดมีอยู่ในระบบแล้ว' });
             }
 
             // นำเข้าข้อมูลใหม่ทั้งหมด
             const addedCategories = await Category.insertMany(newEntries);
 
-            // ลบไฟล์หลังใช้งาน
-            fs.unlinkSync(filePath);
-
             return res.status(200).json({
                 message: 'เพิ่มหมวดหมู่สินค้าลงในระบบแล้ว',
-                totalAdded: `มีข้อมูลที่ถูกเพิ่มเข้าไปจำนวน: ${addedCategories.length} ตัว`,
+                totalAdded: `มีข้อมูลที่ถูกเพิ่มเข้าไปจำนวน: ${newEntries.length} ตัว`,
                 addedCategories,
-                totalDuplicates: `มีข้อมูลที่ซ้ำกับในระบบจำนวน: ${duplicateEntries.length} ตัว`,
+                totalDuplicateEntries: `มีข้อมูลที่ซ้ำกับในระบบจำนวน: ${duplicateEntries.length} ตัว`,
                 duplicateEntries,
-                totalEmptyDatas: `มีข้อมูลว่างจำนวน: ${emptyNames.length} ตัว`,
-                emptyNames
-            });
+                totalEmptyDatas: `มีข้อมูลที่ใส่ข้อมูลไม่ครบจำนวน: ${emptyDatas.length} ตัว`,
+                emptyDatas
+            })
+
         } catch (error) {
-            // ลบไฟล์กรณีเกิดข้อผิดพลาด
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
             return res.status(400).json({ message: error.message });
         }
     });

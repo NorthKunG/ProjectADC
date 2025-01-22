@@ -17,7 +17,7 @@ if (!fs.existsSync(uploadDir)) {
 
 // ตั้งค่าการอัพโหลดไฟล์สินค้า
 const storage = multer.diskStorage({
-    destiation: (req, file, cb) => {
+    destination: (req, file, cb) => {
         // กำหนดโฟลเดอร์ที่ใช้เก็บรูปสินค้า
         cb(null, uploadDir);
     },
@@ -34,7 +34,7 @@ const fileFilter = (req, file, cb) => {
         cb(null, true);
     } else {
         // cb(new Error('อนุญาติให้ใช้งานเฉพาะไฟล์รูปภาพเท่านั้น!'), false);
-        return res.status(400).json({ message: 'อนุญาติให้ใช้งานเฉพาะไฟล์รูปภาพเท่านั้น!' });
+        return res.status(400).json({ message: 'อนุญาตให้ใช้งานเฉพาะไฟล์รูปภาพเท่านั้น!' });
     }
 };
 
@@ -66,29 +66,35 @@ const addProduct = async (req, res) => {
             return res.status(404).json({ message: 'ระบบเกิดข้อผิดพลาด' });
         }
 
-        // รับข้อมูล name, price, ict, categoryId, subcategoryId, distributorId และ features จาก request body
-        const { name, price, ict, categoryId, subcategoryId, distributorId, features } = req.body;
+        // รับข้อมูลจาก request body
+        const { productId, name, ict, description, price, categoryId, subcategoryId, distributorId, features } = req.body;
 
         try {
+            // ตรวจสอบว่ามีการระบุ productId หรือไม่
+            if (!productId || productId === "") {
+                return res.status(400).json({ message: "กรุณาใส่รหัสสินค้าของคุณ" });
+            }
+
+            // ตรวจสอบว่ามีรห้สสินค้านี้มีในระบบหรือไม่
+            const productFindId = await Product.findOne({ productId: productId });
+            if (productFindId) {
+                return res.status(400).json({ message: 'รห้สสินค้านี้มีอยู่ในระบบแล้ว' });
+            }
+
             // ตรวจสอบว่ามีการใส่ชื่อสินค้าหรือไม่
             if (!name || name === "") {
                 return res.status(400).json({ message: "กรุณาใส่ชื่อสินค้าของคุณ" });
             }
 
             // ตรวจสอบว่ามีสินค้าตัวนี้อยู่ในระบบหรือไม่
-            const product = await Product.findOne({ name: name });
-            if (product) {
+            const productFindName = await Product.findOne({ name: name });
+            if (productFindName) {
                 return res.status(400).json({ message: 'สินค้าชิ้นนี้มีอยู่ในระบบแล้ว' });
             }
 
             // ตรวจสอบว่าระบุว่าอยู่ในมาตรฐาน ICT หรือไม่
             if (!ict || ict === "") {
                 return res.status(400).json({ message: 'โปรดระบุว่าสินค้าชิ้นนี้อยู่ในมาตรฐาน ICT หรือไม่' });
-            }
-
-            // ตรวจสอบว่าระบุข้อมูลถูกต้องหรือไม่
-            if (ict != "Yes" || ict != "No") {
-                return res.status(400).json({ message: 'คุณระบุการกำหนดมาตรฐาน ICT ไม่ถูต้อง' });
             }
 
             // ตรวจสอบว่ามีการใส่ Category ของสินค้าหรือไม่
@@ -136,9 +142,11 @@ const addProduct = async (req, res) => {
 
                 // เพิ่มสินค้าใหม่ลงในระบบ
                 const addProduct = new Product({
+                    productId,
                     name,
                     ict,
                     price,
+                    description: description,
                     category: categoryId,
                     subcategory: subcategoryId,
                     distributor: distributorId,
@@ -155,8 +163,11 @@ const addProduct = async (req, res) => {
             } else {
                 // เพิ่มสินค้าใหม่ลงในระบบ
                 const addProduct = new Product({
+                    productId,
                     name,
+                    ict,
                     price,
+                    description: description,
                     category: categoryId,
                     subcategory: subcategoryId,
                     distributor: distributorId,
@@ -228,14 +239,30 @@ const updateProduct = async (req, res) => {
             return res.status(404).json({ message: 'ระบบเกิดข้อผิดพลาด' });
         }
 
-        // รับข้อมูล name, price, categoryId, subcategoryId, distributorId และ features จาก request body
-        const { name, price, categoryId, subcategoryId, distributorId, features } = req.body;
+        // รับข้อมูลจาก request body
+        const { productId, name, ict, description, price, categoryId, subcategoryId, distributorId, features } = req.body;
 
         try {
+            // ตรวจสอบว่ามีการระบุ productId หรือไม่
+            if (!productId || productId === "") {
+                return res.status(400).json({ message: "กรุณาใส่รหัสสินค้าของคุณ" });
+            }
+
+            // ตรวจสอบว่ามีรห้สสินค้านี้มีในระบบหรือไม่
+            const productFindId = await Product.findOne({ productId: productId });
+            if (productFindId) {
+                return res.status(400).json({ message: 'รห้สสินค้านี้มีอยู่ในระบบแล้ว' });
+            }
+
             // ตรวจสอบว่ามีสินค้าตัวนี้อยู่ในระบบหรือไม่
             const product = await Product.findOne({ name: name });
             if (product) {
                 return res.status(400).json({ message: 'สินค้าชิ้นนี้มีอยู่ในระบบแล้ว' });
+            }
+
+            // ตรวจสอบว่าระบุว่าอยู่ในมาตรฐาน ICT หรือไม่
+            if (!ict || ict === "") {
+                return res.status(400).json({ message: 'โปรดระบุว่าสินค้าชิ้นนี้อยู่ในมาตรฐาน ICT หรือไม่' });
             }
 
             // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
@@ -265,12 +292,16 @@ const updateProduct = async (req, res) => {
                 const updateProduct = await Product.findByIdAndUpdate(
                     id,
                     {
-                        name, price,
+                        productId,
+                        name,
+                        ict,
+                        description,
+                        price,
                         category: categoryId,
                         subcategory: subcategoryId,
                         distributor: distributorId,
                         features,
-                        image: fileName
+                        images: fileName
                     },
                     { new: true, runVaildators: true }
                 );
@@ -283,7 +314,11 @@ const updateProduct = async (req, res) => {
                 const updateProduct = await Product.findByIdAndUpdate(
                     id,
                     {
-                        name, price,
+                        productId,
+                        name,
+                        ict,
+                        description,
+                        price,
                         category: categoryId,
                         subcategory: subcategoryId,
                         distributor: distributorId,
@@ -621,7 +656,7 @@ const filterProduct = async (req, res) => {
         }
 
         // กรองสินค้าที่มีการระบุมาตรฐาน ICT โดยไม่สนหมวดหมู่ ประเภท และผู่จัดจำหน่าย
-        if (ict === "Yes" && !categoryId && !subcategoryId && !distributorId) {
+        if (ict === true && !categoryId && !subcategoryId && !distributorId) {
             // ตรวจสอบว่ามีสินค้าหรือไม่
             const products = await Product.find({
                 ict: ict
@@ -636,7 +671,7 @@ const filterProduct = async (req, res) => {
         }
 
         // กรองสินค้าที่มีการระบุมาตรฐาน ICT และอยู่ในหมวดหมู่เดียวกัน
-        if (ict === "Yes" && categoryId && !subcategoryId && !distributorId) {
+        if (ict === true && categoryId && !subcategoryId && !distributorId) {
             // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
             const category = await Category.findById(categoryId);
             if (!category) {
@@ -658,7 +693,7 @@ const filterProduct = async (req, res) => {
         }
 
         // กรองสินค้าที่มีการระบุมาตรฐาน ICT และอยู่ในหมวดหมู่และประเภทเดียวกัน
-        if (ict === "Yes" && categoryId && subcategoryId && !distributorId) {
+        if (ict === true && categoryId && subcategoryId && !distributorId) {
             // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
             const category = await Category.findById(categoryId);
             if (!category) {
@@ -687,7 +722,7 @@ const filterProduct = async (req, res) => {
         }
 
         // กรองสินค้าที่มีการระบุมาตรฐาน ICT และอยู่ในหมวดหมู่ ประเภทและผู้จัดจำหน่ายเดียวกัน
-        if (ict === "Yes" && categoryId && subcategoryId && distributorId) {
+        if (ict === true && categoryId && subcategoryId && distributorId) {
             // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
             const category = await Category.findById(categoryId);
             if (!category) {
@@ -723,7 +758,7 @@ const filterProduct = async (req, res) => {
         }
 
         // กรองสินค้าที่มีการระบุมาตรฐาน ICT และอยู่ในหมวดหมู่และผู้จัดจำหน่ายเดียวกัน
-        if (ict === "Yes" && categoryId && !subcategoryId && distributorId) {
+        if (ict === true && categoryId && !subcategoryId && distributorId) {
             // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
             const category = await Category.findById(categoryId);
             if (!category) {
@@ -752,7 +787,7 @@ const filterProduct = async (req, res) => {
         }
 
         // กรองสินค้าที่มีการระบุมาตรฐาน ICT และผู้จัดจำหน่ายเดียวกัน
-        if (ict === "Yes" && !categoryId && !subcategoryId && distributorId) {
+        if (ict === true && !categoryId && !subcategoryId && distributorId) {
             // ตรวจสอบว่ามีผู้จัดหน่ายรายนี้ในระบบหรือไม่
             const distributor = await Distributor.findById(distributorId);
             if (!distributor) {
@@ -853,18 +888,9 @@ const compareProduct = async (req, res) => {
     }
 };
 
-// การจัดการการอัปโหลดไฟล์ .json
-const uploadJson = multer({
-    storage,
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype === 'application/json') {
-            cb(null, true);
-        } else {
-            // cb(new Error('Only .json files are allowed'), false);
-            return res.status(400).json({ message: 'อนุญาตเฉพาะไฟล์ .json เท่านั้น' });
-        }
-    }
-}).single('file');
+
+// การตั้งค่า Multer เพื่อเก็บไฟล์ในหน่วยความจำ
+const uploadJson = multer({ storage: multer.memoryStorage() }).single('file');
 
 // ระบบอัพโหลดข้อมูลผ่านไฟล์ .json
 const uploadFile = async (req, res) => {
@@ -874,27 +900,31 @@ const uploadFile = async (req, res) => {
             return res.status(404).json({ message: 'ระบบเกิดข้อผิดพลาด' });
         }
 
-        // ตรวจสอบว่ามีไฟล์ที่อัปโหลดมาหรือไม่
+        // ตรวจสอบว่าไฟล์ถูกส่งมาหรือไม่
         if (!req.file) {
             return res.status(400).json({ message: 'กรุณาอัปโหลดไฟล์ .json' });
         }
 
-        // รับข้อมูลไฟล์จาก request file
-        const filePath = req.file.path;
+        // ตรวจสอบประเภทของไฟล์
+        if (req.file.mimetype !== 'application/json') {
+            return res.status(400).json({ message: 'อนุญาตเฉพาะไฟล์ .json เท่านั้น' });
+        }
 
         try {
-            // อ่านไฟล์
-            const fileContent = fs.readFileSync(filePath, 'utf8');
+            // อ่านข้อมูลจากไฟล์ในหน่วยความจำ
+            const fileContent = req.file.buffer.toString('utf-8');
 
             // แปลงข้อมูลให้เป็น JSON
             const parsedData = JSON.parse(fileContent);
 
             // ตรวจสอบข้อมูลในไฟล์ (optional)
             if (!Array.isArray(parsedData) || parsedData.length === 0) {
-                // ลบไฟล์ออกเมื่อข้อมูลไม่ถูกต้อง
-                fs.unlinkSync(filePath);
                 return res.status(400).json({ message: 'ไฟล์ไม่มีข้อมูลสินค้า หรือรูปแบบข้อมูลไม่ถูกต้อง' });
             }
+
+            // ดึงข้อมูล ProductId จาก Database
+            const existingProductIds = await Product.find({}, { productId: 1 });
+            const existingIds = existingProductIds.map(productId => productId.productId);
 
             // ดึงข้อมูล Name จาก Database
             const existingProducts = await Product.find({}, { name: 1 });
@@ -921,10 +951,14 @@ const uploadFile = async (req, res) => {
             const invalidDatas = [];
             parsedData.forEach(item => {
                 // ตรวจสอบว่ามีการใส่ข้อมูลหรือไม่
-                if (!item.name || !item.ict || !item.category || !item.subcategory || !item.distributor) {
-                    emptyDatas.push(item.name)
+                if (!item.productId || !item.name || !item.category || !item.subcategory || !item.distributor) {
+                    emptyDatas.push(item)
                 }
-                // ตรวจสอบว่ามีข้อมูลซ้ำหรือไม่
+                // ตรวจสอบว่ามีรหัสสินค้าซ้ำหรือไม่
+                else if (existingIds.includes(item.productId)) {
+                    duplicateEntries.push(item.productId);
+                }
+                // ตรวจสอบว่ามีชื่อสินค้าซ้ำหรือไม่
                 else if (existingNames.includes(item.name)) {
                     duplicateEntries.push(item.name);
                 }
@@ -941,16 +975,11 @@ const uploadFile = async (req, res) => {
 
             // ตรวจสอบว่าข้อมูลทั้งหมดซ้ำกับใน Database
             if (newEntries.length === 0) {
-                // ลบไฟล์หลังใช้งาน
-                fs.unlinkSync(filePath);
                 return res.status(400).json({ message: 'ข้อมูลสินค้าของคุณทั้งหมดมีอยู่ในระบบแล้ว' });
             }
 
             // นำเข้าข้อมูลใหม่ทั้งหมด
             const addedProducts = await Product.insertMany(newEntries);
-
-            // ลบไฟล์หลังใช้งาน
-            fs.unlinkSync(filePath);
 
             return res.status(200).json({
                 message: 'เพิ่มสินค้าลงในระบบแล้ว',
@@ -960,13 +989,10 @@ const uploadFile = async (req, res) => {
                 duplicateEntries,
                 totalEmptyDatas: `มีข้อมูลที่ใส่ข้อมูลไม่ครบจำนวน: ${emptyDatas.length} ตัว`,
                 emptyDatas,
-                totalInvalidData: `มีข้อมูลที่ไม่ถูกต้องจำนวน: ${invalidDatas.length} ตัว`
+                totalInvalidData: `มีข้อมูลที่ไม่ถูกต้องจำนวน: ${invalidDatas.length} ตัว`,
+                invalidDatas
             });
         } catch (error) {
-            // ลบไฟล์กรณีเกิดข้อผิดพลาด
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
             return res.status(400).json({ message: error.message });
         }
     });

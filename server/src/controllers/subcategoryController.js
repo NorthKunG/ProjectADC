@@ -164,7 +164,7 @@ if (!fs.existsSync(uploadDir)) {
 
 // ตั้งค่าการอัปโหลดไฟล์ข้อมูล
 const storage = multer.diskStorage({
-    destiation: (req, file, cb) => {
+    destination: (req, file, cb) => {
         // กำหนดโฟลเดอร์ที่ใช้เก็บข้อมูล
         cb(null, uploadDir);
     },
@@ -175,77 +175,64 @@ const storage = multer.diskStorage({
     }
 });
 
-// การจัดการการอัปโหลดไฟล์ .json
-const uploadJson = multer({
-    storage,
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype === 'application/json') {
-            cb(null, true);
-        } else {
-            cb(new Error('Only .json files are allowed'), false);
-        }
-    }
-}).single('file');
+// การตั้งค่า Multer เพื่อเก็บไฟล์ในหน่วยความจำ
+const upload = multer({ storage: multer.memoryStorage() }).single('file');
 
-// ระบบอัพโหลดข้อมูลผ่านไฟล์ .json
+// ระบบอัปโหลดข้อมูลผ่านไฟล์ .json
 const uploadFile = async (req, res) => {
     // ใช้ multer สำหรับการอัปโหลดไฟล์
-    uploadJson(req, res, async (error) => {
+    upload(req, res, async (error) => {
         if (error) {
             return res.status(404).json({ message: 'ระบบเกิดข้อผิดพลาด' });
         }
 
-        // ตรวจสอบว่ามีไฟล์ที่อัปโหลดมาหรือไม่
+        // ตรวจสอบว่าไฟล์ถูกส่งมาหรือไม่
         if (!req.file) {
             return res.status(400).json({ message: 'กรุณาอัปโหลดไฟล์ .json' });
         }
 
-        // รับข้อมูลไฟล์จาก request file
-        const filePath = req.file.path;
+        // ตรวจสอบประเภทของไฟล์
+        if (req.file.mimetype !== 'application/json') {
+            return res.status(400).json({ message: 'อนุญาตเฉพาะไฟล์ .json เท่านั้น' });
+        }
 
         try {
-            // อ่านไฟล์
-            const fileContent = fs.readFileSync(filePath, 'utf8');
+            // อ่านข้อมูลจากไฟล์ในหน่วยความจำ
+            const fileContent = req.file.buffer.toString('utf-8');
 
             // แปลงข้อมูลให้เป็น JSON
             const parsedData = JSON.parse(fileContent);
 
             // ตรวจสอบข้อมูลในไฟล์ (optional)
             if (!Array.isArray(parsedData) || parsedData.length === 0) {
-                // ลบไฟล์ออกเมื่อข้อมูลไม่ถูกต้อง
-                fs.unlinkSync(filePath);
-                return res.status(400).json({ message: 'ไฟล์ไม่มีข้อมูล หรือรูปแบบข้อมูลไม่ถูกต้อง' });
+                return res.status(400).json({ message: 'ไฟล์ไม่มีข้อมูลสินค้า หรือรูปแบบข้อมูลไม่ถูกต้อง' });
             }
 
-            // ดึงข้อมูล Subcategory จาก Database
+            // ดึงข้อมูลประเภทจากฐานข้อมูล
             const existingSubcategories = await Subcategory.find({}, { name: 1 });
-            const existingNames = existingSubcategories.map(subcategory => subcategory.name);
+            const existingName = existingSubcategories.map(subcategory => subcategory.name);
 
-            // ดึงข้อมูล Category จาก Database
+            // ดึงข้อมูลหมวดหมู่จากฐานข้อมูล
             const categories = await Category.find({}, { _id: 1 });
             const categoryId = categories.map(category => category._id.toString());
 
-            // ตรวจสอบข้อมูลว่าที่ว่างหรือไม่
+            // ตรวจสอบความถูกต้องของข้อมูล
             const emptyDatas = [];
-
-            // ตรวจสอบ Category ที่ไม่มีอยู่ระบบ
-            const invalidCategories = [];
-
-            // ตรวจสอบข้อมูลที่ซ้ำกัน
             const duplicateEntries = [];
             const newEntries = [];
+            const invalidDatas = [];
             parsedData.forEach(item => {
                 // ตรวจสอบว่ามีการใส่ข้อมูลหรือไม่
-                if (!item.name || !item.categoryId) {
+                if (!item.name || !item.category) {
                     emptyDatas.push(item);
                 }
-                // ตรวจสอบว่ามีข้อมูล category ในระบบหรือไม่
-                else if (!categoryId.includes(item.category)) {
-                    invalidCategories.push(item);
+                // ตรวจสอบว่ามีชื่อประเภทสินค้าซ้ำหรือไม่
+                else if (existingName.includes(item.name)) {
+                    duplicateEntries.push(item);
                 }
-                // ตรวจสอบว่าข้อมูลที่ใส่มามีซ้ำกับในระบบหรือไม่
-                else if (existingNames.includes(item.name)) {
-                    duplicateEntries.push(item.name);
+                // ตรวจสอบว่ามีข้อมูลหมวดหมู่ในระบบหรือไม่
+                else if (!categoryId.includes(item.category)) {
+                    invalidDatas.push(item);
                 }
                 // ดำเนินการตามปกติ
                 else {
@@ -253,39 +240,30 @@ const uploadFile = async (req, res) => {
                 }
             });
 
-            // ตรวจสอบว่าข้อมูลทั้งหมดซ้ำกับในระบบหรือไม่
+            // ตรวจสอบว่าข้อมูลทั้งหมดซ้ำกับใน Database
             if (newEntries.length === 0) {
-                // ลบไฟล์หลังใช้งาน
-                fs.unlinkSync(filePath);
-                return res.status(400).json({ message: 'ข้อมูลประเภทของคุณทั้งหมดมีอยู่ในระบบแล้ว' });
+                return res.status(400).json({ message: 'ข้อมูลสินค้าของคุณทั้งหมดมีอยู่ในระบบแล้ว' });
             }
 
             // นำเข้าข้อมูลใหม่ทั้งหมด
             const addedSubcategories = await Subcategory.insertMany(newEntries);
 
-            // ลบไฟล์หลังใช้งาน
-            fs.unlinkSync(filePath);
-
             return res.status(200).json({
-                message: 'เพิ่มข้อมูลประเภทลงในระบบ',
-                totalAdded: `มีข้อมูลที่ถูกเพิ่มเข้าไปจำนวน: ${addedSubcategories.length} ตัว`,
+                message: 'เพิ่มประเภทสินค้าลงในระบบแล้ว',
+                totalAdded: `มีข้อมูลที่ถูกเพิ่มเข้าไปจำนวน: ${newEntries.length} ตัว`,
                 addedSubcategories,
-                totalDuplicates: `มีข้อมูลที่ซ้ำกับในระบบจำนวน: ${duplicateEntries.length} ตัว`,
+                totalDuplicateEntries: `มีข้อมูลที่ซ้ำกับในระบบจำนวน: ${duplicateEntries.length} ตัว`,
                 duplicateEntries,
-                totalEmptyDatas: `มีข้อมูลว่างจำนวน: ${emptyDatas.length} ตัว`,
+                totalEmptyDatas: `มีข้อมูลที่ใส่ข้อมูลไม่ครบจำนวน: ${emptyDatas.length} ตัว`,
                 emptyDatas,
-                totalInvlidCategories: `มีข้อมูลที่ระบุ category ที่ไม่พบในระบบจำนวน: ${invalidCategories.length} ตัว`,
-                invalidCategories
+                totalInvalidData: `มีข้อมูลที่ไม่ถูกต้องจำนวน: ${invalidDatas.length} ตัว`,
+                invalidDatas
             });
         } catch (error) {
-            // ลบไฟล์กรณีเกิดข้อผิดพลาด
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
             return res.status(400).json({ message: error.message });
         }
     });
-}
+};
 
 // ส่งออก Module
 module.exports = {

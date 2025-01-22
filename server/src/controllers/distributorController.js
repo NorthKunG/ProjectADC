@@ -150,7 +150,7 @@ const updateDistributor = async (req, res) => {
             },
             { new: true, runValidators: true }
         );
-        return res.status(200).json({ 
+        return res.status(200).json({
             message: 'แก้ไขข้อมูลผู้จัดจำหน่ายรายนี้เรียบร้อยแล้ว',
             updateDistributor
         });
@@ -178,92 +178,85 @@ const storage = multer.diskStorage({
     }
 });
 
-// การจัดการการอัปโหลดไฟล์ .json
-const uploadJson = multer({
-    storage,
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype === 'application/json') {
-            cb(null, true);
-        } else {
-            cb(new Error('Only .json files are allowed'), false);
-        }
-    }
-}).single('file');
+// การตั้งค่า Multer เพื่อเก็บไฟล์ในหน่วยความจำ
+const upload = multer({ storage: multer.memoryStorage() }).single('file');
 
-// ระบบอัพโหลดข้อมูลผ่านไฟล์ .json
+// ระบบอัปโหลดข้อมูลผ่านไฟล์ .json
 const uploadFile = async (req, res) => {
     // ใช้ multer สำหรับการอัปโหลดไฟล์
-    uploadJson(req, res, async (error) => {
+    upload(req, res, async (error) => {
         if (error) {
             return res.status(404).json({ message: 'ระบบเกิดข้อผิดพลาด' });
         }
 
-        // ตรวจสอบว่ามีไฟล์ที่อัปโหลดมาหรือไม่
+        // ตรวจสอบว่าไฟล์ถูกส่งมาหรือไม่
         if (!req.file) {
             return res.status(400).json({ message: 'กรุณาอัปโหลดไฟล์ .json' });
         }
 
-        // รับข้อมูลไฟล์จาก request file
-        const filePath = req.file.path;
+        // ตรวจสอบประเภทของไฟล์
+        if (req.file.mimetype !== 'application/json') {
+            return res.status(400).json({ message: 'อนุญาตเฉพาะไฟล์ .json เท่านั้น' });
+        }
 
         try {
-            // อ่านไฟล์
-            const fileContent = fs.readFileSync(filePath, 'utf8');
+            // อ่านข้อมูลจากไฟล์ในหน่วยความจำ
+            const fileContent = req.file.buffer.toString('utf-8');
 
-            // แปลงข้อมูลจาก JSON string เป็น object/array
+            // แปลงข้อมูลให้เป็น JSON
             const parsedData = JSON.parse(fileContent);
 
             // ตรวจสอบข้อมูลในไฟล์ (optional)
             if (!Array.isArray(parsedData) || parsedData.length === 0) {
-                // ลบไฟล์ออกเมื่อข้อมูลไม่ถูกต้อง
-                fs.unlinkSync(filePath);
-                return res.status(400).json({ message: 'ไฟล์ไม่มีข้อมูลผู้จัดจำหน่ายหรือรูปแบบข้อมูลไม่ถูกต้อง' });
+                return res.status(400).json({ message: 'ไฟล์ไม่มีข้อมูลสินค้า หรือรูปแบบข้อมูลไม่ถูกต้อง' });
             }
 
-            // ดึงข้อมูลจาก Database
-            const existingDistributors = await Distributor.find({}, { name: 1 }); // ดึงเฉพาะชื่อผู้จัดจำหน่าย
-            const existingNames = existingDistributors.map(distributor => distributor.name);
+            // ดึงข้อมูลผู้จัดจำหน่ายจากฐานข้อมูล
+            const existingDistributors = await Distributor.find({}, { name: 1, email: 1 });
+            const existingName = existingDistributors.map(distributor => distributor.name);
+            const existingEmail = existingDistributors.map(distributor => distributor.email);
 
-            // ตรวจสอบข้อมูลที่ซ้ำกัน
+            // ตรวจสอบความถูกต้องของข้อมูล
+            const emptyDatas = [];
             const duplicateEntries = [];
             const newEntries = [];
             parsedData.forEach(item => {
-                if (existingNames.includes(item.name)) {
-                    duplicateEntries.push(item.name);
-                } else {
+                // ตรวจสอบว่ามีการใส่ข้อมูลหรือไม่
+                if (!item.name) {
+                    emptyDatas.push(item);
+                }
+                // ตรวจสอบว่ามีชื่อผู้จัดจำหน่ายสินค้าซ้ำหรือไม่
+                else if (existingName.includes(item.name) || existingEmail.includes(item.email)) {
+                    duplicateEntries.push(item);
+                }
+                // ดำเนินการตามปกติ
+                else {
                     newEntries.push(item);
                 }
             });
 
             // ตรวจสอบว่าข้อมูลทั้งหมดซ้ำกับใน Database
             if (newEntries.length === 0) {
-                // ลบไฟล์หลังใช้งาน
-                fs.unlinkSync(filePath);
-                return res.status(400).json({ message: 'ข้อมูลผู้จัดจำหน่ายของคุณทั้งหมดมีอยู่ในระบบแล้ว' });
+                return res.status(400).json({ message: 'ข้อมูลหมวดหมู่สินค้าของคุณทั้งหมดมีอยู่ในระบบแล้ว' });
             }
 
             // นำเข้าข้อมูลใหม่ทั้งหมด
             const addedDistributors = await Distributor.insertMany(newEntries);
 
-            // ลบไฟล์หลังใช้งาน
-            fs.unlinkSync(filePath);
-
             return res.status(200).json({
-                message: 'เพิ่มผู้จัดจำหน่ายสินค้าลงในระบบแล้ว',
+                message: 'เพิ่มหมวดหมู่สินค้าลงในระบบแล้ว',
+                totalAdded: `มีข้อมูลที่ถูกเพิ่มเข้าไปจำนวน: ${newEntries.length} ตัว`,
                 addedDistributors,
+                totalDuplicateEntries: `มีข้อมูลที่ซ้ำกับในระบบจำนวน: ${duplicateEntries.length} ตัว`,
                 duplicateEntries,
-                totalAdded: addedDistributors.length,
-                totalDuplicates: duplicateEntries.length
+                totalEmptyDatas: `มีข้อมูลที่ใส่ข้อมูลไม่ครบจำนวน: ${emptyDatas.length} ตัว`,
+                emptyDatas
             });
         } catch (error) {
-            // ลบไฟล์กรณีเกิดข้อผิดพลาด
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
             return res.status(400).json({ message: error.message });
         }
     });
-};
+}
 
 // ส่งออก Module
 module.exports = {

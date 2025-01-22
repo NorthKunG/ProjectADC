@@ -7,21 +7,21 @@ const User = require('../models/userModel');
 // Login
 const login = async (req, res) => {
     try {
-        // const { email, password } = req.body;
-        // const user = await User.findOne({ email });
-        // if (!user || !(await user.matchPassword(password))) {
-        //     res.status(400).json({
-        //         status: 'error',
-        //         message: 'Email or password is incorrect'
-        //     });
-        //     return;
-        // }
-        // const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '6h' });
-        // res.status(200).json({
-        //     status: 'success',
-        //     token
-        // });
-        // return;
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+        if (!user || !(await user.matchPassword(password))) {
+            res.status(400).json({
+                status: 'error',
+                message: 'Email or password is incorrect'
+            });
+            return;
+        }
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '6h' });
+        res.status(200).json({
+            status: 'success',
+            token
+        });
+        return;
     } catch (error) {
         res.status(400).json({
             status: 'error',

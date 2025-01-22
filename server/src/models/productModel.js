@@ -5,20 +5,29 @@ const mongoose = require('mongoose');
 const { validate } = require('./categoryModel');
 
 const productSchema = new mongoose.Schema({
+    productId: {
+        type: String,
+        required: [true, 'Product Id is required.'],
+        trim: true
+    },
     name: {
         type: String,
         required: [true, 'Product name is required.'],
-        tirm: true
+        trim: true
     },
     ict: {
-        type: String,
-        required: [true, 'ICT is required.']
+        type: Boolean
     },
     price: {
         type: Number,
         required: false,
         min: 0,
         default: null
+    },
+    description: {
+        type: String,
+        required: false,
+        trim: true
     },
     category: {
         type: mongoose.Schema.Types.ObjectId,
