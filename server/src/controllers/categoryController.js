@@ -19,10 +19,10 @@ const upload = multer({ storage: multer.memoryStorage() }).single('file');
 const getCategories = async (req, res) => {
     try {
         // เรียกดูข้อมูลหมวดหมู่สินค้าทั้งหมด
-        const getCategories = await Category.find();
+        const categories = await Category.find();
         return res.status(200).json({
-            count: getCategories.length,
-            getCategories
+            count: categories.length,
+            categories
         });
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -32,7 +32,7 @@ const getCategories = async (req, res) => {
 // เพิ่มข้อมูลหมวดหมู่สินค้า
 const addCategory = async (req, res) => {
     // รับข้อมูล name จาก request body
-    const { name } = req.body;
+    const { code, name } = req.body;
 
     try {
         // ตรวจสอบว่ามีชื่อหมวดหมู่สินค้านี้ในระบบหรือไม่

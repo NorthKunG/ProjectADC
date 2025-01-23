@@ -14,5 +14,6 @@ router.get('/:id', productController.getProduct);
 router.delete('/:id', productController.deleteProduct);
 router.put('/:id', productController.updateProduct);
 router.post('/uploadFile', productController.uploadFile);
+router.post('/uploadExcel', productController.uploadExcel);
 
 module.exports = router;

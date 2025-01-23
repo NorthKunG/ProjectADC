@@ -2,6 +2,7 @@
 const fs = require('fs');
 const multer = require('multer');
 const path = require('path');
+const xlsx = require('xlsx');
 
 // ดึงโมเดลที่เกี่ยวข้องสินค้าจากโฟลเดอร์ models
 const Product = require('../models/productModel');
@@ -48,7 +49,7 @@ const upload = multer({
 const getProducts = async (req, res) => {
     try {
         // เรียกดูข้อมูลสินค้าทั้งหมด
-        const products = await Product.find().populate('category').populate('subcategory').populate('distributor');
+        const products = await Product.find().populate('category').populate('brand');
         return res.status(200).json({
             count: products.length,
             products
@@ -67,7 +68,7 @@ const addProduct = async (req, res) => {
         }
 
         // รับข้อมูลจาก request body
-        const { productId, name, ict, description, price, categoryId, subcategoryId, distributorId, features } = req.body;
+        const { brand, productId, name, ict, description, price, categoryId, features } = req.body;
 
         try {
             // ตรวจสอบว่ามีการระบุ productId หรือไม่
@@ -108,33 +109,6 @@ const addProduct = async (req, res) => {
                 return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
             }
 
-            // ตรวจสอบว่ามีการใส่ Subcategory ของสินค้าหรือไม่
-            if (!subcategoryId || subcategoryId === "") {
-                return res.status(400).json({ message: 'กรุณาใส่ประเภทสินค้าของคุณ' });
-            }
-
-            // ตรวจสอบว่ามี Subcategory นี้ในระบบหรือไม่
-            const subcategory = await Subcategory.findById(subcategoryId);
-            if (!subcategory) {
-                return res.status(404).json({ message: 'ไม่พบ Subcategory นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่า Subcategory นี้อยู่ใน Category ที่ระบุหรือไม่
-            if (!subcategory.category.equals(categoryId)) {
-                return res.status(400).json({ message: 'Subcategory ของคุณไม่ตรงกับ Category ที่คุณระบุ' });
-            }
-
-            // ตรวจสอบว่ามีการใส่ผู้จัดจำหน่ายหรือไม่
-            if (!distributorId || distributorId === "") {
-                return res.status(400).json({ message: 'กรุณาใส่ผู้จัดจำหน่ายสินค้าของคุณ' });
-            }
-
-            // ตรวจสอบว่ามีผู้จัดจำหน่ายรายนี้ในระบบหรือไม่
-            const distributor = await Distributor.findById(distributorId);
-            if (!distributor) {
-                return res.status(404).json({ message: 'ไม่พบผู้จัดจำหน่ายรายนี้ในระบบ' });
-            }
-
             // ตรวจสอบว่ามีการอัพโหลดไฟล์รูปภาพสินค้าหรือไม่
             if (req.files && req.files.length > 0) {
                 // รับข้อมูล fileName จาก request file
@@ -148,8 +122,6 @@ const addProduct = async (req, res) => {
                     price,
                     description: description,
                     category: categoryId,
-                    subcategory: subcategoryId,
-                    distributor: distributorId,
                     features,
                     images: fileNames
                 });
@@ -206,11 +178,11 @@ const getProduct = async (req, res) => {
 }
 
 // แสดงสินค้าที่ไม่ติดมาตรฐาน ICT
-const getProductNoIct = async (req ,res) => {
+const getProductNoIct = async (req, res) => {
     try {
         // เรียกดูข้อมูลสินค้าไม่ติดมาตรฐาน ICT
         const products = await Product.find({ ict: false });
-        
+
         // ตรวจสอบว่ามีสินค้าหรือไม่
         if (products.length === 0) {
             return res.status(500).json({ message: 'ไม่พบสินค้าในระบบ' });
@@ -954,12 +926,12 @@ const uploadFile = async (req, res) => {
             const categoryId = categories.map(category => category._id.toString());
 
             // ดึงข้อมูล Subcategory จาก Database
-            const subcategories = await Subcategory.find({}, { _id: 1 });
-            const subcategoryId = subcategories.map(subcategory => subcategory._id.toString());
+            // const subcategories = await Subcategory.find({}, { _id: 1 });
+            // const subcategoryId = subcategories.map(subcategory => subcategory._id.toString());
 
             // ดึงข้อมูล Distributor จาก Database
-            const distributors = await Distributor.find({}, { _id: 1 });
-            const distributorId = distributors.map(distributor => distributor._id.toString());
+            // const distributors = await Distributor.find({}, { _id: 1 });
+            // const distributorId = distributors.map(distributor => distributor._id.toString());
 
             // ตรวจสอบว่ามีการใส่ข้อมูลหรือไม่
             const emptyDatas = [];
@@ -970,7 +942,7 @@ const uploadFile = async (req, res) => {
             const invalidDatas = [];
             parsedData.forEach(item => {
                 // ตรวจสอบว่ามีการใส่ข้อมูลหรือไม่
-                if (!item.productId || !item.name || !item.category || !item.subcategory || !item.distributor) {
+                if (!item.productId || !item.name || !item.category) {
                     emptyDatas.push(item)
                 }
                 // ตรวจสอบว่ามีรหัสสินค้าซ้ำหรือไม่
@@ -982,8 +954,8 @@ const uploadFile = async (req, res) => {
                     duplicateEntries.push(item.name);
                 }
                 // ตรวจสอบว่ามีข้อมูลในระบบหรือไม่
-                else if (!categoryId.includes(item.category) || !subcategoryId.includes(item.subcategory) ||
-                    !distributorId.includes(item.distributor)) {
+                else if (!categoryId.includes(item.category) /* || !subcategoryId.includes(item.subcategory) ||
+                    !distributorId.includes(item.distributor) */) {
                     invalidDatas.push(item.name);
                 }
                 // ดำเนินการตามปกติ
@@ -1002,6 +974,7 @@ const uploadFile = async (req, res) => {
 
             return res.status(200).json({
                 message: 'เพิ่มสินค้าลงในระบบแล้ว',
+                total: parsedData.length,
                 totalAdded: `มีข้อมูลที่ถูกเพิ่มเข้าไปจำนวน: ${newEntries.length} ตัว`,
                 addedProducts,
                 totalDuplicateEntries: `มีข้อมูลที่ซ้ำกับในระบบจำนวน: ${duplicateEntries.length} ตัว`,
@@ -1017,6 +990,54 @@ const uploadFile = async (req, res) => {
     });
 };
 
+const uploadExcel = async (req, res) => {
+    // ใช้ multer สำหรับการอัปโหลดไฟล์
+    uploadJson(req, res, async (error) => {
+        if (error) {
+            return res.status(404).json({ message: 'ระบบเกิดข้อผิดพลาด' });
+        }
+
+        // ตรวจสอบว่าไฟล์ถูกส่งมาหรือไม่
+        if (!req.file) {
+            return res.status(400).json({ message: 'กรุณาอัปโหลดไฟล์ .xlsx' });
+        }
+
+        const filePath = req.file.path;
+
+        try {
+            // อ่านไฟล์ Excel
+            const workbook = xlsx.readFile(filePath);
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+
+            // แปลงข้อมูลใน sheet เป็น JSON
+            const data = xlsx.utils.sheet_to_json(sheet);
+
+            // แปลงข้อมูลเป็น array ของข้อมูลสินค้า
+            const products = data.map((item, index) => ({
+                brand: item.Brand,
+                productId: `ADC${item.CSCode}${String(index + 1).padStart(4, '0')}`,
+                name: item['Item Description'],
+                ict: false,
+                price: parseFloat(item['Price Ex.']),
+                category: 'CATEGORY_ID', // ใส่ ID ของหมวดหมู่ที่ต้องการ
+                features: [], // อาจจะใช้ข้อมูลจากไฟล์ได้ถ้าต้องการเพิ่มฟีเจอร์
+            }));
+
+            // บันทึกข้อมูลลงฐานข้อมูล
+            Product.insertMany(products)
+                .then(() => {
+                    res.status(200).json({ message: 'File data uploaded successfully!' });
+                })
+                .catch((err) => {
+                    res.status(500).json({ error: err.message });
+                });
+        } catch (error) {
+            return res.status(400).json({ message: error.message });
+        }
+    })
+};
+
 // Exports an api
 module.exports = {
     getProducts,
@@ -1028,5 +1049,6 @@ module.exports = {
     searchProductByName,
     filterProduct,
     compareProduct,
-    uploadFile
+    uploadFile,
+    uploadExcel
 }

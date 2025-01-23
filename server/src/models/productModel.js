@@ -5,6 +5,11 @@ const mongoose = require('mongoose');
 const { validate } = require('./categoryModel');
 
 const productSchema = new mongoose.Schema({
+    brand: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: [true, 'Product brand is required.'],
+        ref: 'Brand'
+    },
     productId: {
         type: String,
         required: [true, 'Product Id is required.'],
@@ -16,7 +21,8 @@ const productSchema = new mongoose.Schema({
         trim: true
     },
     ict: {
-        type: Boolean
+        type: Boolean,
+        default: false
     },
     price: {
         type: Number,
@@ -34,24 +40,24 @@ const productSchema = new mongoose.Schema({
         required: [true, 'Product category is required.'],
         ref: 'Category'
     },
-    subcategory: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: [true, 'Product subcategory is required.'],
-        ref: 'Subcategory',
-        validate: {
-            validator: async function (subcategoryId) {
-                const subcategory = await mongoose.model('Subcategory').findById(subcategoryId);
-                const validCategory = subcategory && subcategory.category.toString() === this.category.toString();
-                return validCategory;
-            },
-            message: 'Subcategory does not belong to the selected Category'
-        }
-    },
-    distributor: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: [true, 'Product distributor is required.'],
-        ref: 'Distributor'
-    },
+    // subcategory: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     required: [true, 'Product subcategory is required.'],
+    //     ref: 'Subcategory',
+    //     validate: {
+    //         validator: async function (subcategoryId) {
+    //             const subcategory = await mongoose.model('Subcategory').findById(subcategoryId);
+    //             const validCategory = subcategory && subcategory.category.toString() === this.category.toString();
+    //             return validCategory;
+    //         },
+    //         message: 'Subcategory does not belong to the selected Category'
+    //     }
+    // },
+    // distributor: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     required: [true, 'Product distributor is required.'],
+    //     ref: 'Distributor'
+    // },
     features: [{
         name: {
             type: String,

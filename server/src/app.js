@@ -47,6 +47,10 @@ app.use('/subcategories', subcategoryRoutes);
 const contactRoutes = require('./routes/contactRoutes');
 app.use('/api/contact', contactRoutes);
 
+// ดึง API brand
+const brandRoutes = require('./routes/brandRoutes');
+app.use('/api/brands', brandRoutes);
+
 app.use((err, req, res, next) => {
     req.status(err.status || 500).json({
         message: err || 'เกิดข้อผิดพลาด'
