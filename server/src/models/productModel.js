@@ -6,7 +6,7 @@ const { validate } = require('./categoryModel');
 
 const productSchema = new mongoose.Schema({
     brand: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         required: [true, 'Product brand is required.'],
         ref: 'Brand'
     },
@@ -36,7 +36,7 @@ const productSchema = new mongoose.Schema({
         trim: true
     },
     category: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         required: [true, 'Product category is required.'],
         ref: 'Category'
     },
@@ -61,12 +61,12 @@ const productSchema = new mongoose.Schema({
     features: [{
         name: {
             type: String,
-            required: [true, 'Feature name is required.'],
+            required: false,
             trim: true
         },
         description: {
             type: String,
-            required: [true, 'Feature descrition is required.'],
+            required: false,
             trim: true
         }
     }],

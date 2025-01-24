@@ -2,13 +2,14 @@
 const fs = require('fs');
 const multer = require('multer');
 const path = require('path');
-const xlsx = require('xlsx');
+const mongoose = require('mongoose');
 
 // ดึงโมเดลที่เกี่ยวข้องสินค้าจากโฟลเดอร์ models
 const Product = require('../models/productModel');
 const Category = require('../models/categoryModel');
 const Subcategory = require('../models/subcategoryModel');
 const Distributor = require('../models/distributorModel');
+const Brand = require('../models/brandModel');
 
 // สร้าเส้นทางไปยังโฟลเดอร์ uploads
 const uploadDir = path.join(__dirname, '..', 'uploads');
@@ -48,12 +49,45 @@ const upload = multer({
 // ดูข้อมูลสินค้าทั้งหมด
 const getProducts = async (req, res) => {
     try {
-        // เรียกดูข้อมูลสินค้าทั้งหมด
-        const products = await Product.find().populate('category').populate('brand');
-        return res.status(200).json({
-            count: products.length,
-            products
-        });
+        const products = await Product.aggregate([
+            {
+                $lookup: {
+                    // ชื่อคอลเลกชันที่คุณต้องการ join (ในที่นี้คือ 'categories')
+                    from: 'categories',
+                    // ฟิลด์ใน `Product` ที่เก็บ `ObjectId` ของหมวดหมู่
+                    localField: 'category',
+                    // ฟิลด์ใน `Category` ที่จะจับคู่กับ `category`
+                    foreignField: 'code',
+                    // ชื่อฟิลด์ที่เก็บข้อมูลจาก `Category` 
+                    as: 'categoryDetails'
+                }
+            },
+            {
+                // ถ้ามีหลายค่าหรือข้อมูล, ใช้ $unwind เพื่อทำให้เป็น single document
+                $unwind: '$categoryDetails'
+            },
+            {
+                $project: {
+                    // แสดง brand สินค้า
+                    brand: 1,
+                    // แสดงชื่อสินค้า
+                    name: 1,
+                    // แสดงราคา
+                    price: 1,
+                    // แสดงชื่อหมวดหมู่ (ใช้ชื่อหมวดหมู่จาก `Category`)
+                    category: '$categoryDetails.name',
+                    // แสดง Features ของสินค้า
+                    features: 1
+                }
+            }
+        ]);
+
+        // ตรวจสอบว่ามีสินค้าหรือไม่
+        if (!products) {
+            return res.status(404).send({ message: 'ไม่พบสินค้า' });
+        }
+
+        return res.status(200).json(products);
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
@@ -68,12 +102,18 @@ const addProduct = async (req, res) => {
         }
 
         // รับข้อมูลจาก request body
-        const { brand, productId, name, ict, description, price, categoryId, features } = req.body;
+        const { brandName, productId, name, ict, description, price, cscode, features } = req.body;
 
         try {
-            // ตรวจสอบว่ามีการระบุ productId หรือไม่
-            if (!productId || productId === "") {
-                return res.status(400).json({ message: "กรุณาใส่รหัสสินค้าของคุณ" });
+            // ตรวจสอบว่ามีการระบุ Brand หรือไม่
+            if (!brandName || brandName === "") {
+                return res.status(400).json({ message: "กรุณาใส่ Brand สินค้าของคุณ" });
+            }
+
+            // ตรวจสอบว่ามี Brand นี้ในระบบหรือไม่
+            const brand = await Brand.findOne({ name: brandName })
+            if (!brand) {
+                return res.status(400).json({ message: 'ไม่พบ Brand นี้ในระบบ' })
             }
 
             // ตรวจสอบว่ามีรห้สสินค้านี้มีในระบบหรือไม่
@@ -93,18 +133,13 @@ const addProduct = async (req, res) => {
                 return res.status(400).json({ message: 'สินค้าชิ้นนี้มีอยู่ในระบบแล้ว' });
             }
 
-            // ตรวจสอบว่าระบุว่าอยู่ในมาตรฐาน ICT หรือไม่
-            if (!ict || ict === "") {
-                return res.status(400).json({ message: 'โปรดระบุว่าสินค้าชิ้นนี้อยู่ในมาตรฐาน ICT หรือไม่' });
-            }
-
             // ตรวจสอบว่ามีการใส่ Category ของสินค้าหรือไม่
-            if (!categoryId || categoryId === "") {
+            if (!cscode || cscode === "") {
                 return res.status(400).json({ message: "กรุณาใส่หมวดหมู่สินค้าของคุณ" });
             }
 
             // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
-            const category = await Category.findById(categoryId);
+            const category = await Category.findOne({ code: cscode });
             if (!category) {
                 return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
             }
@@ -116,12 +151,13 @@ const addProduct = async (req, res) => {
 
                 // เพิ่มสินค้าใหม่ลงในระบบ
                 const addProduct = new Product({
+                    brand: brandName,
                     productId,
                     name,
                     ict,
                     price,
                     description: description,
-                    category: categoryId,
+                    category: cscode,
                     features,
                     images: fileNames
                 });
@@ -135,14 +171,13 @@ const addProduct = async (req, res) => {
             } else {
                 // เพิ่มสินค้าใหม่ลงในระบบ
                 const addProduct = new Product({
+                    brand: brandName,
                     productId,
                     name,
                     ict,
                     price,
                     description: description,
-                    category: categoryId,
-                    subcategory: subcategoryId,
-                    distributor: distributorId,
+                    category: cscode,
                     features
                 });
 
@@ -165,17 +200,58 @@ const getProduct = async (req, res) => {
     const { id } = req.params;
 
     try {
-        // เรียกดูข้อมูลสินค้าโดยใช้ id
-        const product = await Product.findById(id).populate('category').populate('subcategory').populate('distributor');
+        const product = await Product.aggregate([
+            {
+                $match: {
+                    // แปลง id ที่รับมาให้เป็น ObjectId
+                    _id: new mongoose.Types.ObjectId(id)
+                }
+            },
+            {
+                $lookup: {
+                    // ชื่อคอลเลกชันที่ต้องการ join (ในที่นี้คือ 'categories')
+                    from: 'categories',
+                    // ฟิลด์ใน `Product` ที่เก็บ `ObjectId` ของหมวดหมู่
+                    localField: 'category',
+                    // ฟิลด์ใน `Category` ที่จะจับคู่กับ `category`
+                    foreignField: 'code',
+                    // ชื่อฟิลด์ที่เก็บข้อมูลจาก `Category`
+                    as: 'categoryDetails'
+                }
+            },
+            {
+                // ถ้ามีหลายค่าหรือข้อมูล, ใช้ $unwind เพื่อทำให้เป็น single document
+                $unwind: {
+                    path: '$categoryDetails',
+                    preserveNullAndEmptyArrays: true // เพื่อให้ยังแสดงสินค้าแม้ไม่มี category
+                }
+            },
+            {
+                $project: {
+                    // แสดง brand สินค้า
+                    brand: 1,
+                    // แสดงชื่อสินค้า
+                    name: 1,
+                    // แสดงราคา
+                    price: 1,
+                    // แสดงชื่อหมวดหมู่ (ใช้ชื่อหมวดหมู่จาก `Category`)
+                    category: '$categoryDetails.name',
+                    // แสดง Features ของสินค้า
+                    features: 1
+                }
+            }
+        ]);
+
         // ตรวจสอบว่ามีสินค้าชิ้นในระบบหรือไม่
-        if (!product) {
+        if (!product || product.length === 0) {
             return res.status(404).json({ message: 'ไม่พบสินค้าชิ้นนี้ในระบบ' });
         }
-        return res.status(200).json(product);
+
+        return res.status(200).json(product[0]); // ส่งคืนสินค้าชิ้นเดียว
     } catch (error) {
         return res.status(400).json({ message: error.message });
     }
-}
+};
 
 // แสดงสินค้าที่ไม่ติดมาตรฐาน ICT
 const getProductNoIct = async (req, res) => {
@@ -357,447 +433,78 @@ const searchProductByName = async (req, res) => {
 
 // กรองสินค้าผ่าน ราคา, Category และ Subcategory
 const filterProduct = async (req, res) => {
-    // รับข้อมูล price, categoryId และ subcategoryId จาก request body
-    const { minPrice, maxPrice, ict, categoryId, subcategoryId, distributorId } = req.query;
+    // รับข้อมูลจาก request query
+    const { minPrice, maxPrice, brand, ict, category } = req.query;
 
     try {
-        // กรองสินค้าที่อยู่ระหว่างราคาต่ำที่สุดและราคาสูงสุด
-        if (minPrice && maxPrice && !categoryId && !subcategoryId && !distributorId) {
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                price: { $gte: minPrice, $lte: maxPrice }
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่พบสินค้าที่คุณค้นหา' });
+        // สร้างตัวกรองแบบ dynamic
+        const filters = {};
+
+        // กรองตามช่วงราคา
+        if (minPrice && maxPrice) {
+            filters.price = {
+                $gte: parseFloat(minPrice), // มากกว่าหรือเท่ากับ minPrice
+                $lte: parseFloat(maxPrice), // น้อยกว่าหรือเท่ากับ maxPrice
             }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
         }
 
-        // กรองสินค้าที่อยู่ระหว่างราคาต่ำที่สุดและราคาสูงสุดโดยที่อยู่ใน Category เดียวกัน
-        if (minPrice && maxPrice && categoryId && !subcategoryId && !distributorId) {
-            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
-            const category = await Category.findById(categoryId);
-            if (!category) {
-                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                price: { $gte: minPrice, $lte: maxPrice },
-                category: categoryId
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่พบสินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
+        // กรองตาม brand
+        if (brand) {
+            filters.brand = brand;
         }
 
-        // กรองสินค้าที่อยู่ระหว่างราคาต่ำที่สุดและราคาสูงสุดโดยยังที่อยู่ใน Category และ Subcategory เดียวกัน
-        if (minPrice && maxPrice && categoryId && subcategoryId && !distributorId) {
-            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
-            const category = await Category.findById(categoryId);
-            if (!category) {
-                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามี Subcategory นี้ในระบบหรือไม่
-            const subcategory = await Subcategory.findById(subcategoryId);
-            if (!subcategory) {
-                return res.status(404).json({ message: 'ไม่พบ Subcategory นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                price: { $gte: minPrice, $lte: maxPrice },
-                category: categoryId,
-                subcategory: subcategoryId
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่พบสินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
+        // กรองตาม ict (ตรวจสอบว่าเป็น boolean)
+        if (ict !== undefined) {
+            filters.ict = ict === 'true';
         }
 
-        // กรองสินค้าที่อยู่ระหว่างราคาต่ำที่สุดและราคาสูงสุดโดยมีผู้จัดจำหน่ายรายเดียวกัน
-        if (minPrice && maxPrice && !categoryId && !subcategoryId && distributorId) {
-            // ตรวจสอบว่ามีผู้จัดหน่ายรายนี้ในระบบหรือไม่
-            const distributor = await Distributor.findById(distributorId);
-            if (!distributor) {
-                return res.status(404).json({ message: 'ไม่พบผู้จัดหน่ายรายนี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                price: { $gte: minPrice, $lte: maxPrice },
-                distributor: distributorId
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่พบสินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
+        // กรองตาม category
+        if (category) {
+            filters.category = category;
         }
 
-        // กรองสินค้าที่อยู่ระหว่างราคาต่ำที่สุดและราคาสูงสุดโดยยังที่อยู่ใน Category และมีผู้จัดจำหน่ายรายเดียวกัน
-        if (minPrice && maxPrice && categoryId && !subcategoryId && distributorId) {
-            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
-            const category = await Category.findById(categoryId);
-            if (!category) {
-                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
+        const products = await Product.aggregate([
+            {
+                $match: filters
+            },
+            {
+                $lookup: {
+                    // ชื่อคอลเลกชันที่คุณต้องการ join (ในที่นี้คือ 'categories')
+                    from: 'categories',
+                    // ฟิลด์ใน `Product` ที่เก็บ `ObjectId` ของหมวดหมู่
+                    localField: 'category',
+                    // ฟิลด์ใน `Category` ที่จะจับคู่กับ `category`
+                    foreignField: 'code',
+                    // ชื่อฟิลด์ที่เก็บข้อมูลจาก `Category` 
+                    as: 'categoryDetails'
+                }
+            },
+            {
+                // ถ้ามีหลายค่าหรือข้อมูล, ใช้ $unwind เพื่อทำให้เป็น single document
+                $unwind: '$categoryDetails'
+            },
+            {
+                $project: {
+                    // แสดง brand สินค้า
+                    brand: 1,
+                    // แสดงชื่อสินค้า
+                    name: 1,
+                    // แสดงราคา
+                    price: 1,
+                    // แสดงชื่อหมวดหมู่ (ใช้ชื่อหมวดหมู่จาก `Category`)
+                    category: '$categoryDetails.name',
+                    // แสดง Features ของสินค้า
+                    features: 1
+                }
             }
+        ]);
 
-            // ตรวจสอบว่ามีผู้จัดหน่ายรายนี้ในระบบหรือไม่
-            const distributor = await Distributor.findById(distributorId);
-            if (!distributor) {
-                return res.status(404).json({ message: 'ไม่พบผู้จัดหน่ายรายนี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                price: { $gte: minPrice, $lte: maxPrice },
-                category: categoryId,
-                distributor: distributorId
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่พบสินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
+        // ตรวจสอบว่ามีสินค้าหรือไม่
+        if (!products || products.length === 0) {
+            return res.status(404).send({ message: 'ไม่พบสินค้า' });
         }
 
-        // กรองสินค้าที่อยู่ระหว่างราคาต่ำที่สุดและราคาสูงสุดโดยยังที่อยู่ใน Category, Subcategory และมีผู้จัดจำหน่ายรายเดียวกัน
-        if (minPrice && maxPrice && categoryId && subcategoryId && distributorId) {
-            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
-            const category = await Category.findById(categoryId);
-            if (!category) {
-                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามี Subcategory นี้ในระบบหรือไม่
-            const subcategory = await Subcategory.findById(subcategoryId);
-            if (!subcategory) {
-                return res.status(404).json({ message: 'ไม่พบ Subcategory นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีผู้จัดหน่ายรายนี้ในระบบหรือไม่
-            const distributor = await Distributor.findById(distributorId);
-            if (!distributor) {
-                return res.status(404).json({ message: 'ไม่พบผู้จัดหน่ายรายนี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                price: { $gte: minPrice, $lte: maxPrice },
-                category: categoryId,
-                subcategory: subcategoryId,
-                distributor: distributorId
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่พบสินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
-        }
-
-        // กรองสินค้าที่อยู่ใน Category, Subcategory และมีผู้จัดจำหน่ายรายเดียวกัน
-        if (!minPrice && !maxPrice && categoryId && subcategoryId && distributorId) {
-            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
-            const category = await Category.findById(categoryId);
-            if (!category) {
-                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามี Subcategory นี้ในระบบหรือไม่
-            const subcategory = await Subcategory.findById(subcategoryId);
-            if (!subcategory) {
-                return res.status(404).json({ message: 'ไม่พบ Subcategory นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีผู้จัดหน่ายรายนี้ในระบบหรือไม่
-            const distributor = await Distributor.findById(distributorId);
-            if (!distributor) {
-                return res.status(404).json({ message: 'ไม่พบผู้จัดหน่ายรายนี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                category: categoryId,
-                subcategory: subcategoryId,
-                distributor: distributorId
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่พบสินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
-        }
-
-        // กรองสินค้าที่อยู่ใน Category และ Subcategory เดียวกัน
-        if (categoryId && subcategoryId && !distributorId) {
-            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
-            const category = await Category.findById(categoryId);
-            if (!category) {
-                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามี Subcategory นี้ในระบบหรือไม่
-            const subcategory = await Subcategory.findById(subcategoryId);
-            if (!subcategory) {
-                return res.status(404).json({ message: 'ไม่พบ Subcategory นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                category: categoryId,
-                subcategory: subcategoryId
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่พบสินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
-        }
-
-        // กรองสินค้าที่อยู่ใน Category เดียวกัน
-        if (!minPrice && !maxPrice && categoryId && !subcategoryId && !distributorId) {
-            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
-            const category = await Category.findById(categoryId);
-            if (!category) {
-                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({ category: categoryId }).populate('category').populate('subcategory')
-                .populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่พบสินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
-        }
-
-        // กรองสินค้าที่อยู่ใน Category และมีผู้จัดจำหน่ายรายเดียวกัน
-        if (!minPrice && !maxPrice && categoryId && !subcategoryId && distributorId) {
-            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
-            const category = await Category.findById(categoryId);
-            if (!category) {
-                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีผู้จัดหน่ายรายนี้ในระบบหรือไม่
-            const distributor = await Distributor.findById(distributorId);
-            if (!distributor) {
-                return res.status(404).json({ message: 'ไม่พบผู้จัดหน่ายรายนี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                category: categoryId,
-                distributor: distributorId
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่พบสินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
-        }
-
-        // กรองสินค้าที่มีผู้จัดจำหน่ายรายเดียวกัน
-        if (!minPrice && !maxPrice && !categoryId && !subcategoryId && distributorId) {
-            // ตรวจสอบว่ามีผู้จัดหน่ายรายนี้ในระบบหรือไม่
-            const distributor = await Distributor.findById(distributorId);
-            if (!distributor) {
-                return res.status(404).json({ message: 'ไม่พบผู้จัดหน่ายรายนี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                distributor: distributorId
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่พบสินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
-        }
-
-        // กรองสินค้าที่มีการระบุมาตรฐาน ICT โดยไม่สนหมวดหมู่ ประเภท และผู่จัดจำหน่าย
-        if (ict === true && !categoryId && !subcategoryId && !distributorId) {
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                ict: ict
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่สินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
-        }
-
-        // กรองสินค้าที่มีการระบุมาตรฐาน ICT และอยู่ในหมวดหมู่เดียวกัน
-        if (ict === true && categoryId && !subcategoryId && !distributorId) {
-            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
-            const category = await Category.findById(categoryId);
-            if (!category) {
-                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                ict: ict,
-                category: categoryId
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่สินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
-        }
-
-        // กรองสินค้าที่มีการระบุมาตรฐาน ICT และอยู่ในหมวดหมู่และประเภทเดียวกัน
-        if (ict === true && categoryId && subcategoryId && !distributorId) {
-            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
-            const category = await Category.findById(categoryId);
-            if (!category) {
-                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามี Subcategory นี้ในระบบหรือไม่
-            const subcategory = await Subcategory.findById(subcategoryId);
-            if (!subcategory) {
-                return res.status(404).json({ message: 'ไม่พบ Subcategory นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                ict: ict,
-                category: categoryId,
-                subcategory: subcategoryId
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่สินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
-        }
-
-        // กรองสินค้าที่มีการระบุมาตรฐาน ICT และอยู่ในหมวดหมู่ ประเภทและผู้จัดจำหน่ายเดียวกัน
-        if (ict === true && categoryId && subcategoryId && distributorId) {
-            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
-            const category = await Category.findById(categoryId);
-            if (!category) {
-                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามี Subcategory นี้ในระบบหรือไม่
-            const subcategory = await Subcategory.findById(subcategoryId);
-            if (!subcategory) {
-                return res.status(404).json({ message: 'ไม่พบ Subcategory นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีผู้จัดหน่ายรายนี้ในระบบหรือไม่
-            const distributor = await Distributor.findById(distributorId);
-            if (!distributor) {
-                return res.status(404).json({ message: 'ไม่พบผู้จัดหน่ายรายนี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                ict: ict,
-                category: categoryId,
-                subcategory: subcategoryId,
-                distributor: distributorId
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่สินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
-        }
-
-        // กรองสินค้าที่มีการระบุมาตรฐาน ICT และอยู่ในหมวดหมู่และผู้จัดจำหน่ายเดียวกัน
-        if (ict === true && categoryId && !subcategoryId && distributorId) {
-            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
-            const category = await Category.findById(categoryId);
-            if (!category) {
-                return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีผู้จัดหน่ายรายนี้ในระบบหรือไม่
-            const distributor = await Distributor.findById(distributorId);
-            if (!distributor) {
-                return res.status(404).json({ message: 'ไม่พบผู้จัดหน่ายรายนี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                ict: ict,
-                category: categoryId,
-                distributor: distributorId
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่สินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
-        }
-
-        // กรองสินค้าที่มีการระบุมาตรฐาน ICT และผู้จัดจำหน่ายเดียวกัน
-        if (ict === true && !categoryId && !subcategoryId && distributorId) {
-            // ตรวจสอบว่ามีผู้จัดหน่ายรายนี้ในระบบหรือไม่
-            const distributor = await Distributor.findById(distributorId);
-            if (!distributor) {
-                return res.status(404).json({ message: 'ไม่พบผู้จัดหน่ายรายนี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าหรือไม่
-            const products = await Product.find({
-                ict: ict,
-                distributor: distributorId
-            }).populate('category').populate('subcategory').populate('distributor');
-            if (products.length === 0) {
-                return res.status(404).json({ message: 'ไม่สินค้าที่คุณค้นหา' });
-            }
-            return res.status(200).json({
-                count: products.length,
-                products
-            });
-        }
+        return res.status(200).json({ count: products.length, products });
     } catch (error) {
         return res.status(400).json({ message: error.message });
     }
@@ -829,11 +536,6 @@ const compareProduct = async (req, res) => {
         // ตรวจสอบว่าสินค้าชิ้นที่ 1 กับสินค้าชิ้นที่ 2 อยู่ใน Catetgory เดียวกันหรือไม่
         if (!product1.category.equals(product2.category)) {
             return res.status(400).json({ message: 'สินค้าทั้ง 2 ชิ้นไม่ได้อยู่ในหมวดหมู่เดียวกันจึงไม่สามารถเปรียบเทียบกันได้' });
-        }
-
-        // ตรวจสอบว่าสินค้าชิ้นที่ 1 กับสินค้าชิ้นที่ 2 อยู่ใน Subcategory เดียวกันหรือไม่
-        if (!product1.subcategory.equals(product2.subcategory)) {
-            return res.status(400).json({ message: 'สินค้าทั้ง 2 ชิ้นไม่ได้อยู่ในประเภทเดียวกันจึงไม่สามารถเปรียบเทียบกันได้' });
         }
 
         // ตรวจสอบว่าสินค้าทั้ง 2 ตัวมีจำนวน features เท่ากันหรือไม่
@@ -879,7 +581,6 @@ const compareProduct = async (req, res) => {
     }
 };
 
-
 // การตั้งค่า Multer เพื่อเก็บไฟล์ในหน่วยความจำ
 const uploadJson = multer({ storage: multer.memoryStorage() }).single('file');
 
@@ -922,8 +623,8 @@ const uploadFile = async (req, res) => {
             const existingNames = existingProducts.map(product => product.name);
 
             // ดึงข้อมูล Category จาก Database
-            const categories = await Category.find({}, { _id: 1 });
-            const categoryId = categories.map(category => category._id.toString());
+            const categories = await Category.find({}, { code: 1 });
+            const categoryId = categories.map(category => category.code);
 
             // ดึงข้อมูล Subcategory จาก Database
             // const subcategories = await Subcategory.find({}, { _id: 1 });
@@ -966,6 +667,7 @@ const uploadFile = async (req, res) => {
 
             // ตรวจสอบว่าข้อมูลทั้งหมดซ้ำกับใน Database
             if (newEntries.length === 0) {
+                console.log(invalidDatas)
                 return res.status(400).json({ message: 'ข้อมูลสินค้าของคุณทั้งหมดมีอยู่ในระบบแล้ว' });
             }
 
@@ -990,54 +692,6 @@ const uploadFile = async (req, res) => {
     });
 };
 
-const uploadExcel = async (req, res) => {
-    // ใช้ multer สำหรับการอัปโหลดไฟล์
-    uploadJson(req, res, async (error) => {
-        if (error) {
-            return res.status(404).json({ message: 'ระบบเกิดข้อผิดพลาด' });
-        }
-
-        // ตรวจสอบว่าไฟล์ถูกส่งมาหรือไม่
-        if (!req.file) {
-            return res.status(400).json({ message: 'กรุณาอัปโหลดไฟล์ .xlsx' });
-        }
-
-        const filePath = req.file.path;
-
-        try {
-            // อ่านไฟล์ Excel
-            const workbook = xlsx.readFile(filePath);
-            const sheetName = workbook.SheetNames[0];
-            const sheet = workbook.Sheets[sheetName];
-
-            // แปลงข้อมูลใน sheet เป็น JSON
-            const data = xlsx.utils.sheet_to_json(sheet);
-
-            // แปลงข้อมูลเป็น array ของข้อมูลสินค้า
-            const products = data.map((item, index) => ({
-                brand: item.Brand,
-                productId: `ADC${item.CSCode}${String(index + 1).padStart(4, '0')}`,
-                name: item['Item Description'],
-                ict: false,
-                price: parseFloat(item['Price Ex.']),
-                category: 'CATEGORY_ID', // ใส่ ID ของหมวดหมู่ที่ต้องการ
-                features: [], // อาจจะใช้ข้อมูลจากไฟล์ได้ถ้าต้องการเพิ่มฟีเจอร์
-            }));
-
-            // บันทึกข้อมูลลงฐานข้อมูล
-            Product.insertMany(products)
-                .then(() => {
-                    res.status(200).json({ message: 'File data uploaded successfully!' });
-                })
-                .catch((err) => {
-                    res.status(500).json({ error: err.message });
-                });
-        } catch (error) {
-            return res.status(400).json({ message: error.message });
-        }
-    })
-};
-
 // Exports an api
 module.exports = {
     getProducts,
@@ -1050,5 +704,4 @@ module.exports = {
     filterProduct,
     compareProduct,
     uploadFile,
-    uploadExcel
 }

@@ -7,7 +7,6 @@ const brandSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Brand name is required.'],
         unique: true,
-        trim: true
     },
     createdAt: {
         type: Date,
