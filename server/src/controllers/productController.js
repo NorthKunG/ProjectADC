@@ -510,14 +510,43 @@ const filterProduct = async (req, res) => {
     }
 };
 
+// ฟังก์ชันเปรียบเทียบ features ของสินค้าทั้งสองตัว
+function compareFeatures(product1, product2, product3) {
+    const comparison = {}; // สร้างอ็อบเจ็กต์สำหรับเก็บผลการเปรียบเทียบ
+
+    // รวบรวมชื่อฟีเจอร์ทั้งหมดจากทั้งสองสินค้า
+    const allFeatureNames = new Set([
+        ...product1.features.map((f) => f.name), // ดึงชื่อฟีเจอร์จาก Product 1
+        ...product2.features.map((f) => f.name), // ดึงชื่อฟีเจอร์จาก Product 2
+        ...product3.features.map((f) => f.name), // ดึงชื่อฟีเจอร์จาก Product 3
+    ]);
+
+    // วนลูปเพื่อเปรียบเทียบฟีเจอร์ที่มีในทั้งสองสินค้า
+    allFeatureNames.forEach((featureName) => {
+        // ค้นหาฟีเจอร์ใน Product 1 และ Product 2 ตามชื่อ
+        const feature1 = product1.features.find((f) => f.name === featureName);
+        const feature2 = product2.features.find((f) => f.name === featureName);
+        const feature3 = product3.features.find((f) => f.name === featureName);
+
+        // บันทึกผลการเปรียบเทียบ
+        comparison[featureName] = {
+            product1: feature1 ? feature1.description : 'N/A', // หากพบฟีเจอร์ใน Product 1 ให้แสดง description, ถ้าไม่พบให้แสดง 'N/A'
+            product2: feature2 ? feature2.description : 'N/A', // หากพบฟีเจอร์ใน Product 2 ให้แสดง description, ถ้าไม่พบให้แสดง 'N/A'
+            product3: feature3 ? feature3.description : 'N/A', // หากพบฟีเจอร์ใน Product 2 ให้แสดง description, ถ้าไม่พบให้แสดง 'N/A'
+        };
+    });
+
+    return comparison; // คืนค่าเป็นผลการเปรียบเทียบ
+}
+
 // ระบบเปรียบเทียบสินค้า
 const compareProduct = async (req, res) => {
     // รับข้อมูล product1, product2, จาก request query
-    const { name1, name2 } = req.query;
+    const { name1, name2, name3 } = req.query;
 
     try {
         // ตรวจสอบว่าเป็นสินค้าตัวเดียวกันหรือไม่
-        if (name1 === name2) {
+        if (name1 === name2 === name3) {
             return res.status(400).json({ message: 'คุณไม่สามารถเปรียบเทียบสินค้าตัวเดียวกันได้' });
         }
 
@@ -533,49 +562,15 @@ const compareProduct = async (req, res) => {
             return res.status(404).json({ message: `ไม่พบสินค้าชิ้นนี้ '${name2}'` });
         }
 
-        // ตรวจสอบว่าสินค้าชิ้นที่ 1 กับสินค้าชิ้นที่ 2 อยู่ใน Catetgory เดียวกันหรือไม่
-        if (!product1.category.equals(product2.category)) {
-            return res.status(400).json({ message: 'สินค้าทั้ง 2 ชิ้นไม่ได้อยู่ในหมวดหมู่เดียวกันจึงไม่สามารถเปรียบเทียบกันได้' });
+        // ตรวจสอบว่ามีสินค้าชิ้นนี้หริอไม่
+        const product3 = await Product.findOne({ name: name3 });
+        if (!product3) {
+            return res.status(404).json({ message: `ไม่พบสินค้าชิ้นนี้ '${name3}'` });
         }
 
-        // ตรวจสอบว่าสินค้าทั้ง 2 ตัวมีจำนวน features เท่ากันหรือไม่
-        if (product1.features.length !== product2.features.length) {
-            return res.status(400).json({ message: 'Features ของสินค้าทั้ง 2 ไม่เท่ากันจึงไม่สามารถเปรียบเทียบกันได้' });
-        }
-
-        // ตรวจสอบว่าชื่อ features ของสินค้าทั้ง 2 เหมือนกันหรือไม่
-        for (let i = 0; i < Math.max(product1.features.length, product2.features.length); i++) {
-            // แทนค่า feature สินค้าทั้ง 2
-            const feature1 = product1.features[i];
-            const feature2 = product2.features[i];
-
-            // ตรวจสอบว่าฟีเจอร์ทั้งสองมีค่าอยู่
-            if (!feature1 || !feature2 || feature1['name'] !== feature2['name']) {
-                return res.status(400).json({ message: 'Features ของสินค้าทั้ง 2 ไม่เหมือนกันจึงไม่สามารถเปรียบเทียบกันได้' });
-            }
-        }
-
-        // เก็บรายการความแตกต่างทั้งหมด
-        const differences = [];
-
-        // ตรวจสอบว่ามีสินค้าทั้ง 2 ต่างกันอย่างไรบ้าง
-        for (let i = 0; i < Math.max(product1.features.length, product2.features.length); i++) {
-            // แทนค่า feature สินค้าทั้ง 2
-            const feature1 = product1.features[i];
-            const feature2 = product2.features[i];
-
-            // ตรวจสอบว่าฟีเจอร์ทั้งสองมีค่าอยู่
-            if (!feature1 || !feature2 || feature1['description'] !== feature2['description']) {
-                differences.push({
-                    feature1: feature1,
-                    feature2: feature2
-                });
-            }
-        }
-        return res.status(200).json({
-            message: 'Features ของสินค้าทั้ง 2 มีความแตกต่างกัน',
-            differences: differences
-        });
+        // เรียกใช้ฟังก์ชันเปรียบเทียบระหว่างสินค้า Product 1 และ Product 2
+        const comparisonResult = compareFeatures(product1, product2, product3);
+        return res.status(200).send(comparisonResult);
     } catch (error) {
         return res.status(400).json({ message: error.message });
     }
