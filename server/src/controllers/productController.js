@@ -307,7 +307,7 @@ const updateProduct = async (req, res) => {
         }
 
         // รับข้อมูลจาก request body
-        const { productId, name, ict, description, price, categoryId, subcategoryId, distributorId, features } = req.body;
+        const { productId, name, ict, description, price, categoryId, features } = req.body;
 
         try {
             // ตรวจสอบว่ามีการระบุ productId หรือไม่
@@ -327,27 +327,10 @@ const updateProduct = async (req, res) => {
                 return res.status(400).json({ message: 'สินค้าชิ้นนี้มีอยู่ในระบบแล้ว' });
             }
 
-            // ตรวจสอบว่าระบุว่าอยู่ในมาตรฐาน ICT หรือไม่
-            if (!ict || ict === "") {
-                return res.status(400).json({ message: 'โปรดระบุว่าสินค้าชิ้นนี้อยู่ในมาตรฐาน ICT หรือไม่' });
-            }
-
             // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
             const category = await Category.findOne({ category: categoryId });
             if (!category) {
                 return res.status(400).json({ message: 'ไม่พบ Category นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามี Subcategory นี้ในระบบหรือไม่
-            const subcategory = await Subcategory.findOne({ subcategory: subcategoryId });
-            if (!subcategory) {
-                return res.status(400).json({ message: 'ไม่พบ Subcategory นี้ในระบบ' });
-            }
-
-            // ตรวจสอบว่ามีผู้จัดจำหน่ายรายนี้ในระบบหรือไม่
-            const distributor = await Distributor.findById(distributorId);
-            if (!distributor) {
-                return res.status(404).json({ message: 'ไม่พบผู้จัดจำหน่ายรายนี้ในระบบ' });
             }
 
             // ตรวจสอบว่ามีการอัพโหลดไฟล์รูปภาพสินค้าหรือไม่
@@ -365,8 +348,6 @@ const updateProduct = async (req, res) => {
                         description,
                         price,
                         category: categoryId,
-                        subcategory: subcategoryId,
-                        distributor: distributorId,
                         features,
                         images: fileName
                     },
@@ -387,8 +368,6 @@ const updateProduct = async (req, res) => {
                         description,
                         price,
                         category: categoryId,
-                        subcategory: subcategoryId,
-                        distributor: distributorId,
                         features
                     },
                     { new: true, runVaildators: true }
@@ -510,8 +489,34 @@ const filterProduct = async (req, res) => {
     }
 };
 
-// ฟังก์ชันเปรียบเทียบ features ของสินค้าทั้งสองตัว
-function compareFeatures(product1, product2, product3) {
+// ฟังก์ชันเปรียบเทียบ features ของสินค้าทั้งสามตัว
+function compareFeatures2Products(product1, product2) {
+    const comparison = {}; // สร้างอ็อบเจ็กต์สำหรับเก็บผลการเปรียบเทียบ
+
+    // รวบรวมชื่อฟีเจอร์ทั้งหมดจากทั้งสองสินค้า
+    const allFeatureNames = new Set([
+        ...product1.features.map((f) => f.name), // ดึงชื่อฟีเจอร์จาก Product 1
+        ...product2.features.map((f) => f.name), // ดึงชื่อฟีเจอร์จาก Product 2
+    ]);
+
+    // วนลูปเพื่อเปรียบเทียบฟีเจอร์ที่มีในทั้งสองสินค้า
+    allFeatureNames.forEach((featureName) => {
+        // ค้นหาฟีเจอร์ใน Product 1 และ Product 2 ตามชื่อ
+        const feature1 = product1.features.find((f) => f.name === featureName);
+        const feature2 = product2.features.find((f) => f.name === featureName);
+
+        // บันทึกผลการเปรียบเทียบ
+        comparison[featureName] = {
+            product1: feature1 ? feature1.description : 'N/A', // หากพบฟีเจอร์ใน Product 1 ให้แสดง description, ถ้าไม่พบให้แสดง 'N/A'
+            product2: feature2 ? feature2.description : 'N/A', // หากพบฟีเจอร์ใน Product 2 ให้แสดง description, ถ้าไม่พบให้แสดง 'N/A'
+        };
+    });
+
+    return comparison; // คืนค่าเป็นผลการเปรียบเทียบ
+}
+
+// ฟังก์ชันเปรียบเทียบ features ของสินค้าทั้งสามตัว
+function compareFeatures3Products(product1, product2, product3) {
     const comparison = {}; // สร้างอ็อบเจ็กต์สำหรับเก็บผลการเปรียบเทียบ
 
     // รวบรวมชื่อฟีเจอร์ทั้งหมดจากทั้งสองสินค้า
@@ -562,14 +567,20 @@ const compareProduct = async (req, res) => {
             return res.status(404).json({ message: `ไม่พบสินค้าชิ้นนี้ '${name2}'` });
         }
 
-        // ตรวจสอบว่ามีสินค้าชิ้นนี้หริอไม่
-        const product3 = await Product.findOne({ name: name3 });
-        if (!product3) {
-            return res.status(404).json({ message: `ไม่พบสินค้าชิ้นนี้ '${name3}'` });
+        // ตรวจสอบว่ามีการเลือกสินค้าตัวที่ 3 หรือไม่
+        if (name3) {
+            // ตรวจสอบว่ามีสินค้าชิ้นนี้หริอไม่
+            const product3 = await Product.findOne({ name: name3 });
+            if (!product3) {
+                return res.status(404).json({ message: `ไม่พบสินค้าชิ้นนี้ '${name3}'` });
+            }
+            // เรียกใช้ฟังก์ชันเปรียบเทียบระหว่างสินค้า 3 ตัว
+            const comparisonResult = compareFeatures3Products(product1, product2, product3);
+            return res.status(200).send(comparisonResult);
         }
 
-        // เรียกใช้ฟังก์ชันเปรียบเทียบระหว่างสินค้า Product 1 และ Product 2
-        const comparisonResult = compareFeatures(product1, product2, product3);
+        // เรียกใช้ฟังก์ชันเปรียบเทียบระหว่างสินค้า 2 ตัว
+        const comparisonResult = compareFeatures2Products(product1, product2);
         return res.status(200).send(comparisonResult);
     } catch (error) {
         return res.status(400).json({ message: error.message });
@@ -662,7 +673,6 @@ const uploadFile = async (req, res) => {
 
             // ตรวจสอบว่าข้อมูลทั้งหมดซ้ำกับใน Database
             if (newEntries.length === 0) {
-                console.log(invalidDatas)
                 return res.status(400).json({ message: 'ข้อมูลสินค้าของคุณทั้งหมดมีอยู่ในระบบแล้ว' });
             }
 
