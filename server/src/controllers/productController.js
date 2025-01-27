@@ -74,6 +74,7 @@ const getProducts = async (req, res) => {
                     name: 1,
                     // แสดงราคา
                     price: 1,
+                    ict: 1,
                     // แสดงชื่อหมวดหมู่ (ใช้ชื่อหมวดหมู่จาก `Category`)
                     category: '$categoryDetails.name',
                     // แสดง Features ของสินค้า
