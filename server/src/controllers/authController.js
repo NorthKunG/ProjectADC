@@ -110,9 +110,20 @@ const newAddress = async (req, res) => {
     }
 };
 
+// ดูข้อมูลผู้ใช้ทั้งหมด
+const getUsers = async (req, res) => {
+    // เรียกดูข้อมูลผู้ใช้ทั้งหมด
+    const users = await User.find();
+    return res.status(200).json({
+        count: users.length,
+        users
+    });
+}
+
 // Export an api
 module.exports = {
     login,
     register,
-    newAddress
+    newAddress,
+    getUsers
 }
