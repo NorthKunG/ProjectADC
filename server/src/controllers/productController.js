@@ -145,6 +145,10 @@ const addProduct = async (req, res) => {
                 return res.status(404).json({ message: 'ไม่พบ Category นี้ในระบบ' });
             }
 
+            if (!ict) {
+                const ict = false;
+            }
+
             // ตรวจสอบว่ามีการอัพโหลดไฟล์รูปภาพสินค้าหรือไม่
             if (req.files && req.files.length > 0) {
                 // รับข้อมูล fileName จาก request file
