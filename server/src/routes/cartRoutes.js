@@ -11,10 +11,10 @@ const auth = require('../middleware/auth');
 const cartController = require('../controllers/cartController');
 
 // Routers
-router.post('/', auth, cartController.addItem);
-router.get('/', auth, cartController.getCartById);
-router.delete('/', auth, cartController.removeFromCart);
-router.put('/', auth, cartController.updateCart);
+router.post('/', cartController.addItem);
+router.get('/', cartController.getCartById);
+router.delete('/', cartController.removeFromCart);
+router.put('/', cartController.updateCart);
 
 // Export a route
 module.exports = router;
