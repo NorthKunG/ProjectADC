@@ -1,34 +1,40 @@
 // ดึง Dependencies จาก package
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
 // ดึงโมเดลที่เกี่ยวข้องสินค้าจากโฟลเดอร์ models
 const User = require('../models/userModel');
 
-// Login
+// เข้าสู่ระบบ
 const login = async (req, res) => {
+    // รับข้อมูลจาก request body
+    const { email, password } = req.body;
+
     try {
-        const { email, password } = req.body;
+        // ตรวจสอบว่าผู้ใช้มีอีเมลนี้ในฐานข้อมูลหรือไม่
         const user = await User.findOne({ email });
-        if (!user || !(await user.matchPassword(password))) {
-            res.status(400).json({
-                status: 'error',
-                message: 'Email or password is incorrect'
-            });
-            return;
+        if (!user) {
+            return res.status(400).json({ message: 'ข้อมูลประจำตัวไม่ถูกต้อง' });
         }
+
+        // เปรียบเทียบรหัสผ่านที่กรอกกับรหัสผ่านในฐานข้อมูล
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'ข้อมูลประจำตัวไม่ถูกต้อง' });
+        }
+
+        // สร้าง JWT token
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '6h' });
-        res.status(200).json({
-            status: 'success',
-            token
+
+        // ส่ง token กลับให้ผู้ใช้
+        return res.status(200).json({
+            message: 'เข้าสู่ระบบสำเร็จ',
+            token,
         });
-        return;
+
     } catch (error) {
-        res.status(400).json({
-            status: 'error',
-            message: error.message
-        });
-        return;
+        return res.status(500).json({ message: error.message });
     }
 };
 
@@ -127,41 +133,41 @@ const register = async (req, res) => {
 
 const verifyOTP = async (req, res) => {
     const { email, otp } = req.body;
-  
+
     try {
-      // ค้นหาผู้ใช้ในฐานข้อมูล
-      const user = await User.findOne({ email });
-      if (!user) {
-        return res.status(404).json({ message: 'ไม่พบผู้ใช้' });
-      }
-  
-      // ตรวจสอบว่า OTP Token ยังมีอยู่หรือไม่
-      if (!user.otp) {
-        return res.status(400).json({ message: 'OTP หมดอายุหรือถูกใช้ไปแล้ว' });
-      }
-  
-      // ตรวจสอบ OTP Token
-      const decoded = jwt.verify(user.otp, process.env.JWT_SECRET); // ใช้ secret key เดียวกับที่ใช้ตอนสร้าง token
-      if (decoded.otp !== parseInt(otp, 10)) {
-        return res.status(400).json({ message: 'รหัส OTP ไม่ถูกต้อง' });
-      }
-  
-      // ยืนยันตัวตน
-      user.isVerified = true;
-      user.otp = null; // ลบ OTP Token ออกจากฐานข้อมูล
-      await user.save();
-  
-      return res.status(200).json({ message: 'ตรวจสอบบัญชีสำเร็จแล้ว' });
+        // ค้นหาผู้ใช้ในฐานข้อมูล
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'ไม่พบผู้ใช้' });
+        }
+
+        // ตรวจสอบว่า OTP Token ยังมีอยู่หรือไม่
+        if (!user.otp) {
+            return res.status(400).json({ message: 'OTP หมดอายุหรือถูกใช้ไปแล้ว' });
+        }
+
+        // ตรวจสอบ OTP Token
+        const decoded = jwt.verify(user.otp, process.env.JWT_SECRET); // ใช้ secret key เดียวกับที่ใช้ตอนสร้าง token
+        if (decoded.otp !== parseInt(otp, 10)) {
+            return res.status(400).json({ message: 'รหัส OTP ไม่ถูกต้อง' });
+        }
+
+        // ยืนยันตัวตน
+        user.isVerified = true;
+        user.otp = null; // ลบ OTP Token ออกจากฐานข้อมูล
+        await user.save();
+
+        return res.status(200).json({ message: 'ตรวจสอบบัญชีสำเร็จแล้ว' });
     } catch (error) {
-      if (error.name === 'TokenExpiredError') {
-        // ลบผู้ใช้หาก OTP หมดอายุ
-        await User.deleteOne({ email });
-        return res.status(400).json({ message: 'รหัส OTP หมดอายุ กรุณาลงทะเบียนใหม่อีกครั้ง' });
-      }
-  
-      return res.status(400).json({ message: error.message });
+        if (error.name === 'TokenExpiredError') {
+            // ลบผู้ใช้หาก OTP หมดอายุ
+            await User.deleteOne({ email });
+            return res.status(400).json({ message: 'รหัส OTP หมดอายุ กรุณาลงทะเบียนใหม่อีกครั้ง' });
+        }
+
+        return res.status(400).json({ message: error.message });
     }
-  };
+};
 
 // ดูข้อมูลผู้ใช้ทั้งหมด
 const getUsers = async (req, res) => {

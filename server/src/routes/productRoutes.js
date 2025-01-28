@@ -4,7 +4,7 @@ const productController = require('../controllers/productController');
 const cache = require('../middleware/cache');
 const auth = require('../middleware/auth');
 
-router.get('/', productController.getProducts);
+router.get('/', auth.adminAuth, productController.getProducts);
 router.post('/', /* auth ,*/ productController.addProduct);
 router.get('/search', productController.searchProductByName);
 router.get('/filter', productController.filterProduct);
