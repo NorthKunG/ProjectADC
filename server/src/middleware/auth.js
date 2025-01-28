@@ -4,6 +4,25 @@ const jwt = require('jsonwebtoken');
 // ดึงโมเดลที่เกี่ยวข้องสินค้าจากโฟลเดอร์ models
 const User = require('../models/userModel');
 
+// การรับรองความถูกต้อง
+const auth = (req, res, next) => {
+    // ดึง token จาก header
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+
+    if (!token) {
+        return res.status(401).json({ message: 'การเข้าถึงถูกปฏิเสธ ไม่มีการให้โทเค็น' });
+    }
+
+    try {
+        // ตรวจสอบและถอดรหัส token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.userId = decoded.id; // เก็บข้อมูล user ที่ตรวจสอบแล้ว
+        next();
+    } catch (error) {
+        return res.status(400).json({ message: 'กรุณาเข้าสู่ระบบ' });
+    }
+};
+
 // การรับรองความถูกต้องสำหรับผู้ดูแลระบบ
 const adminAuth = async (req, res, next) => {
     try {
@@ -29,23 +48,6 @@ const adminAuth = async (req, res, next) => {
 
     } catch (error) {
         return res.status(400).json({ message: 'กรุณาเข้าสู่ระบบ' })
-    }
-};
-
-const auth = async (req, res, next) => {
-    try {
-        const token = req.header('Authorization').replace('Bearer ', '');
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        req.userId = decoded.id;
-        next();
-        return;
-    } catch (error) {
-        res.status(400).json({
-            status: 'error',
-            message: 'Please login'
-        });
-        return;
     }
 };
 

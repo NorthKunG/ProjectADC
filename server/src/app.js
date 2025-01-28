@@ -51,6 +51,10 @@ app.use('/api/contact', contactRoutes);
 const brandRoutes = require('./routes/brandRoutes');
 app.use('/api/brands', brandRoutes);
 
+// ดึง API user
+const userRoutes = require('./routes/userRoutes');
+app.use('/api/users', userRoutes);
+
 app.use((err, req, res, next) => {
     req.status(err.status || 500).json({
         message: err || 'เกิดข้อผิดพลาด'
