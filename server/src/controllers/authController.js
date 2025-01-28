@@ -24,6 +24,11 @@ const login = async (req, res) => {
             return res.status(400).json({ message: 'ข้อมูลประจำตัวไม่ถูกต้อง' });
         }
 
+        // ตรวจสอบว่า isVerified เป็น true หรือไม่
+        if (!user.isVerified) {
+            return res.status(400).json({ message: 'บัญชีของคุณยังไม่ได้รับการยืนยัน' });
+        }
+
         // สร้าง JWT token
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '6h' });
 
