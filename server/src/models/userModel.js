@@ -42,6 +42,13 @@ const userSchema = new mongoose.Schema(
             type: String,
             enum: ['user', 'admin'], // จำกัดค่าที่สามารถเป็นได้
             default: 'user', // ตั้งค่าเริ่มต้นเป็น 'user'
+        },
+        isVerified: {
+            type: Boolean,
+            default: false, // ผู้ใช้ยังไม่ยืนยันตัวตน
+        },
+        otp: {
+            type: String, // เก็บ JWT Token ของ OTP
         }
     },
     {
