@@ -1,9 +1,9 @@
-// MenuDropdown.jsx
-
+// src/components/Nav/MenuDropdown.jsx
 import { Menu, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { Link } from "react-router-dom"; // ✅ Import Link
 
-const MENU_SECTION_1 = [{ label: "หน้าแรก" }];
+const MENU_SECTION_1 = [{ label: "หน้าแรก", path: "/" }]; // ✅ เพิ่ม path
 const MENU_SECTION_2 = [
   {
     label: "กล้องวงจร",
@@ -39,32 +39,33 @@ const MENU_SECTION_2 = [
   },
 ];
 const MENU_SECTION_3 = [
-  { label: "เกี่ยวกับเรา", dropdownItems: [] },
-  { label: "ติดต่อ", dropdownItems: [] },
+  { label: "เกี่ยวกับเรา", path: "/about" }, // ✅ เพิ่ม path
+  { label: "ติดต่อ", path: "/contact" }, // ✅ เพิ่ม path
 ];
 
 export default function MenuDropdown() {
   return (
     <div className="bg-gray-100 p-3 shadow-md hidden md:block">
       <div className="container mx-auto flex items-center justify-between gap-2 lg:gap-4 flex-nowrap">
-        {/* Section 1 */}
+        {/* ✅ Section 1 - ปุ่ม "หน้าแรก" */}
         <div className="flex items-center gap-2">
           {MENU_SECTION_1.map((menu, index) => (
-            <button
+            <Link
               key={index}
-              className="px-2 lg:px-3 py-1 text-black font-semibold hover:text-blue-500 whitespace-nowrap text-xs lg:text-sm"
+              to={menu.path} // ✅ ใช้ Link ไปยัง Home
+              className="px-2 lg:px-3 py-1 text-black font-semibold hover:text-blue-500 whitespace-nowrap text-sm lg:text-lg"
             >
               {menu.label}
-            </button>
+            </Link>
           ))}
         </div>
 
-        {/* Section 2 */}
+        {/* Section 2 - Dropdown เมนู */}
         <div className="flex items-center gap-2 lg:gap-4">
           {MENU_SECTION_2.map((menu, index) => (
             <Menu as="div" key={index} className="relative inline-block text-left">
               <Menu.Button
-                className="flex items-center px-2 lg:px-3 py-1 text-black font-semibold hover:text-blue-500 whitespace-nowrap text-xs lg:text-sm"
+                className="flex items-center px-2 lg:px-3 py-1 text-black font-semibold hover:text-blue-500 whitespace-nowrap text-sm lg:text-base"
               >
                 {menu.label}
                 <ChevronDownIcon className="ml-1 lg:ml-2 h-4 w-4 text-gray-500" />
@@ -113,18 +114,19 @@ export default function MenuDropdown() {
           ))}
         </div>
 
-        {/* Section 3 */}
+        {/* ✅ Section 3 - ปุ่ม "เกี่ยวกับเรา" และ "ติดต่อ" */}
         <div className="flex items-center gap-2 lg:gap-4">
           {MENU_SECTION_3.map((menu, index) => (
-            <button
+            <Link
               key={index}
-              className="px-2 lg:px-3 py-1 text-black font-semibold hover:text-blue-500 whitespace-nowrap text-xs lg:text-sm"
+              to={menu.path} // ✅ ใช้ Link ไปยัง About และ Contact
+              className="px-2 lg:px-3 py-1 text-black font-semibold hover:text-blue-500 whitespace-nowrap text-sm lg:text-base"
             >
               {menu.label}
-            </button>
+            </Link>
           ))}
         </div>
       </div>
     </div>
-  )
+  );
 }

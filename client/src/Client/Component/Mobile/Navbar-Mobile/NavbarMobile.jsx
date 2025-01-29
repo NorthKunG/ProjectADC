@@ -1,7 +1,7 @@
 // NavbarMobile.jsx
 
 import { Search } from "lucide-react";
-import LogoADCM from "../../../assets/Image/logo-ADCM.png";
+import LogoADCM from "../../../../assets/Image/logo-ADCM.png";
 import LanguagMobile from "./LanguageDropdown-mobile"// Import ส่วนของเปลี่ยนภาษา
 
 const NavbarMobile = () => {

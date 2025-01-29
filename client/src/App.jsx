@@ -1,17 +1,25 @@
-import Banners from "./Component/Desktop/Navbar/Banners";
-import NavbarDesktop from "./Component/Desktop/Navbar/NavbarDesktop";
-import MenuDropdown from "./Component/Desktop/Navbar/MenuDropdown";
-import NavbarMobile from "./Component/Mobile/Navbar-Mobile/NavbarMobile";
-
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./Client/Page/Home"
+import LoginPage from "./Client/Component/Desktop/Login/Login"; // นำเข้าไฟล์ login.jsx
+import DashboardPage from "./Client/Component/Desktop/Login/dashboard"; // นำเข้าไฟล์ dashboard.jsx
+import AddProductPage from "./Client/Component/Desktop/Login/AddProductPage"; // นำเข้าไฟล์ AddProduct.jsx
 
 function App() {
-  return <>
-    <Banners />
-    <NavbarDesktop/>
-    <MenuDropdown/>
-    <NavbarMobile/>
-
-  </>;
+  return (
+    <Router>
+      {/* ส่วน Banner และ Navbar แสดงผลเสมอ */}
+     
+      {/* กำหนด Routing */}
+      <Routes>
+        <Route path="/" element={<Home/>} /> {/* หน้าแรก */}
+        <Route path="/Home" element={<Home/>} /> {/* หน้าแรก */}
+        <Route path="/login" element={<LoginPage />} /> {/* หน้าล็อกอิน */}
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/add-product" element={<AddProductPage />} />
+        
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;
