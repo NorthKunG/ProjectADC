@@ -81,7 +81,7 @@ const sendOTP = async (email, otp) => {
 // ระบบสมัครสมาชิก
 const register = async (req, res) => {
     // รับข้อมูลจาก request body
-    const { name, companyName, password, email, phoneNumber, taxNumber } = req.body;
+    const { name, companyName, password, email, address, phoneNumber, taxNumber } = req.body;
 
     try {
         // ตรวจสอบว่ามีการใส่ข้อมูลครบถ้วนหรือไม่
@@ -91,6 +91,7 @@ const register = async (req, res) => {
         if (!companyName) missingFields.push('ชื่อบริษัท');
         if (!password) missingFields.push('รหัสผ่าน');
         if (!email) missingFields.push('อีเมล');
+        if (!address) missingFields.push('ที่อยู่');
         if (!phoneNumber) missingFields.push('หมายเลขโทรศัพท์');
         if (!taxNumber) missingFields.push('เลขประจำตัวผู้เสียภาษี');
 
@@ -121,6 +122,7 @@ const register = async (req, res) => {
             companyName,
             password,
             email,
+            address,
             phoneNumber,
             taxNumber,
             otp: token,     // บันทึก OTP ลงในฐานข้อมูล
@@ -174,20 +176,9 @@ const verifyOTP = async (req, res) => {
     }
 };
 
-// ดูข้อมูลผู้ใช้ทั้งหมด
-const getUsers = async (req, res) => {
-    // เรียกดูข้อมูลผู้ใช้ทั้งหมด
-    const users = await User.find();
-    return res.status(200).json({
-        count: users.length,
-        users
-    });
-}
-
 // Export an api
 module.exports = {
     login,
     register,
     verifyOTP,
-    getUsers
 }

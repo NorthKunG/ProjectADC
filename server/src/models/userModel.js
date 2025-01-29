@@ -33,6 +33,11 @@ const userSchema = new mongoose.Schema(
             required: [true, 'จำเป็นต้องมีหมายเลขโทรศัพท์'],
             match: [/^\d+$/, 'หมายเลขโทรศัพท์ไม่ถูกต้อง'], // ตรวจสอบว่าเป็นตัวเลขเท่านั้น
         },
+        address: {
+            type: String,
+            required: [true, 'จำเป็นต้องมีที่อยู่'],
+            trim: true
+        },
         taxNumber: {
             type: String,
             required: [true, 'จำเป็นต้องมีหมายเลขภาษี'],
