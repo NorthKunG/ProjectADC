@@ -54,6 +54,14 @@ const userSchema = new mongoose.Schema(
         },
         otp: {
             type: String, // เก็บ JWT Token ของ OTP
+        },
+        resetPasswordToken: {
+            type: String, // Token สำหรับการรีเซ็ตรหัสผ่าน
+            default: null
+        },
+        resetPasswordExpires: { 
+            type: Date, // วันหมดอายุของ Token
+            default: null 
         }
     },
     {

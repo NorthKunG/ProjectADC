@@ -103,7 +103,6 @@ const register = async (req, res) => {
             });
         }
 
-
         // ตรวจสอบว่าอีเมลนี้มีผู้ใช้แล้วหรือไม่
         const existingUser = await User.findOne({ email });
         if (existingUser) {

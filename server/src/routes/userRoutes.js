@@ -16,6 +16,8 @@ const adminAuth = auth.adminAuth;
 router.get('/', adminAuth, userController.getUsers);
 router.get('/profile', userAuth, userController.getProfile);
 router.put('/profile', userAuth, userController.editProfile);
+router.post('/forgetPassword', userController.forgetPassword);
+router.post('/resetPassword/:token', userController.resetPassword);
 
 // ส่งออก Module
 module.exports = router;
