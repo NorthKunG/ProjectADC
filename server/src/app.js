@@ -59,6 +59,10 @@ app.use('/api/cscodes', cscodeRoutes);
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);
 
+// ดึง API product
+const newProductRoutes = require('./routes/newProductRoutes');
+app.use('/api/newProducts', newProductRoutes);
+
 app.use((err, req, res, next) => {
     req.status(err.status || 500).json({
         message: err || 'เกิดข้อผิดพลาด'

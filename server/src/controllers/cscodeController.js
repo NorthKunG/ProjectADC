@@ -97,10 +97,27 @@ const addCSCode = async (req, res) => {
     } catch (error) {
         return res.status(400).json({ message: error.message });
     }
-}
+};
+
+// ดูข้อมูลทั้งหมด
+const getCSCodes = async (req, res) => {
+    try {
+        // เรียกข้อมูลทั้งหมด
+        const CSCodes = await CSCode.find();
+
+        // ตรวจสอบว่ามีข้อมูลหรือไม่
+        if (CSCodes.length === 0) {
+            return res.status(400).json({ message: 'ไม่พบข้อมูล CSCode' });
+        }
+        return res.status(200).json({ count: CSCodes.length, CSCodes });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
 
 // ส่งออก API
 module.exports = {
     uploadFileJson,
-    addCSCode
+    addCSCode,
+    getCSCodes
 }

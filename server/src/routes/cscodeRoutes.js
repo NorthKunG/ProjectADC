@@ -15,6 +15,7 @@ const cscodeController = require('../controllers/cscodeController');
 // เชื่อมต่อเส้นทาง (Path) กับ ตัวควบคุม (Controller)
 router.post('/', authAdmin, cscodeController.addCSCode);
 router.post('/uploads/file/json', authAdmin, cscodeController.uploadFileJson);
+router.get('/', cscodeController.getCSCodes);
 
 // ส่งออก Module
 module.exports = router;
