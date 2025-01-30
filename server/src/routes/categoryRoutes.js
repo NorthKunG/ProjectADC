@@ -3,6 +3,7 @@ const router = express.Router();
 const categoryController = require('../controllers/categoryController');
 const cache = require('../middleware/cache');
 const auth = require('../middleware/auth');
+const cscodeController = require('../controllers/cscodeController');
 
 router.get('/', categoryController.getCategories);
 router.post('/', categoryController.addCategory);

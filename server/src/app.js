@@ -51,6 +51,10 @@ app.use('/api/contact', contactRoutes);
 const brandRoutes = require('./routes/brandRoutes');
 app.use('/api/brands', brandRoutes);
 
+// ดึง API CSCode
+const cscodeRoutes = require('./routes/cscodeRoutes');
+app.use('/api/cscodes', cscodeRoutes);
+
 // ดึง API user
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);

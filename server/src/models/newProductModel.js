@@ -1,0 +1,20 @@
+// ดึง Dependencies จาก package
+const mongoose = require('mongoose');
+
+// โครงร่างสินค้า
+const productSchema = new mongoose.Schema({
+    brand: { type: String, required: [true, 'จำเป็นต้องมียี่ห้อสินค้า'] },
+    csCode: { type: String, required: [true, 'จำเป็นต้องมี CSCode'] },
+    itemNumber: { type: String, required: [true, 'จำเป็นต้องมีหมายเลขสินค้า'], unqiue: true },
+    vendorItemId: { type: String },
+    itemDescription: { type: String, required: [true, 'จำเป็นต้องมีคำอธิบายสินค้า'] },
+    price: { type: Number, required: [true, 'จำเป็นต้องมีราคาสินค้า'] },
+    category: { type: String, required: [true, 'จำเป็นต้องมีหมวดหมู่สินค้า'], enum: ['Network', 'IOT', 'Solar Cell'] },
+    subcategory: { type: String, enum: ['Home', 'Factory'], default: null },
+    specICT: { type: Boolean, required: [true, 'จำเป็นต้องกำหนดว่าเป็น ICT หรือไม่'], default: false },
+    specifications: [{ name: { type: String }, description: { type: String } }],
+    images: [{ fileName: { type: String } }]
+});
+
+// ส่งออกโมเดลสินค้า
+module.exports = mongoose.model('Product', productSchema);

@@ -157,9 +157,7 @@ const resetPassword = async (req, res) => {
             return res.status(400).json({ message: 'โทเค็นไม่ถูกต้องหรือหมดอายุ' });
         }
 
-        // Hash รหัสผ่านใหม่
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        user.password = hashedPassword;
+        user.password = newPassword;
 
         // ล้าง Token รีเซ็ตรหัสผ่าน
         user.resetPasswordToken = null;

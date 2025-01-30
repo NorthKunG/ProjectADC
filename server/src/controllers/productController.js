@@ -7,8 +7,6 @@ const mongoose = require('mongoose');
 // ดึงโมเดลที่เกี่ยวข้องสินค้าจากโฟลเดอร์ models
 const Product = require('../models/productModel');
 const Category = require('../models/categoryModel');
-const Subcategory = require('../models/subcategoryModel');
-const Distributor = require('../models/distributorModel');
 const Brand = require('../models/brandModel');
 
 // สร้าเส้นทางไปยังโฟลเดอร์ uploads
