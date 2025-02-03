@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import ImageUpload from "./image-upload";
 
 const AddProductPage = () => {
   const [brandName, setBrand] = useState(""); // Dropdown สำหรับ Brand
@@ -153,6 +154,10 @@ const AddProductPage = () => {
             />
           </div>
 
+          <div>
+            <ImageUpload/>
+          </div>
+
           {/* ICT Checkbox */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -204,6 +209,8 @@ const AddProductPage = () => {
               placeholder="รายละเอียดสินค้า"
             ></textarea>
           </div>
+
+         
 
           {/* Features */}
           <div>

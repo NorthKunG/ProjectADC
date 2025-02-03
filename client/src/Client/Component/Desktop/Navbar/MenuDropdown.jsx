@@ -3,7 +3,7 @@ import { Menu, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { Link } from "react-router-dom"; // ✅ Import Link
 
-const MENU_SECTION_1 = [{ label: "หน้าแรก", path: "/" }]; // ✅ เพิ่ม path
+const MENU_SECTION_1 = [{ label: "หน้าแรก", path: "/" }];
 const MENU_SECTION_2 = [
   {
     label: "กล้องวงจร",
@@ -39,20 +39,21 @@ const MENU_SECTION_2 = [
   },
 ];
 const MENU_SECTION_3 = [
-  { label: "เกี่ยวกับเรา", path: "/about" }, // ✅ เพิ่ม path
-  { label: "ติดต่อ", path: "/contact" }, // ✅ เพิ่ม path
+  { label: "เกี่ยวกับเรา", path: "/about" },
+  { label: "ติดต่อ", path: "/contact" },
 ];
 
 export default function MenuDropdown() {
   return (
     <div className="bg-gray-100 p-3 shadow-md hidden md:block">
-      <div className="container mx-auto flex items-center justify-between gap-2 lg:gap-4 flex-nowrap">
+      <div className="container mx-auto  flex items-center justify-between gap-2 lg:gap-4 flex-nowrap">
+        
         {/* ✅ Section 1 - ปุ่ม "หน้าแรก" */}
         <div className="flex items-center gap-2">
           {MENU_SECTION_1.map((menu, index) => (
             <Link
               key={index}
-              to={menu.path} // ✅ ใช้ Link ไปยัง Home
+              to={menu.path}
               className="px-2 lg:px-3 py-1 text-black font-semibold hover:text-blue-500 whitespace-nowrap text-sm lg:text-lg"
             >
               {menu.label}
@@ -60,7 +61,7 @@ export default function MenuDropdown() {
           ))}
         </div>
 
-        {/* Section 2 - Dropdown เมนู */}
+        {/* ✅ Section 2 - Dropdown เมนู */}
         <div className="flex items-center gap-2 lg:gap-4">
           {MENU_SECTION_2.map((menu, index) => (
             <Menu as="div" key={index} className="relative inline-block text-left">
@@ -93,9 +94,7 @@ export default function MenuDropdown() {
                         <a
                           href="#"
                           className={`${
-                            active
-                              ? "bg-gray-100 text-gray-900"
-                              : "text-gray-700"
+                            active ? "bg-gray-100 text-gray-900" : "text-gray-700"
                           } block p-2 sm:p-4 rounded-md`}
                         >
                           <p className="font-semibold text-xs sm:text-sm">
@@ -115,11 +114,11 @@ export default function MenuDropdown() {
         </div>
 
         {/* ✅ Section 3 - ปุ่ม "เกี่ยวกับเรา" และ "ติดต่อ" */}
-        <div className="flex items-center gap-2 lg:gap-4">
+        <div className="flex items-center gap-4 lg:gap-16">
           {MENU_SECTION_3.map((menu, index) => (
             <Link
               key={index}
-              to={menu.path} // ✅ ใช้ Link ไปยัง About และ Contact
+              to={menu.path}
               className="px-2 lg:px-3 py-1 text-black font-semibold hover:text-blue-500 whitespace-nowrap text-sm lg:text-base"
             >
               {menu.label}

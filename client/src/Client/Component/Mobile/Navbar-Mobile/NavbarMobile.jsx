@@ -1,7 +1,7 @@
 // NavbarMobile.jsx
-
+import { Link } from "react-router-dom";
+import LogoADCM from "../../../../assets/Image/Logo01.png";
 import { Search } from "lucide-react";
-import LogoADCM from "../../../../assets/Image/logo-ADCM.png";
 import LanguagMobile from "./LanguageDropdown-mobile"// Import ส่วนของเปลี่ยนภาษา
 
 const NavbarMobile = () => {
@@ -11,24 +11,13 @@ const NavbarMobile = () => {
       <div className="bg-gradient-to-r from-[#63a6dd] via-[#63a6dd] to-[#00C999] p-4 shadow-md">
         <div className="container mx-auto flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-2 flex-none">
+          <Link to="/Home" className="flex items-center gap-2 text-white flex-none">
             <img
               src={LogoADCM}
               alt="ADC Microsystems"
-              className="h-12 w-auto object-cover"
+              className="h-10 w-auto object-cover cursor-pointer"
             />
-            <div className="leading-tight">
-              <h1 className="font-bold text-xs text-white">ADC</h1>{" "}
-              {/* ขนาดเล็กลงและเปลี่ยนเป็นสีขาว */}
-              <p className="font-bold text-xs text-white">MICROSYSTEMS</p>{" "}
-              {/* ขนาดเล็กลงและเปลี่ยนเป็นสีขาว */}
-              <p className="text-[9px] text-[#31ffdd]">
-                {" "}
-                {/* ขนาดเล็กลงและเปลี่ยนเป็นสีขาว */}
-                บริษัท เอดีซี ไมโครซิสเต็มส์ จำกัด
-              </p>
-            </div>
-          </div>
+          </Link>
 
           {/* Language Dropdown */}
           <LanguagMobile/>

@@ -1,11 +1,12 @@
 // src/components/Nav/NavbarDesktop.jsx
+import PropTypes from "prop-types";
 import { Search, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import LogoADCM from "../../../../assets/Image/Logo01.png";
 import Banners from "./Banners";
 import MenuDropdown from "./MenuDropdown";
 
-const NavbarDesktop = () => {
+const NavbarDesktop = ({ onLoginClick }) => {
   return (
     <>
       {/* Banners ด้านบน */}
@@ -13,13 +14,13 @@ const NavbarDesktop = () => {
 
       {/* Navbar หลัก */}
       <nav className="bg-gradient-to-r from-[#63a6dd] via-[#63a6dd] to-[#00C999] p-4 hidden md:block shadow-md">
-        <div className="container mx-auto max-w-full px-1 md:px-5 lg:px-18 flex items-center justify-between gap-4 flex-nowrap">
+        <div className="container mx-auto md:px-0 lg:px-0 xl:px-2 flex items-center justify-between gap-4 flex-nowrap">
           {/* คลิกโลโก้แล้วไปหน้า Home */}
           <Link to="/Home" className="flex items-center gap-2 text-white flex-none">
             <img
               src={LogoADCM}
               alt="ADC Microsystems"
-              className="h-20 w-auto object-cover cursor-pointer"
+              className="h-12 md:h-14 lg:h-16 xl:h-20 w-auto object-cover cursor-pointer"
             />
           </Link>
 
@@ -29,11 +30,11 @@ const NavbarDesktop = () => {
               <input
                 type="text"
                 placeholder="ค้นหาสินค้า ประเภทสินค้า แบรนด์...."
-                className="flex-grow h-14 md:h-14 text-xs md:text-sm lg:text-base pl-4 md:pl-6 rounded-l-full border border-gray-300 bg-gray-100 focus:outline-none focus:ring-1 focus:ring-black transition-all"
+                className="flex-grow h-12 md:h-11 lg:h-12 xl:h-14 text-xs md:text-sm lg:text-base pl-4 md:pl-6 rounded-l-full border border-gray-300 bg-gray-100 focus:outline-none focus:ring-1 focus:ring-black transition-all"
               />
               <button
                 type="button"
-                className="bg-purple-600 hover:bg-purple-700 text-white h-14 md:h-14 px-4 lg:px-7 flex items-center justify-center border-l border-black rounded-r-full transition-all focus:ring-1 focus:ring-black"
+                className="bg-purple-600 hover:bg-purple-700 text-white h-12 md:h-11 lg:h-12 xl:h-14 px-4 lg:px-7 flex items-center justify-center border-l border-black rounded-r-full transition-all focus:ring-1 focus:ring-black"
               >
                 <Search className="h-5 w-5 lg:h-6 lg:w-6" />
               </button>
@@ -50,13 +51,13 @@ const NavbarDesktop = () => {
               <span className="tracking-wide">เปรียบเทียบ</span>
             </a>
 
-            <Link
-              to="/login"
+            <button
+              onClick={onLoginClick}
               className="flex flex-col items-center text-xs lg:text-sm whitespace-nowrap hover:text-gray-200 transition-opacity"
             >
               <User className="h-5 w-5 lg:h-6 lg:w-6 mb-1" />
               <span className="tracking-wide">เข้าสู่ระบบ</span>
-            </Link>
+            </button>
           </div>
         </div>
       </nav>
@@ -64,6 +65,11 @@ const NavbarDesktop = () => {
       <MenuDropdown />
     </>
   );
+};
+
+// ✅ กำหนด PropTypes เพื่อป้องกัน warning
+NavbarDesktop.propTypes = {
+  onLoginClick: PropTypes.func.isRequired,
 };
 
 export default NavbarDesktop;
