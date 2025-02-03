@@ -21,11 +21,9 @@ const LoginPage = ({ setIsOpen }) => {
       if (response.status === 200) {
         const token = response.data.token;
         setMessage("เข้าสู่ระบบสำเร็จ!");
-        localStorage.setItem("token", token);
-        setTimeout(() => {
-          setIsOpen(false);
-          navigate("/dashboard");
-        }, 2000);
+        sessionStorage.setItem("token", token);
+        setIsOpen(false);
+        navigate("/dashboard");
       }
     } catch (error) {
       setMessage(error.response?.data?.message || "เข้าสู่ระบบล้มเหลว");
@@ -35,7 +33,6 @@ const LoginPage = ({ setIsOpen }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-transparent z-50">
       <div className="w-full max-w-md p-6 bg-white bg-opacity-90 backdrop-blur-xl rounded-2xl shadow-2xl relative">
-        {/* ปุ่มปิด (✖) */}
         <button
           onClick={() => setIsOpen(false)}
           className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-lg"
@@ -43,7 +40,6 @@ const LoginPage = ({ setIsOpen }) => {
           ✖
         </button>
         
-        {/* โลโก้ */}
         <div className="flex justify-center mb-0">
           <img 
             src={LogoADCM} 
@@ -78,7 +74,6 @@ const LoginPage = ({ setIsOpen }) => {
             />
           </div>
           
-          {/* ข้อความแจ้งเตือน */}
           {message && (
             <p className={`text-center text-sm ${message === "เข้าสู่ระบบสำเร็จ!" ? "text-green-500" : "text-red-500"}`}>
               {message}

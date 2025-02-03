@@ -6,26 +6,45 @@ const ImageUpload = () => {
 
   const handleImageChange = async (event, index) => {
     const file = event.target.files[0];
-    if (file) {
-      const newImages = [...images];
-      newImages[index] = URL.createObjectURL(file); // แสดงรูปที่เลือกทันที
-      setImages([...newImages]);
+    if (!file) return;
 
-      const formData = new FormData();
-      formData.append("images", file);
+    if (!file.type.startsWith("image/")) {
+      alert("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น");
+      return;
+    }
 
-      try {
-        const response = await axios.post("/api/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
+    // สร้าง Object URL
+    const objectUrl = URL.createObjectURL(file);
+    setImages((prevImages) => {
+      const newImages = [...prevImages];
+      newImages[index] = objectUrl;
+      return newImages;
+    });
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const token = sessionStorage.getItem("token"); // ใช้ sessionStorage แทน
+
+    try {
+      const response = await axios.post("http://localhost:3000/api/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.filePath) {
+        setImages((prevImages) => {
+          const updatedImages = [...prevImages];
+          // ลบ URL เก่าออกจากหน่วยความจำ
+          URL.revokeObjectURL(objectUrl);
+          updatedImages[index] = response.data.filePath;
+          return updatedImages;
         });
-
-        if (response.data.filePath) {
-          newImages[index] = response.data.filePath; // ใช้ URL จริงเมื่ออัปโหลดสำเร็จ
-          setImages([...newImages]);
-        }
-      } catch (error) {
-        console.error("Upload error:", error);
       }
+    } catch (error) {
+      console.error("Upload error:", error.response?.data?.message || error.message);
     }
   };
 
