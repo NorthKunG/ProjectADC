@@ -314,29 +314,6 @@ const updateProduct = async (req, res) => {
         const { productId, name, ict, description, price, categoryId, features } = req.body;
 
         try {
-            // ตรวจสอบว่ามีการระบุ productId หรือไม่
-            if (!productId || productId === "") {
-                return res.status(400).json({ message: "กรุณาใส่รหัสสินค้าของคุณ" });
-            }
-
-            // ตรวจสอบว่ามีรห้สสินค้านี้มีในระบบหรือไม่
-            const productFindId = await Product.findOne({ productId: productId });
-            if (productFindId) {
-                return res.status(400).json({ message: 'รห้สสินค้านี้มีอยู่ในระบบแล้ว' });
-            }
-
-            // ตรวจสอบว่ามีสินค้าตัวนี้อยู่ในระบบหรือไม่
-            const product = await Product.findOne({ name: name });
-            if (product) {
-                return res.status(400).json({ message: 'สินค้าชิ้นนี้มีอยู่ในระบบแล้ว' });
-            }
-
-            // ตรวจสอบว่ามี Category นี้ในระบบหรือไม่
-            const category = await Category.findOne({ category: categoryId });
-            if (!category) {
-                return res.status(400).json({ message: 'ไม่พบ Category นี้ในระบบ' });
-            }
-
             // ตรวจสอบว่ามีการอัพโหลดไฟล์รูปภาพสินค้าหรือไม่
             if (req.file) {
                 // รับข้อมูล fileName จาก request file

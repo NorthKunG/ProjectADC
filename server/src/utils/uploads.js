@@ -26,10 +26,10 @@ const fileFilter = (req, file, cb) => {
 };
 
 // ตั้งค่า Multer สำหรับอัปโหลดหลายไฟล์
-const uploads = multer({
+const uploadImages = multer({
     storage: storage,
     fileFilter: fileFilter,
     limits: { fileSize: 5 * 1024 * 1024 } // จำกัดขนาดไฟล์ 5MB
 });
 
-module.exports = uploads;
+module.exports = { uploadImages };

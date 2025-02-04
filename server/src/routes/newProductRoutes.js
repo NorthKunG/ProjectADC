@@ -8,5 +8,7 @@ const adminAuth = auth.adminAuth;
 
 router.get('/', newProductController.getProducts);
 router.post('/', adminAuth, newProductController.addProduct);
+router.delete('/:id', adminAuth, newProductController.deleteProduct);
+router.put('/:id', adminAuth, newProductController.updateProduct);
 
 module.exports = router;
