@@ -1,5 +1,6 @@
 // ดึง Dependencies จาก package
-const { uploadImages } = require('../utils/uploads');
+const uploadImages = require('../utils/uploadImages');
+const uploadJson = require('../utils/uploadJson');
 const path = require('path');
 const fs = require('fs');
 
@@ -25,9 +26,7 @@ const getProducts = async (req, res) => {
 // เพิ่มข้อมูลสินค้า
 const addProduct = async (req, res) => {
     uploadImages.array('images', 5)(req, res, async (error) => {
-        if (error) {
-            return res.status(400).json({ message: error.message });
-        }
+        if (error) return res.status(400).json({ message: error.message }); // ตรวจสอบข้อผิดพลาด
 
         // รับข้อมูลจาก request body
         const { brand, cscode, itemNumber, vendorItemId, itemDescription,
@@ -105,6 +104,8 @@ const deleteProduct = async (req, res) => {
 // แก้ไขสินค้า
 const updateProduct = async (req, res) => {
     uploadImages.array('images', 5)(req, res, async (error) => {
+        if (error) return res.status(400).json({ message: 'เกิดข้อผิดพลาด' });
+
         // รับข้อมูล `id` จาก request params
         const { id } = req.params;
 
@@ -117,7 +118,7 @@ const updateProduct = async (req, res) => {
             price, category, subcategory, specICT, specifications } = req.body;
 
         try {
-            // ✅ อัปเดตข้อมูลสินค้า (ถ้าไม่ได้ส่งค่ามาจะใช้ค่าตามเดิม)
+            // อัปเดตข้อมูลสินค้า (ถ้าไม่ได้ส่งค่ามาจะใช้ค่าตามเดิม)
             product.brand = brand || product.brand;
             product.cscode = cscode || product.cscode;
             product.itemNumber = itemNumber || product.itemNumber;
@@ -129,9 +130,9 @@ const updateProduct = async (req, res) => {
             product.specICT = specICT !== undefined ? specICT : product.specICT;
             product.specifications = specifications ? JSON.parse(specifications) : product.specifications;
 
-            // ✅ ตรวจสอบว่ามีการอัปโหลดรูปใหม่หรือไม่
+            // ตรวจสอบว่ามีการอัปโหลดรูปใหม่หรือไม่
             if (Array.isArray(req.files) && req.files.length > 0) {
-                // 🔥 ลบรูปเก่าทั้งหมดออกจากเซิร์ฟเวอร์ก่อน
+                // ลบรูปเก่าทั้งหมดออกจากเซิร์ฟเวอร์ก่อน
                 product.images.forEach((img) => {
                     const imagePath = path.join(__dirname, '../uploads/products', img.fileName);
                     if (fs.existsSync(imagePath)) {
@@ -139,11 +140,11 @@ const updateProduct = async (req, res) => {
                     }
                 });
 
-                // 📌 บันทึกชื่อไฟล์ของรูปใหม่
+                // บันทึกชื่อไฟล์ของรูปใหม่
                 product.images = req.files.map((file) => ({ fileName: file.filename }));
             }
 
-            // ✅ บันทึกข้อมูลที่แก้ไขลงในฐานข้อมูล
+            // บันทึกข้อมูลที่แก้ไขลงในฐานข้อมูล
             await product.save();
 
             return res.status(200).json({ message: 'อัปเดตข้อมูลสินค้าสำเร็จแล้ว', product });
@@ -153,11 +154,35 @@ const updateProduct = async (req, res) => {
     });
 };
 
+// ระบบอัปโหลดข้อมูลผ่านไฟล์ .json
+const uploadFile = async (req, res) => {
+    uploadJson.single('file')(req, res, async (error) => {
+        if (error) return res.status(400).json({ message: 'เกิดข้อผิดพลาด' }); // ตรวจสอบข้อผิดพลาด
+        if (!req.file) return res.status(400).json({ message: 'กรุณาอัปโหลดไฟล์ .json' }); // ตรวจสอบว่าไฟล์ถูกส่งมาหรือไม่
+        // ตรวจสอบประเภทของไฟล์
+        if (req.file.mimetype !== 'application/json')
+            return res.status(400).json({ message: 'อนุญาตเฉพาะไฟล์ .json เท่านั้น' });
+
+        try {
+            const fileContent = req.file.buffer.toString('utf-8'); // อ่านข้อมูลจากไฟล์ในหน่วยความจำ
+            const parsedDatas = JSON.parse(fileContent); // แปลงข้อมูลให้เป็น JSON
+            // ตรวจสอบข้อมูลในไฟล์ (optional)
+            if (!Array.isArray(parsedDatas) || parsedDatas.length === 0)
+                return res.status(400).json({ message: 'ไฟล์ไม่มีข้อมูลสินค้า หรือรูปแบบข้อมูลไม่ถูกต้อง' });
+
+            const addedProducts = await Product.insertMany(parsedDatas); // นำเข้าข้อมูลใหม่ทั้งหมด
+            
+            return res.status(200).json({ message: 'เพิ่มสินค้าลงในระบบแล้ว', total: parsedDatas.length, addedProducts });
+        } catch (error) { res.status(400).json({ message: error.message }); }
+    });
+}
+
 // ส่งออก API
 module.exports = {
     getProducts,
     addProduct,
     getProduct,
     deleteProduct,
-    updateProduct
+    updateProduct,
+    uploadFile
 }
