@@ -1,18 +1,13 @@
-// src/components/Nav/Banners.jsx
-import { Phone } from 'lucide-react';
+import { Phone } from "lucide-react";
 import LanguageDropdown from "./LanguageDropdown";
 
 function Banners() {
   return (
-    // hidden sm:block = ซ่อนบนจอเล็ก แสดงเฉพาะจอ ≥640px
-    <div className="hidden md:block bg-white  px-2 py-0 text-black">
-      {/* 
-        layout-wrapper ถ้ามี (หรือจะตัดออกไปใช้ flex ตรง ๆ ก็ได้)
-        แล้วใส่ flex justify-between เพื่อจัดซ้ายเป็นเบอร์โทร ขวาเป็น dropdown 
-      */}
-      <div className=" flex items-center justify-between text-sm font-medium mx-24">
+    <div className="hidden sm:hidden md:flex bg-white w-full md:px-0 lg:px-0 xl:px-0 h-8 md:h-10 lg:h-10 xl:h-10 py-0 text-black">
+      {/* Layout Wrapper */}
+      <div className="w-full flex items-center justify-between text-sm font-medium h-full">
         {/* ด้านซ้าย = เบอร์โทร */}
-        <div className="flex items-center gap-3 text-xs">
+        <div className="flex items-center gap-2 text-xs whitespace-nowrap pl-4 md:pl-4 lg:pl-4 xl:pl-24">
           <Phone />
           <span>ติดต่อสอบถาม โทร</span>
           <span>055-055-589</span>
@@ -20,7 +15,9 @@ function Banners() {
         </div>
 
         {/* ด้านขวา = Dropdown เปลี่ยนภาษา */}
-        <LanguageDropdown />
+        <div className="ml-auto pr-0 md:pr-0 lg:pr-0 xl:pr-20  ">
+          <LanguageDropdown />
+        </div>
       </div>
     </div>
   );
