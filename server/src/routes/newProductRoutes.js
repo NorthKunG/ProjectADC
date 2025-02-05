@@ -11,10 +11,13 @@ const { adminAuth } = require('../middleware/auth');
 // เชื่อมต่อเส้นทาง (Path) กับ ตัวควบคุม (Controller)
 router.get('/', newProductController.getProducts);
 router.post('/', adminAuth, newProductController.addProduct);
+router.get('/search', newProductController.searchProduct);
 router.get('/:id', newProductController.getProduct);
 router.delete('/:id', adminAuth, newProductController.deleteProduct);
 router.put('/:id', adminAuth, newProductController.updateProduct);
 router.post('/uploadFile', adminAuth, newProductController.uploadFile);
+router.post('/compareProducts', newProductController.compareProduct);
+router.get('/filter/keyword', newProductController.filterProduct);
 
 // ส่งออก Module
 module.exports = router;
