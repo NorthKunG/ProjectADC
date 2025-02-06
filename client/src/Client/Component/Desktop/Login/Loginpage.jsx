@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import LogoADCM from "../../../../assets/Image/Logo-Login.png";
 
-const LoginPage = ({ setIsOpen }) => {
+const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -22,7 +22,6 @@ const LoginPage = ({ setIsOpen }) => {
         const token = response.data.token;
         setMessage("เข้าสู่ระบบสำเร็จ!");
         localStorage.setItem("token", token);  // ใช้ localStorage
-        setIsOpen(false);
         navigate("/dashboard");  // นำทางไปที่หน้า Dashboard
       }
     } catch (error) {
@@ -30,23 +29,10 @@ const LoginPage = ({ setIsOpen }) => {
     }
   };
 
-  // ฟังก์ชันเพื่อไปยังหน้าแรก
-  const handleClose = () => {
-    setIsOpen(false);  // ปิดหน้า Login Modal
-    navigate("/");  // นำทางไปยังหน้าแรก
-  };
-
   return (
-    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-transparent z-50">
-      <div className="w-full max-w-md p-6 bg-white bg-opacity-90 backdrop-blur-xl rounded-2xl shadow-2xl relative">
-        <button
-          onClick={handleClose}  // เมื่อกดปุ่มจะไปหน้าแรก
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-lg"
-        >
-          ✖
-        </button>
-        
-        <div className="flex justify-center mb-0">
+    <div className="min-h-screen bg-gray-200 flex items-center justify-center"> {/* พื้นหลังสีเทา */}
+      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
+        <div className="flex justify-center mb-6">
           <img 
             src={LogoADCM} 
             alt="Logo" 
@@ -54,9 +40,9 @@ const LoginPage = ({ setIsOpen }) => {
           />
         </div>
 
-        <h2 className="text-xl font-bold text-center mb-0">เข้าสู่ระบบ</h2>
+        <h2 className="text-xl font-bold text-center mb-4">เข้าสู่ระบบ</h2>
         
-        <form onSubmit={handleLogin} className="space-y-2">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">อีเมล</label>
             <input

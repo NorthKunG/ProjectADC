@@ -19,7 +19,7 @@ const AddProductPage = () => {
 
   useEffect(() => {
     if (!token) {
-      navigate("/login");
+      navigate("/loginPage");
     }
     const fetchData = async () => {
       try {

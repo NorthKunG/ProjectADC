@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ProductCard from "./ProductCard"; // ✅ ใช้ ProductCard เพื่อแสดงสินค้าแต่ละตัว
+import ProductCard from "../Component/Desktop/Product/ProductCard"; // ✅ ใช้ ProductCard เพื่อแสดงสินค้าแต่ละตัว
 
 export default function ProductList() {
   const [products, setProducts] = useState([]);
