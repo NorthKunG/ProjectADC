@@ -19,15 +19,15 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       {/* ✅ Sidebar คงที่และอยู่ติดกับ Header */}
       <div
         id="sidebar"
-        className={`fixed md:fixed top-[60px] left-0 w-64 h-[calc(100vh-60px)] bg-gray-800 text-white p-5 transition-transform duration-300 z-50 
+        className={`fixed md:fixed top-[120px] left-0 w-64 h-[calc(100vh-50px)] bg-gray-800 text-white text-2xl p-7 transition-transform duration-300 z-50 
           flex flex-col overflow-y-auto
           ${isOpen ? "translate-x-0" : "-translate-x-64"} md:translate-x-0`}
       >
-        <nav className="space-y-2">
+        <nav className="space-y-7">
           <Link to="/dashboard" className="flex items-center gap-2 p-2 rounded hover:bg-gray-700">
-            <Home size={20} /> หน้าแรก
+            <Home size={25} /> หน้าแรก
           </Link>
-          <Link to="/add-product" className="flex items-center gap-2 p-2 rounded hover:bg-gray-700">
+          <Link to="/add-product1" className="flex items-center gap-2 p-2 rounded hover:bg-gray-700">
             <PackagePlus size={20} /> เพิ่มสินค้า
           </Link>
           <div>

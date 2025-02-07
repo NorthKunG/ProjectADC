@@ -1,7 +1,11 @@
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 import { Menu, Bell, Settings, User } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+
+// ✅ ใช้ Path ที่ถูกต้อง (เลือกใช้แบบใดแบบหนึ่ง)
+import LogoADCM from "../../assets/Image/Logo01.png"; // ถ้าไฟล์อยู่ใน `public/assets/Image/`
 
 export default function Header({ toggleSidebar }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -38,7 +42,8 @@ export default function Header({ toggleSidebar }) {
   }, []);
 
   return (
-    <header className="w-full fixed top-0 left-0 bg-gray-800 text-white shadow-md z-50 flex items-center justify-between p-4">
+    <header className="w-full fixed top-0 left-0 bg-gradient-to-r from-[#63a6dd] via-[#63a6dd] to-[#00C999] text-white shadow-md z-50 flex items-center justify-between p-4">
+      {/* ✅ ปุ่ม Toggle Sidebar สำหรับมือถือ */}
       <button
         onClick={toggleSidebar}
         className="md:hidden p-2 bg-gray-700 text-white rounded"
@@ -48,11 +53,19 @@ export default function Header({ toggleSidebar }) {
         <Menu size={24} />
       </button>
 
+      {/* ✅ Logo และชื่อระบบ */}
       <div className="flex items-center space-x-2">
-        <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
+        <Link to="/Home" className="flex items-center gap-2 text-white flex-none">
+          <img
+            src={LogoADCM}
+            alt="ADC Microsystems"
+            className="h-12 md:h-14 lg:h-16 xl:h-16 w-auto object-cover cursor-pointer"
+          />
+        </Link>
         <h1 className="text-lg font-bold text-white">ระบบคลังสินค้า</h1>
       </div>
 
+      {/* ✅ เมนูไอคอนด้านขวา */}
       <div className="flex items-center space-x-4 relative">
         <button className="hover:text-gray-300">
           <Bell size={24} />
@@ -61,9 +74,9 @@ export default function Header({ toggleSidebar }) {
           <Settings size={24} />
         </button>
 
-        {/* ✅ User Icon (ใช้ ref) */}
+        {/* ✅ User Icon และ Dropdown Menu */}
         <div
-          ref={userIconRef} 
+          ref={userIconRef}
           onClick={toggleDropdown}
           className="flex items-center space-x-2 hover:text-gray-300 cursor-pointer"
         >

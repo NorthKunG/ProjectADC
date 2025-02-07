@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./Client/Page/Home";
 import LoginPopup from "./Client/Component/Desktop/Login/Login"; // นำเข้าไฟล์ login.jsx
 import DashboardPage from "./Admin/Pages/DashboardPage"; // นำเข้าไฟล์ dashboard.jsx
-import AddProductPage from "./Client/Component/Desktop/Login/AddProductPage"; // นำเข้าไฟล์ AddProduct.jsx
+import AddProductPage from "./Admin/Pages/Add"; // นำเข้าไฟล์ AddProduct.jsx
 import LoginPage from "./Client/Component/Desktop/Login/Loginpage"; // นำเข้าไฟล์ Loginpage.jsx
 
 function App() {
@@ -24,7 +24,7 @@ function App() {
 
         <Route path="/loginPage" element={<LoginPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/add-product" element={<AddProductPage />} />
+        <Route path="/add-product1" element={<AddProductPage />} />
       </Routes>
     </Router>
   );

@@ -14,11 +14,13 @@ export default function AdminLayout({ children }) {
 
       {/* ✅ Layout ของ Sidebar & Main Content */}
       <div className="flex">
-        {/* ✅ Sidebar คงที่และชิดกับ Header */}
-        <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
+        {/* ✅ Sidebar ขยับขึ้นไปชิด Header */}
+        <div className="md:fixed md:left-0 md:top-[60px] md:w-64 md:h-[calc(100vh-60px)]">
+          <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
+        </div>
 
         {/* ✅ Main Content อยู่ข้าง Sidebar และเลื่อนได้อิสระ */}
-        <main className="flex-1 ml-0 md:ml-64 p-5 overflow-y-auto min-h-[calc(100vh-60px)] pt-[80px]">
+        <main className="flex-1 ml-0 md:ml-64 p-5 overflow-y-auto  min-h-[calc(100vh-60px)] pt-[120px]">
           <div className="bg-white p-5 rounded shadow dark:bg-gray-800 dark:text-white">
             {children}
           </div>
