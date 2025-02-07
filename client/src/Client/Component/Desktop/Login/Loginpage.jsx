@@ -1,14 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import LogoADCM from "../../../../assets/Image/Logo-Login.png";
 
-const LoginPage = () => {
+const LoginPage = ({ setIsOpen }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const navigate = useNavigate();  // ใช้ navigate จาก react-router-dom
+  const navigate = useNavigate();
+
+  // ✅ ตรวจสอบว่ามี Token อยู่แล้วหรือไม่
+  useEffect(() => {
+    const token = sessionStorage.getItem("token");
+    if (token) {
+      console.log("✅ พบ Token ใน sessionStorage:", token);
+      navigate("/dashboard");
+    }
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -18,26 +27,25 @@ const LoginPage = () => {
         email,
         password,
       });
+
       if (response.status === 200) {
         const token = response.data.token;
+        console.log("✅ Token ที่ได้รับ:", token);
+        sessionStorage.setItem("token", token);
         setMessage("เข้าสู่ระบบสำเร็จ!");
-        localStorage.setItem("token", token);  // ใช้ localStorage
-        navigate("/dashboard");  // นำทางไปที่หน้า Dashboard
+        navigate("/dashboard");
       }
     } catch (error) {
+      console.error("❌ เกิดข้อผิดพลาด:", error.response?.data?.message || error);
       setMessage(error.response?.data?.message || "เข้าสู่ระบบล้มเหลว");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-200 flex items-center justify-center"> {/* พื้นหลังสีเทา */}
+    <div className="min-h-screen bg-gray-200 flex items-center justify-center">
       <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
         <div className="flex justify-center mb-6">
-          <img 
-            src={LogoADCM} 
-            alt="Logo" 
-            className="w-60 h-60 max-w-xs object-contain"
-          />
+          <img src={LogoADCM} alt="Logo" className="w-40 h-40 object-contain" />
         </div>
 
         <h2 className="text-xl font-bold text-center mb-4">เข้าสู่ระบบ</h2>
@@ -84,8 +92,9 @@ const LoginPage = () => {
   );
 };
 
+// ✅ แก้ไข PropTypes ของ `setIsOpen` เป็นไม่บังคับ (เพราะอาจไม่ได้ใช้)
 LoginPage.propTypes = {
-  setIsOpen: PropTypes.func.isRequired,
+  setIsOpen: PropTypes.func,
 };
 
 export default LoginPage;
