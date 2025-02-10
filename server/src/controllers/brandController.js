@@ -6,22 +6,74 @@ const path = require('path');
 // ดึงโมเดลที่เกี่ยวข้องสินค้าจากโฟลเดอร์ models
 const Brand = require('../models/brandModel');
 
-// แสดง Brand สินค้าทั้งหมด
+// แสดงแบรนด์สินค้าทั้งหมด
 const getBrands = async (req, res) => {
     try {
         // เรียกข้อมูล Brand สินค้าทั้งหมด
         const brands = await Brand.find();
         // ตรวจสอบว่ามีข้อมูล Brand สินค้าหรือไม่
-        if (brands.length === 0) {
-            return res.status(404).json({ message: 'ไม่พบข้อมูล Brand' });
-        }
-        return res.status(200).json({
-            count: brands.length,
-            brands
-        });
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
-    }
+        if (brands.length === 0) return res.status(404).json({ message: 'ไม่พบข้อมูล Brand' });
+        return res.status(200).json({ count: brands.length, brands });
+    } catch (error) { return res.status(500).json({ message: error.message }); }
+};
+
+// แสดงรายละเอียดแบรนด์
+const getBrandById = async (req, res) => {
+    // รับ id จาก params
+    const { id } = req.params;
+    try {
+        // ค้นหาแบรนด์
+        const brand = await Brand.findById(id);
+        if (!brand) return res.status(404).json({ message: 'ไม่พบแบรนด์' });
+        return res.status(200).json(brand);
+    } catch (error) { return res.status(400).json({ message: error.message }); }
+};
+
+// เพิ่มข้อมูลแบรนด์
+const newBrand = async (req, res) => {
+    // รับ name จาก body
+    const { name } = req.body;
+    try {
+        // ค้นหาชื่อแบรนด์
+        const brand = await Brand.find(name);
+        if (brand) return res.status(400).json({ message: 'แบรนด์นี้มีอยู่ในระบบแล้ว' });
+        // สร้างแบรนใหม่
+        const newBrand = new Brand(name);
+        // บันทึกข้อมูล
+        const saveBrand = await newBrand.save();
+        return res.status(200).json({ message: 'สร้างแบรนด์ใหม่เรียบร้อย', saveBrand });
+    } catch (error) { return res.status(400).json({ message: error.message }); }
+};
+
+// แก้ไขแบรนด์สินค้า
+const updateBrandById = async (req, res) => {
+    // รับ id จาก params
+    const { id } = req.params;
+    // รับ name จาก body
+    const { name } = req.body;
+    try {
+        // ค้นหาแบรนด์
+        const brand = await Brand.findById(id);
+        if (!brand) return res.status(404).json({ message: 'ไม่พบแบรนด์' });
+        // อัปเดตข้อมูลแบรนด์
+        brand.name = name || brand.name;
+        // บันทึกข้อมูล
+        const saveBrand = await brand.save();
+        return res.status(200).json({ message: 'อัปเดตข้อมูลแบรนด์เรียบร้อยแล้ว', saveBrand });
+    } catch (error) { return res.status(400).json({ message: error.message }); }
+};
+
+// ลบแบรนด์สินค้า
+const removeBrandById = async (req, res) => {
+    // รับ id จาก params
+    const { id } = req.params;
+    try {
+        // ค้นหาแบรนด์
+        const brand = await Brand.findById(id);
+        if (!brand) return res.status(404).json({ message: 'ไม่พบแบรนด์' });
+        const removeBrand = await Brand.findByIdAndDelete(id);
+        return res.status(200).json({ message: 'ลบข้อมูลแบรนด์เรียบร้อยแล้ว', removeBrand });
+    } catch (error) { return res.status(400).json({ message: error.message }); }
 };
 
 // การตั้งค่า Multer เพื่อเก็บไฟล์ในหน่วยความจำ

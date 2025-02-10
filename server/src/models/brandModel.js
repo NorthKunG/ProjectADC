@@ -1,7 +1,6 @@
 // ดึง Dependencies จาก package
 const mongoose = require('mongoose');
 
-// Schema brand
 const brandSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -14,5 +13,4 @@ const brandSchema = new mongoose.Schema({
     }
 });
 
-// Export a model
 module.exports = mongoose.model('Brand', brandSchema);

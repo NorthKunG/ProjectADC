@@ -10,7 +10,7 @@ const { adminAuth } = require('../middleware/auth');
 
 // เชื่อมต่อเส้นทาง (Path) กับ ตัวควบคุม (Controller)
 router.get('/', newProductController.getProducts);
-router.post('/', adminAuth, newProductController.addProduct);
+router.post('/', adminAuth, newProductController.newProduct);
 router.get('/search', newProductController.searchProduct);
 router.get('/:id', newProductController.getProduct);
 router.delete('/:id', adminAuth, newProductController.deleteProduct);
