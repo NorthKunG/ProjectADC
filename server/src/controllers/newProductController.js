@@ -27,11 +27,11 @@ const newProduct = async (req, res) => {
         // รับข้อมูลจาก body
         const { specifications, specICT, subcategory, ...productData } = req.body;
         // ตรวจสอบว่าข้อมูลครบถ้วนหรือไม่
-        if (requiredFields.some(field => !productData[field])) 
+        if (requiredFields.some(field => !productData[field]))
             return res.status(400).json({ message: 'กรุณากรอกข้อมูลสินค้าครบถ้วน' });
         try {
             // ดึงชื่อไฟล์ที่อัปโหลด
-            const imagePaths = req.files.map(file => ({ fileName: `/uploads/${file.filename}` }));
+            const imagePaths = req.files.map(file => ({ fileName: file.filename }));
             // สร้างสินค้าใหม่
             const newProduct = new Product({
                 ...productData,
@@ -88,48 +88,69 @@ const deleteProduct = async (req, res) => {
     }
 };
 
-// แก้ไขสินค้า
+// แก้ไขข้อมูลสินค้า
 const updateProduct = async (req, res) => {
     uploadImages.array('images', 5)(req, res, async (error) => {
-        if (error) return res.status(400).json({ message: 'เกิดข้อผิดพลาด' });
-        // รับข้อมูล `id` จาก request params
+        if (error) return res.status(400).json({ message: error.message }); // ตรวจสอบข้อผิดพลาด
+        // รับข้อมูลจาก request params
         const { id } = req.params;
-        // ตรวจสอบว่ามีสินค้านี้หรือไม่
+        // ตรวจสอบว่ามีสินค้าตาม id หรือไม่
         const product = await Product.findById(id);
         if (!product) return res.status(404).json({ message: 'ไม่พบสินค้า' });
-        // รับข้อมูลจาก request body
-        const { brand, cscode, itemNumber, vendorItemId, itemDescription,
-            price, category, subcategory, specICT, specifications } = req.body;
+        const { specifications, specICT, subcategory, ...productData } = req.body;
+
         try {
-            // อัปเดตข้อมูลสินค้า (ถ้าไม่ได้ส่งค่ามาจะใช้ค่าตามเดิม)
-            product.brand = brand || product.brand;
-            product.cscode = cscode || product.cscode;
-            product.itemNumber = itemNumber || product.itemNumber;
-            product.vendorItemId = vendorItemId || product.vendorItemId;
-            product.itemDescription = itemDescription || product.itemDescription;
-            product.price = price !== undefined ? price : product.price;
-            product.category = category || product.category;
-            product.subcategory = subcategory || product.subcategory;
-            product.specICT = specICT !== undefined ? specICT : product.specICT;
-            product.specifications = specifications ? JSON.parse(specifications) : product.specifications;
             // ตรวจสอบว่ามีการอัปโหลดรูปใหม่หรือไม่
             if (Array.isArray(req.files) && req.files.length > 0) {
                 // ลบรูปเก่าทั้งหมดออกจากเซิร์ฟเวอร์ก่อน
-                product.images.forEach((img) => {
-                    const imagePath = path.join(__dirname, '../uploads/products', img.fileName);
-                    if (fs.existsSync(imagePath)) {
-                        fs.unlinkSync(imagePath);
-                    }
-                });
+                if (Array.isArray(product.images)) {
+                    product.images.forEach((img) => {
+                        if (img.fileName) {
+                            const imagePath = path.join(__dirname, '../uploads/products/', img.fileName);
+
+                            // ดีบั๊ก: ตรวจสอบเส้นทางไฟล์ที่ต้องการลบ
+                            console.log(`กำลังลบไฟล์: ${imagePath}`);
+
+                            // ตรวจสอบว่าไฟล์มีอยู่ในเซิร์ฟเวอร์หรือไม่
+                            if (fs.existsSync(imagePath)) {
+                                fs.unlinkSync(imagePath);
+                                console.log(`ลบไฟล์สำเร็จ: ${imagePath}`);
+                            } else {
+                                console.log(`ไม่พบไฟล์ที่ต้องการลบ: ${imagePath}`);
+                            }
+                        }
+                    });
+                }
+
                 // บันทึกชื่อไฟล์ของรูปใหม่
                 product.images = req.files.map((file) => ({ fileName: file.filename }));
+            } else {
+                // ถ้าไม่มีการอัปโหลดรูปใหม่ ให้เก็บรูปเดิมไว้
+                product.images = Array.isArray(product.images) ? product.images : [];
             }
+
+            // อัปเดตข้อมูลสินค้า
+            product.brand = productData.brand || product.brand;
+            product.cscode = productData.cscode || product.cscode;
+            product.itemNumber = productData.itemNumber || product.itemNumber;
+            product.vendorItemId = productData.vendorItemId || product.vendorItemId;
+            product.itemDescription = productData.itemDescription || product.itemDescription;
+            product.price = productData.price !== undefined ? productData.price : product.price;
+            product.category = productData.category || product.category;
+            product.subcategory = subcategory || product.subcategory;
+            product.specICT = specICT === 'true' ? true : product.specICT;
+            product.specifications = specifications ? JSON.parse(specifications) : product.specifications;
+
             // บันทึกข้อมูลที่แก้ไขลงในฐานข้อมูล
             await product.save();
+
             return res.status(200).json({ message: 'อัปเดตข้อมูลสินค้าสำเร็จแล้ว', product });
-        } catch (error) { return res.status(400).json({ message: error.message }); }
+        } catch (error) {
+            return res.status(400).json({ message: error.message });
+        }
     });
 };
+
 
 // ระบบอัปโหลดข้อมูลผ่านไฟล์ .json
 const uploadFile = async (req, res) => {
