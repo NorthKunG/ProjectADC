@@ -5,9 +5,15 @@ const brandController = require('../controllers/brandController');
 const express = require('express');
 const router = express.Router();
 
-// เชื่อมต่อเส้นทาง (Path) กับ ตัวควบคุม (Controller)
-router.post('/uploadFile', brandController.uploadFile);
-router.get('/', brandController.getBrands);
+// เรียกใช้งาน middleware
+const { adminAuth } = require('../middleware/auth');
 
-// ส่งออก Module
+// เชื่อมต่อเส้นทาง (Path) กับ ตัวควบคุม (Controller)
+router.get('/', brandController.getBrands);
+router.get('/:id', brandController.getBrandById);
+router.post('/', adminAuth, brandController.newBrand);
+router.put('/:id', adminAuth, brandController.updateBrandById);
+router.delete('/:id', adminAuth, brandController.removeBrandById);
+router.post('/uploadFile', adminAuth, brandController.uploadFile);
+
 module.exports = router;

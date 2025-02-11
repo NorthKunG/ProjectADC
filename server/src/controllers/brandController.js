@@ -158,5 +158,9 @@ const uploadFile = async (req, res) => {
 
 module.exports = {
     getBrands,
+    getBrandById,
+    newBrand,
+    updateBrandById,
+    removeBrandById,
     uploadFile
 }

@@ -92,18 +92,14 @@ const deleteProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
     uploadImages.array('images', 5)(req, res, async (error) => {
         if (error) return res.status(400).json({ message: 'เกิดข้อผิดพลาด' });
-
         // รับข้อมูล `id` จาก request params
         const { id } = req.params;
-
         // ตรวจสอบว่ามีสินค้านี้หรือไม่
         const product = await Product.findById(id);
         if (!product) return res.status(404).json({ message: 'ไม่พบสินค้า' });
-
         // รับข้อมูลจาก request body
         const { brand, cscode, itemNumber, vendorItemId, itemDescription,
             price, category, subcategory, specICT, specifications } = req.body;
-
         try {
             // อัปเดตข้อมูลสินค้า (ถ้าไม่ได้ส่งค่ามาจะใช้ค่าตามเดิม)
             product.brand = brand || product.brand;
@@ -116,7 +112,6 @@ const updateProduct = async (req, res) => {
             product.subcategory = subcategory || product.subcategory;
             product.specICT = specICT !== undefined ? specICT : product.specICT;
             product.specifications = specifications ? JSON.parse(specifications) : product.specifications;
-
             // ตรวจสอบว่ามีการอัปโหลดรูปใหม่หรือไม่
             if (Array.isArray(req.files) && req.files.length > 0) {
                 // ลบรูปเก่าทั้งหมดออกจากเซิร์ฟเวอร์ก่อน
@@ -126,14 +121,11 @@ const updateProduct = async (req, res) => {
                         fs.unlinkSync(imagePath);
                     }
                 });
-
                 // บันทึกชื่อไฟล์ของรูปใหม่
                 product.images = req.files.map((file) => ({ fileName: file.filename }));
             }
-
             // บันทึกข้อมูลที่แก้ไขลงในฐานข้อมูล
             await product.save();
-
             return res.status(200).json({ message: 'อัปเดตข้อมูลสินค้าสำเร็จแล้ว', product });
         } catch (error) { return res.status(400).json({ message: error.message }); }
     });
