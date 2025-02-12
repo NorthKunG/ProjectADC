@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AdminLayout from "../Layouts/AdminLayout";
-import LogoADD from "../../assets/Image/addProduct.png";
+
 
 export default function AddProductForm() {
   const [product, setProduct] = useState({
@@ -34,6 +34,7 @@ export default function AddProductForm() {
     setProduct((prev) => ({ ...prev, specs: [...prev.specs, ""] }));
   };
 
+  {/* ส่วนอัพโหลดรูป*/}
   const [images, setImages] = useState([null, null, null, null]);
 
   const handleImageChange = async (event, index) => {
@@ -58,8 +59,10 @@ export default function AddProductForm() {
     setImages([null, null, null, null]);
   };
 
+  {/* ลบรายการสเปคสินค้า*/}
   const [productType, setProductType] = useState("สินค้า");
 
+  {/* ลบรายการสเปคสินค้า*/}
   const removeSpecField = (index) => {
     const newSpecs = [...product.specs];
     newSpecs.splice(index, 1); // ลบ 1 รายการตาม index ที่เลือก
@@ -67,44 +70,8 @@ export default function AddProductForm() {
   };
 
   return (
-      <AdminLayout>
-       <div className="w-full max-w-full mx-auto rounded-t-2xl shadow-2xl bg-white overflow-hidden">
-                    {/* ส่วนหัว */}
-                    <div className="w-full bg-[#007bff] text-white p-5 flex items-center gap-4 justify-start">
-                      <img
-                        src={LogoADD}
-                        alt="เพิ่มข้อมูลสินค้า"
-                        className="h-12 w-auto object-cover cursor-pointer"
-                      />
-                      <h2 className="text-2xl sm:text-3xl font-bold">เพิ่มข้อมูลสินค้า</h2>
-                    </div>
-          
-                    {/* ส่วนเลือกประเภทสินค้า */}
-                    <div className="bg-gray-100 p-6 shadow-md w-full">
-                      <h3 className="font-semibold text-black mb-4 text-xl sm:text-2xl">ประเภทสินค้า</h3>
-                      <div className="flex flex-col sm:flex-row gap-4 w-full">
-                        {["สินค้า", "โปรโมชั่นแพ็กเกจ"].map((type) => (
-                          <button
-                            key={type}
-                            onClick={() => setProductType(type)}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-lg border transition-all w-full text-center justify-center shadow-md text-lg sm:text-xl ${
-                              productType === type ? "bg-white text-blue-600 font-bold border-blue-600" : "bg-gray-200 text-gray-700 border-gray-300"
-                            }`}
-                          >
-                            <div
-                              className={`w-5 h-5 flex items-center justify-center border rounded-full ${
-                                productType === type ? "bg-blue-600 border-blue-600" : "border-gray-500 bg-gray-500"
-                              }`}
-                            >
-                              <div className={`${productType === type ? "w-2.5 h-2.5 bg-white rounded-full" : "w-2.5 h-2.5 bg-white rounded-full"}`}></div>
-                            </div>
-                            {type}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-  
-           {/* form*/}
+    <AdminLayout>
+        {/* form*/}
         <div className="max-w-full mx-auto p-6 bg-white rounded shadow-lg ">
           <h2 className="text-2xl font-bold mb-4">ข้อมูลสินค้า</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -358,8 +325,6 @@ export default function AddProductForm() {
             </button>
           </div>
         </div>
-        </div>
-      </AdminLayout>
-    );
-  }
-  
+    </AdminLayout>
+  );
+}

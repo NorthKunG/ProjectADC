@@ -5,9 +5,12 @@ import LoginPopup from "./Client/Component/Desktop/Login/Login"; // นำเข
 import DashboardPage from "./Admin/Pages/DashboardPage"; // นำเข้าไฟล์ dashboard.jsx
 import AddProductPage from "./Admin/Pages/AddProductPage"; // นำเข้าไฟล์ AddProduct.jsx
 import LoginPage from "./Client/Component/Desktop/Login/Loginpage"; // นำเข้าไฟล์ Loginpage.jsx
+import Test from "./Admin/Pages/test"; // นำเข้าไฟล์ test.jsx
+import Twse from "./Admin/Pages/Twse"; // นำเข้าไฟล์ Twse.jsx
+import Uuu from "./Admin/Pages/uuuu"; // นำเข้าไฟล์ uuu.jsx
 
 function App() {
-  const [isOpen, setIsOpen] = useState(false);  // สร้าง state สำหรับควบคุมการเปิด/ปิด Modal
+  const [ setIsOpen] = useState(false);  // สร้าง state สำหรับควบคุมการเปิด/ปิด Modal
 
   return (
     <Router>
@@ -21,7 +24,10 @@ function App() {
         {/* ส่ง setIsOpen ไปที่ LoginPage */}
         <Route path="/login" element={<LoginPopup setIsOpen={setIsOpen} />} /> {/* หน้าล็อกอิน */}
         
-
+        <Route path="/Test" element={<Test/>} />
+        <Route path="/Twse" element={<Twse/>} />
+        <Route path="/uuu" element={<Uuu/>} />
+        <Route path="/loginPage" element={<LoginPage />} />
         <Route path="/loginPage" element={<LoginPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/add-product" element={<AddProductPage />} />

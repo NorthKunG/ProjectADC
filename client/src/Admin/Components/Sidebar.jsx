@@ -19,12 +19,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       {/* ✅ Sidebar คงที่และอยู่ติดกับ Header */}
       <div
         id="sidebar"
-        className={`fixed md:fixed top-[80px] left-0 w-64 h-[calc(100vh-50px)] bg-gray-800 text-white text-2xl p-7 transition-transform duration-300 z-50 
+        className={`fixed md:fixed top-[80px] left-0 w-64 h-[calc(100vh-50px)] bg-gray-200 text-black text-2xl p-7 transition-transform duration-300 z-50 
           flex flex-col overflow-y-auto
           ${isOpen ? "translate-x-0" : "-translate-x-64"} md:translate-x-0`}
       >
         <nav className="space-y-7">
-          <Link to="/dashboard" className="flex items-center gap-2 p-2 rounded hover:bg-gray-700">
+          <Link to="/dashboard" className="flex items-center gap-2 p-2 rounded hover:bg-blue-600">
             <Home size={25} /> หน้าแรก
           </Link>
           <Link to="/add-product" className="flex items-center gap-2 p-2 rounded hover:bg-gray-700">
@@ -43,11 +43,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             </button>
             {openDropdown && (
               <div className="pl-6 space-y-2">
-                <Link to="/manage-users/list" className="block p-2 rounded hover:bg-gray-700">
+                <Link to="/Test" className="block p-2 rounded hover:bg-gray-700">
                   รายชื่อผู้ใช้
                 </Link>
-                <Link to="/manage-users/add" className="block p-2 rounded hover:bg-gray-700">
+                <Link to="/Twse" className="block p-2 rounded hover:bg-gray-700">
                   เพิ่มผู้ใช้
+                </Link>
+                <Link to="/uuu" className="block p-2 rounded hover:bg-gray-700">
+                  เพิ่มผู้ใช้5555
                 </Link>
               </div>
             )}
