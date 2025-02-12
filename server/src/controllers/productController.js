@@ -50,40 +50,29 @@ const getProducts = async (req, res) => {
         const products = await Product.aggregate([
             {
                 $lookup: {
-                    // ชื่อคอลเลกชันที่คุณต้องการ join (ในที่นี้คือ 'categories')
                     from: 'categories',
-                    // ฟิลด์ใน `Product` ที่เก็บ `ObjectId` ของหมวดหมู่
                     localField: 'category',
-                    // ฟิลด์ใน `Category` ที่จะจับคู่กับ `category`
                     foreignField: 'code',
-                    // ชื่อฟิลด์ที่เก็บข้อมูลจาก `Category` 
                     as: 'categoryDetails'
                 }
             },
             {
-                // ถ้ามีหลายค่าหรือข้อมูล, ใช้ $unwind เพื่อทำให้เป็น single document
                 $unwind: '$categoryDetails'
             },
             {
                 $project: {
-                    // แสดง brand สินค้า
                     brand: 1,
-                    // แสดงชื่อสินค้า
                     name: 1,
-                    // แสดงราคา
                     price: 1,
-                    // แสดงมาตรฐาน ICT
                     ict: 1,
-                    // แสดงชื่อหมวดหมู่ (ใช้ชื่อหมวดหมู่จาก `Category`)
                     category: '$categoryDetails.name',
-                    // แสดง Features ของสินค้า
-                    features: 1
+                    features: 1,
+                    images: 1 // ✅ เพิ่ม images ให้ API ส่งกลับไปด้วย
                 }
             }
         ]);
 
-        // ตรวจสอบว่ามีสินค้าหรือไม่
-        if (!products) {
+        if (!products || products.length === 0) {
             return res.status(404).send({ message: 'ไม่พบสินค้า' });
         }
 
@@ -92,6 +81,7 @@ const getProducts = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 };
+
 
 // เพิ่มสินค้า
 const addProduct = async (req, res) => {
