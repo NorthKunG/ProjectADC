@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ProductCard from "./ProductCard";
+import ProductCard from "./ProductCard2";
 import newIcon from "../../assets/Image/New.png"; 
 
 export default function LatestProducts() {
