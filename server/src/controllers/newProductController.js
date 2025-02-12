@@ -42,8 +42,8 @@ const newProduct = async (req, res) => {
             });
             // บันทึกข้อมูล
             await newProduct.save();
-            return res.status(201).json({ message: 'เพิ่มสินค้าเรียบร้อยแล้ว', newProduct });
-        } catch (error) { return res.status(400).json({ message: 'เกิดข้อผิดพลาด', error: error.message }); }
+            return res.status(201).json({ message: 'เพิ่มสินค้าใหม่เรียบร้อยแล้ว', newProduct });
+        } catch (error) { return res.status(400).json({ message: error.message }); }
     });
 };
 

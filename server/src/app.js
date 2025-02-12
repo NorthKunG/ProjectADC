@@ -2,6 +2,7 @@ require('dotenv').config();
 require('./config/database').connect();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 // Require a body-parser
 const bodyParser = require('body-parser');
@@ -62,6 +63,9 @@ app.use('/api/users', userRoutes);
 // ดึง API product
 const newProductRoutes = require('./routes/newProductRoutes');
 app.use('/api/newProducts', newProductRoutes);
+
+// ให้เซิร์ฟเวอร์ serve ไฟล์จากโฟลเดอร์ uploads/products
+app.use('/uploads/products', express.static(path.join(__dirname, 'uploads/products')));
 
 app.use((err, req, res, next) => {
     req.status(err.status || 500).json({
