@@ -50,6 +50,7 @@ const addedPromotion = async (req, res) => {
     // ใช้งาน multer
     upload(req, res, async (error) => {
         if (error) {
+            console.log(error.message);
             return res.status(404).json({ message: 'ระบบเกิดข้อผิดพลาด' });
         }
 
@@ -85,7 +86,6 @@ const addedPromotion = async (req, res) => {
             const promotionItems = cart.items.map(item => ({
                 productId: item.productId._id,
                 quantity: item.quantity,
-                price: item.productId.price
             }));
 
             // เพิ่มรายการโปรโมชั่นขาย
@@ -107,6 +107,7 @@ const addedPromotion = async (req, res) => {
                 addedPromotion
             });
         } catch (error) {
+            console.log(error)
             return res.status(500).json({ message: error.message });
         }
     });

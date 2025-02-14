@@ -5,14 +5,14 @@ const express = require('express');
 const router = express.Router();
     
 // Require a middleware auth
-const auth = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 
 // Require a cart controller
 const cartController = require('../controllers/cartController');
 
 // Routers
-router.post('/', cartController.addItem);
-router.get('/', cartController.getCartById);
+router.post('/', auth, cartController.addItem);
+router.get('/', auth, cartController.getCartById);
 router.delete('/', cartController.removeFromCart);
 router.put('/', cartController.updateCart);
 

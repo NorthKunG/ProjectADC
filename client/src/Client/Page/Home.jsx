@@ -2,7 +2,7 @@ import { useState } from "react";
 import NavbarDesktop from "../Component/Desktop/Navbar/NavbarDesktop";
 import NavbarMobile from "../Component/Mobile/Navbar-Mobile/NavbarMobile";
 import ImageSlider from "../Component/Desktop/Promotion and BrandSlider/ImageSlider";
-import LatestProducts from "./LatestProducts";
+import LatestProducts2 from "./LatestProducts2";
 import LoginPage from "../Component/Desktop/Login/Login"; // ✅ นำเข้า Pop-up Logi
 import LayoutTest from "./Card Layout"
 
@@ -16,7 +16,7 @@ function Home() {
       {isLoginOpen && <LoginPage setIsOpen={setIsLoginOpen} />}
       <NavbarMobile />
       <ImageSlider />
-      <LatestProducts/>
+      <LatestProducts2/>
       {/* <LayoutTest /> */}
 
     </>

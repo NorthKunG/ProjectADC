@@ -5,9 +5,9 @@ const ImageUpload = () => {
   const [images, setImages] = useState([null, null, null, null]);
 
   // ✅ เพิ่ม: เก็บไฟล์รูปภาพเพื่อใช้ตอนอัปโหลด
-  const [files, setFiles] = useState([null, null, null, null]);
+  // const [files, setFiles] = useState([null, null, null, null]);
 
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
 
   const handleImageChange = async (event, index) => {
     const file = event.target.files[0];
@@ -18,13 +18,13 @@ const ImageUpload = () => {
       return;
     }
 
-    // ✅ เพิ่ม: เก็บ URL ของรูปที่เลือกไว้เพื่อแสดงตัวอย่าง
-    const objectUrl = URL.createObjectURL(file);
-    setImages((prevImages) => {
-      const newImages = [...prevImages];
-      newImages[index] = objectUrl;
-      return newImages;
-    });
+    // // ✅ เพิ่ม: เก็บ URL ของรูปที่เลือกไว้เพื่อแสดงตัวอย่าง
+    // const objectUrl = URL.createObjectURL(file);
+    // setImages((prevImages) => {
+    //   const newImages = [...prevImages];
+    //   newImages[index] = objectUrl;
+    //   return newImages;
+    // });
 
     // ✅ เพิ่ม: เก็บไฟล์จริงไว้ใน `files` เพื่อส่งไป Backend
     setFiles((prevFiles) => {
@@ -35,37 +35,37 @@ const ImageUpload = () => {
   };
 
   // ✅ เพิ่ม: ฟังก์ชันอัปโหลดรูปไปที่ API `/api/uploadImages`
-  const handleUpload = async () => {
-    if (!files.some((file) => file)) {
-      alert("กรุณาเลือกรูปภาพก่อนอัปโหลด");
-      return;
-    }
+  // const handleUpload = async () => {
+  //   if (!files.some((file) => file)) {
+  //     alert("กรุณาเลือกรูปภาพก่อนอัปโหลด");
+  //     return;
+  //   }
 
-    setLoading(true);
-    const formData = new FormData();
-    files.forEach((file) => {
-      if (file) formData.append("images", file);
-    });
+  //   setLoading(true);
+  //   const formData = new FormData();
+  //   files.forEach((file) => {
+  //     if (file) formData.append("images", file);
+  //   });
 
-    try {
-      const response = await fetch("http://localhost:3000/api/uploadImages", {
-        method: "POST",
-        body: formData,
-      });
+  //   try {
+  //     const response = await fetch("http://localhost:3000/api/uploadImages", {
+  //       method: "POST",
+  //       body: formData,
+  //     });
 
-      const data = await response.json();
-      if (response.ok) {
-        alert("อัปโหลดรูปภาพสำเร็จ!");
-        console.log("✅ Uploaded files:", data.files);
-      } else {
-        alert(`❌ อัปโหลดล้มเหลว: ${data.message}`);
-      }
-    } catch (error) {
-      alert("❌ เกิดข้อผิดพลาดในการอัปโหลด");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //       alert("อัปโหลดรูปภาพสำเร็จ!");
+  //       console.log("✅ Uploaded files:", data.files);
+  //     } else {
+  //       alert(`❌ อัปโหลดล้มเหลว: ${data.message}`);
+  //     }
+  //   } catch (error) {
+  //     alert("❌ เกิดข้อผิดพลาดในการอัปโหลด");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleClearImages = () => {
     setImages([null, null, null, null]);
@@ -104,11 +104,6 @@ const ImageUpload = () => {
         <div className="w-full flex justify-between">
           <button onClick={handleClearImages} className="bg-red-500 text-white rounded hover:bg-red-600 transition-all px-5 py-3 lg:px-4 lg:py-2 md:px-3 md:py-1 sm:px-1 sm:py-1 text-lg lg:text-base md:text-sm sm:text-xs">
             ล้างรูปที่อัปโหลด
-          </button>
-
-          {/* ✅ เพิ่ม: ปุ่มอัปโหลดรูป */}
-          <button onClick={handleUpload} className="bg-green-500 text-white rounded hover:bg-green-600 transition-all px-5 py-3 lg:px-4 lg:py-2 md:px-3 md:py-1 sm:px-1 sm:py-1 text-lg lg:text-base md:text-sm sm:text-xs">
-            {loading ? "กำลังอัปโหลด..." : "อัปโหลดรูป"}
           </button>
         </div>
       </div>

@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const productSchema = new mongoose.Schema({
     brand: { type: String, required: [true, 'จำเป็นต้องมียี่ห้อสินค้า'] },
     cscode: { type: String, required: [true, 'จำเป็นต้องมี CSCode'] },
-    itemNumber: { type: String, required: [true, 'จำเป็นต้องมีหมายเลขสินค้า'], unqiue: true },
+    itemNumber: { type: String, required: [true, 'จำเป็นต้องมีหมายเลขสินค้า'], unique: true },
     vendorItemId: { type: String },
     itemDescription: { type: String, required: [true, 'จำเป็นต้องมีคำอธิบายสินค้า'] },
     price: { type: Number, required: false, default: null },

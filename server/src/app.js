@@ -2,12 +2,10 @@ require('dotenv').config();
 require('./config/database').connect();
 const express = require('express');
 const cors = require('cors');
-<<<<<<< HEAD
-=======
+
 const path = require('path');
 
-// Require a body-parser
->>>>>>> 1aff91facfd2d9d1cce1057518de82bec9b3e6ae
+
 const bodyParser = require('body-parser');
 
 const productRoutes = require('./routes/productRoutes');

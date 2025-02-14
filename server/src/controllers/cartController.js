@@ -2,7 +2,7 @@
 const Cart = require('../models/cartModel');
 
 // Require a product model
-const Product = require('../models/productModel');
+const Product = require('../models/newProductModel');
 
 // Get a cart by id
 const getCartById = async (req, res) => {

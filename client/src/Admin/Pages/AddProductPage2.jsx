@@ -4,19 +4,19 @@ import { useNavigate } from "react-router-dom";
 import AdminLayout from "../Layouts/AdminLayout";
 import Swal from "sweetalert2";
 
-const AddProductPage = () => {
+const AddProductPage2 = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token") || "";
 
   const [formData, setFormData] = useState({
     brand: "",
-    cscode: "",
-    itemNumber: "",
-    vendorItemId: "",
-    itemDescription: "",
+    cscode: "",      //*ประเภทสินค้า
+    itemNumber: "",   //* หมายเลขสินค้า
+    vendorItemId: "",    //*รหัสสินค้าผู้ขาย 
+    itemDescription: "",   //* อธิบาย
     price: "",
     category: "",
-    subcategory: "",
+    subcategory: "",   //*จัดเซต 
     specICT: false,
     specifications: [{ name: "", description: "" }],
     images: [],
@@ -317,4 +317,4 @@ const AddProductPage = () => {
   );
 };
 
-export default AddProductPage;
+export default AddProductPage2;
