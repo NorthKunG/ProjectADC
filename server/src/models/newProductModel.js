@@ -13,7 +13,8 @@ const productSchema = new mongoose.Schema({
     subcategory: { type: String, enum: ['Home', 'Factory'], default: null },
     specICT: { type: Boolean, required: [true, 'จำเป็นต้องกำหนดว่าเป็น ICT หรือไม่'], default: false },
     specifications: [{ name: { type: String }, description: { type: String } }],
-    images: [{ fileName: { type: String } }]
+    images: [{ fileName: { type: String } }],
+    status: { type: String, required: [true, 'จำเป็นต้องระบุสถานะของสินค้า'], enum: ['มีสินค้า', 'สินค้าหมด', 'สินค้าใหม่', 'โปรโมชั่น'], default: 'มีสินค้า' }
 });
 
 // ส่งออกโมเดลสินค้า
