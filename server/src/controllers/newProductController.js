@@ -151,7 +151,6 @@ const updateProduct = async (req, res) => {
     });
 };
 
-
 // ระบบอัปโหลดข้อมูลผ่านไฟล์ .json
 const uploadFile = async (req, res) => {
     uploadJson.single('file')(req, res, async (error) => {
