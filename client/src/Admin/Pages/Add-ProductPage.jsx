@@ -1,6 +1,7 @@
 import LogoADD from "../../assets/Image/addProduct.png";
 import { useState } from "react";
 import AdminLayout from "../Layouts/AdminLayout";
+import Type from "../Components/Type"
 
 
 export default function AddProductForm() {
@@ -61,7 +62,7 @@ export default function AddProductForm() {
   };
 
   {/* ลบรายการสเปคสินค้า*/}
-  const [productType, setProductType] = useState("สินค้า");
+  // const [productType, setProductType] = useState("สินค้า");
 
   {/* ลบรายการสเปคสินค้า*/}
   const removeSpecField = (index) => {
@@ -73,8 +74,9 @@ export default function AddProductForm() {
   return (
       <AdminLayout>
        <div className="w-full max-w-full mx-auto rounded-t-2xl shadow-2xl bg-white overflow-hidden">
+        <Type/>
                     {/* ส่วนหัว */}
-                    <div className="w-full bg-[#007bff] text-white p-5 flex items-center gap-4 justify-start">
+                    {/* <div className="w-full bg-[#007bff] text-white p-5 flex items-center gap-4 justify-start">
                       <img
                         src={LogoADD}
                         alt="เพิ่มข้อมูลสินค้า"
@@ -82,9 +84,9 @@ export default function AddProductForm() {
                       />
                       <h2 className="text-2xl sm:text-3xl font-bold">เพิ่มข้อมูลสินค้า</h2>
                     </div>
-          
+           */}
                     {/* ส่วนเลือกประเภทสินค้า */}
-                    <div className="bg-gray-100 p-6 shadow-md w-full">
+                    {/* <div className="bg-gray-100 p-6 shadow-md w-full">
                       <h3 className="font-semibold text-black mb-4 text-xl sm:text-2xl">ประเภทสินค้า</h3>
                       <div className="flex flex-col sm:flex-row gap-4 w-full">
                         {["สินค้า", "โปรโมชั่นแพ็กเกจ"].map((type) => (
@@ -106,7 +108,7 @@ export default function AddProductForm() {
                           </button>
                         ))}
                       </div>
-                    </div>
+                    </div> */}
   
            {/* form*/}
         <div className="max-w-full mx-auto p-6 bg-white rounded shadow-lg ">

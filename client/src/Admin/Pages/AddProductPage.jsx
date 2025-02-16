@@ -1,371 +1,303 @@
-import LogoADD from "../../assets/Image/addProduct.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "../Layouts/AdminLayout";
-import Type from "./Type"
+import Swal from "sweetalert2";
+import TypePage from "../Components/Type"
 
+const AddProductPage = () => {
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token") || "";
 
-export default function AddProductForm() {
-  const [product, setProduct] = useState({
-    name: "",
-    sku: "",
-    category: "",
+  const [formData, setFormData] = useState({
     brand: "",
-    description: "",
-    ictStandard: false,
-    images: [],
-    specs: [""],
+    cscode: "",
+    itemNumber: "",
+    vendorItemId: "",
+    itemDescription: "",
     price: "",
-    status: "มีสินค้า",
+    category: "",
+    subcategory: "",
+    specICT: false,
+    specifications: [{ name: "", description: "" }],
+    images: [],
   });
+
+  const [brands, setBrands] = useState([]);
+  const [cscodes, setCSCodes] = useState([]);
+  const [previewImages, setPreviewImages] = useState([]);
+
+  useEffect(() => {
+    if (!token) navigate("/loginPage");
+
+    const fetchData = async () => {
+      try {
+        const brandRes = await axios.get("http://localhost:3000/api/brands", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setBrands(brandRes.data.brands);
+
+        const cscodeRes = await axios.get("http://localhost:3000/api/cscodes", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCSCodes(cscodeRes.data.CSCodes);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [token, navigate]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setProduct((prev) => ({
-      ...prev,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const handleSpecChange = (index, value) => {
-    const newSpecs = [...product.specs];
-    newSpecs[index] = value;
-    setProduct((prev) => ({ ...prev, specs: newSpecs }));
-  };
-
-  const addSpecField = () => {
-    setProduct((prev) => ({ ...prev, specs: [...prev.specs, ""] }));
-  };
-
-  {/* ส่วนอัพโหลดรูป*/}
-  const [images, setImages] = useState([null, null, null, null]);
-
-  const handleImageChange = async (event, index) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      alert("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น");
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 5) {
+      Swal.fire("❌ อัปโหลดได้สูงสุด 5 รูป");
       return;
     }
+    setFormData((prevData) => ({ ...prevData, images: files }));
+    setPreviewImages(files.map((file) => URL.createObjectURL(file)));
+  };
 
-    // สร้าง Object URL
-    const objectUrl = URL.createObjectURL(file);
-    setImages((prevImages) => {
-      const newImages = [...prevImages];
-      newImages[index] = objectUrl;
-      return newImages;
+  const handleSpecificationChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedSpecifications = [...formData.specifications];
+    updatedSpecifications[index][name] = value;
+    setFormData((prevData) => ({
+      ...prevData,
+      specifications: updatedSpecifications,
+    }));
+  };
+
+  const addSpecification = () => {
+    setFormData((prevData) => ({
+      ...prevData,
+      specifications: [...prevData.specifications, { name: "", description: "" }],
+    }));
+  };
+
+  const removeSpecification = (index) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      specifications: prevData.specifications.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formDataToSend = new FormData();
+
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key === "images") {
+        value.forEach((file) => formDataToSend.append("images", file));
+      } else if (key === "specifications") {
+        formDataToSend.append("specifications", JSON.stringify(value));
+      } else {
+        formDataToSend.append(key, value);
+      }
     });
+
+    try {
+      const response = await axios.post("http://localhost:3000/api/newProducts", formDataToSend, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    
+      if (response.status === 201) {
+        Swal.fire({
+          icon: "success",
+          title: "สำเร็จ",
+          text: response.data.message,
+          showConfirmButton: false,
+          timer: 1500,
+        }).then(() => {
+          window.location.reload();
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "เกิดข้อผิดพลาด",
+          text: response.data.message,
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "เกิดข้อผิดพลาดในการเชื่อมต่อ",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    }
   };
-
-  const handleClearImages = () => {
-    setImages([null, null, null, null]);
-  };
-
-  {/* ลบรายการสเปคสินค้า*/}
-  // const [productType, setProductType] = useState("สินค้า");
-
-  {/* ลบรายการสเปคสินค้า*/}
-  const removeSpecField = (index) => {
-    const newSpecs = [...product.specs];
-    newSpecs.splice(index, 1); // ลบ 1 รายการตาม index ที่เลือก
-    setProduct({ ...product, specs: newSpecs }); // อัปเดต state
-  };
-
   return (
-      <AdminLayout>
-       <div className="w-full max-w-full mx-auto rounded-t-2xl shadow-2xl bg-white overflow-hidden">
-        <Type/>
-                    {/* ส่วนหัว */}
-                    {/* <div className="w-full bg-[#007bff] text-white p-5 flex items-center gap-4 justify-start">
-                      <img
-                        src={LogoADD}
-                        alt="เพิ่มข้อมูลสินค้า"
-                        className="h-12 w-auto object-cover cursor-pointer"
-                      />
-                      <h2 className="text-2xl sm:text-3xl font-bold">เพิ่มข้อมูลสินค้า</h2>
-                    </div>
-           */}
-                    {/* ส่วนเลือกประเภทสินค้า */}
-                    {/* <div className="bg-gray-100 p-6 shadow-md w-full">
-                      <h3 className="font-semibold text-black mb-4 text-xl sm:text-2xl">ประเภทสินค้า</h3>
-                      <div className="flex flex-col sm:flex-row gap-4 w-full">
-                        {["สินค้า", "โปรโมชั่นแพ็กเกจ"].map((type) => (
-                          <button
-                            key={type}
-                            onClick={() => setProductType(type)}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-lg border transition-all w-full text-center justify-center shadow-md text-lg sm:text-xl ${
-                              productType === type ? "bg-white text-blue-600 font-bold border-blue-600" : "bg-gray-200 text-gray-700 border-gray-300"
-                            }`}
-                          >
-                            <div
-                              className={`w-5 h-5 flex items-center justify-center border rounded-full ${
-                                productType === type ? "bg-blue-600 border-blue-600" : "border-gray-500 bg-gray-500"
-                              }`}
-                            >
-                              <div className={`${productType === type ? "w-2.5 h-2.5 bg-white rounded-full" : "w-2.5 h-2.5 bg-white rounded-full"}`}></div>
-                            </div>
-                            {type}
-                          </button>
-                        ))}
-                      </div>
-                    </div> */}
-  
-           {/* form*/}
-        <div className="max-w-full mx-auto p-6 bg-white rounded shadow-lg ">
-          <h2 className="text-2xl font-bold mb-4">ข้อมูลสินค้า</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {/* ชื่อสินค้า */}
-            <div>
-              <label className="font-semibold block mb-2">ชื่อสินค้า :</label>
-              <input
-                type="text"
-                name="name"
-                value={product.name}
-                onChange={handleChange}
-                placeholder="ระบุชื่อสินค้า"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
-              />
-            </div>
-
-            {/* หมายเลขสินค้า */}
-            <div>
-              <label className="font-semibold block mb-2">
-                หมายเลขสินค้า :
-              </label>
-              <input
-                type="text"
-                name="sku"
-                value={product.sku}
-                onChange={handleChange}
-                placeholder="ระบุหมายเลขสินค้า"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
-              />
-            </div>
-
-            {/* ประเภทสินค้า */}
-            <div>
-              <label className="font-semibold block mb-2">ประเภทสินค้า :</label>
-              <select
-                name="category"
-                value={product.category}
-                onChange={handleChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
-              >
-                <option value="">เลือกประเภทสินค้า</option>
-                <option value="electronics">อิเล็กทรอนิกส์</option>
-                <option value="fashion">แฟชั่น</option>
-              </select>
-            </div>
-
-            {/* แบรนด์สินค้า */}
-            <div>
-              <label className="font-semibold block mb-2">แบรนด์สินค้า :</label>
-              <select
-                name="brand"
-                value={product.brand}
-                onChange={handleChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
-              >
-                <option value="">เลือกแบรนด์</option>
-                <option value="brand1">แบรนด์ 1</option>
-                <option value="brand2">แบรนด์ 2</option>
-              </select>
-            </div>
-
-            {/* รายละเอียดสินค้า */}
-            <div className="col-span-2">
-              <label className="font-semibold block mb-2">
-                รายละเอียดสินค้า :
-              </label>
-              <textarea
-                name="description"
-                value={product.description}
-                onChange={handleChange}
-                placeholder="ระบุรายละเอียดสินค้า"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
-              ></textarea>
-            </div>
-
-            {/* มาตราฐาน ICT */}
-            <div className="col-span-2 flex items-center gap-3">
-              <input
-                type="checkbox"
-                name="ictStandard"
-                checked={product.ictStandard}
-                onChange={handleChange}
-                className="w-6 h-6 border-2 border-gray-400 rounded-md"
-              />
-              <label className="font-semibold text-lg cursor-pointer">
-                เป็น SPEC ICT
-              </label>
-            </div>
+    <AdminLayout>
+      <TypePage/>
+      <form onSubmit={handleSubmit} className="max-w-full mx-auto p-6 bg-white rounded shadow-lg">
+        <h2 className="text-2xl font-bold mb-4">ข้อมูลสินค้า</h2>
+        <div className="grid grid-cols-2 gap-4">
+          {/* 1. แบรนด์ */}
+          <div>
+            <label className="font-semibold block mb-2">แบรนด์ :</label>
+            <select name="brand" value={formData.brand} onChange={handleChange} className="w-full p-3 border rounded-lg" required>
+              <option value="">เลือกแบรนด์</option>
+              {brands.map((b) => (
+                <option key={b.id} value={b.name}>{b.name}</option>
+              ))}
+            </select>
           </div>
 
-          <h3 className="text-xl font-bold mt-6">รูปสินค้า</h3>
+          {/* 2. CSCode */}
+          <div>
+            <label className="font-semibold block mb-2">CSCode :</label>
+            <select name="cscode" value={formData.cscode} onChange={handleChange} className="w-full p-3 border rounded-lg" required>
+              <option value="">เลือก CSCode</option>
+              {cscodes.map((c) => (
+                <option key={c.id} value={c.code}>{c.description} ({c.code})</option>
+              ))}
+            </select>
+          </div>
+
+          {/* 3. หมวดหมู่ */}
+          <div>
+            <label className="font-semibold block mb-2">หมวดหมู่สินค้า :</label>
+            <select name="category" value={formData.category} onChange={handleChange} className="w-full p-3 border rounded-lg" required>
+              <option value="">เลือกหมวดหมู่</option>
+              <option value="Network">Network</option>
+              <option value="IOT">IOT</option>
+              <option value="Solar Cell">Solar Cell</option>
+            </select>
+          </div>
+
+          {/* 4. หมวดหมู่ย่อย */}
+          <div>
+            <label className="font-semibold block mb-2">หมวดหมู่ย่อย :</label>
+            <select name="subcategory" value={formData.subcategory} onChange={handleChange} className="w-full p-3 border rounded-lg">
+              <option value="">เลือกหมวดหมู่ย่อย</option>
+              <option value="Home">Home</option>
+              <option value="Factory">Factory</option>
+            </select>
+          </div>
+
+          {/* 5. หมายเลขสินค้า */}
+          <div>
+            <label className="font-semibold block mb-2">หมายเลขสินค้า :</label>
+            <input type="text" name="itemNumber" value={formData.itemNumber} onChange={handleChange} className="w-full p-3 border rounded-lg" required />
+          </div>
+
+          {/* 6. รหัสสินค้าผู้ขาย */}
+          <div>
+            <label className="font-semibold block mb-2">รหัสสินค้าผู้ขาย :</label>
+            <input type="text" name="vendorItemId" value={formData.vendorItemId} onChange={handleChange} className="w-full p-3 border rounded-lg" />
+          </div>
+
+          {/* 7. มาตรฐาน ICT */}
+          <div className="col-span-2 flex items-center gap-3">
+            <input type="checkbox" name="specICT" checked={formData.specICT} onChange={handleChange} className="w-6 h-6 border-2 border-gray-400 rounded-md" />
+            <label className="font-semibold text-lg cursor-pointer">เป็น SPEC ICT</label>
+          </div>
+        </div>
+
+               {/* 8. อัปโหลดรูปสินค้า */}
+        <div className="mt-6">
+          <h3 className="text-xl font-bold mb-2">รูปสินค้า</h3>
           <div className="flex flex-col items-center gap-6 p-1 py-5 bg-gray-100 rounded-2xl">
-            {/* รูปใหญ่ตรงกลาง */}
+            {/* 🔹 รูปใหญ่ตรงกลาง */}
             <div className="flex justify-center">
               <label className="w-48 h-48 border-2 border-dashed bg-white border-blue-400 flex items-center justify-center cursor-pointer rounded-lg overflow-hidden">
-                {images[0] ? (
-                  <img
-                    src={images[0]}
-                    alt="Uploaded"
-                    className="w-full h-full object-cover"
-                  />
+                {previewImages[0] ? (
+                  <img src={previewImages[0]} alt="Uploaded" className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-9xl text-blue-500">+</span>
                 )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleImageChange(e, 0)}
-                />
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, 0)} />
               </label>
             </div>
 
-            {/* 3 รูปด้านล่าง อยู่ตรงกลาง */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 w-full max-w-md justify-center">
+            {/* 🔹 3 รูปเล็กด้านล่าง (อยู่ตรงกลาง) */}
+            <div className="grid grid-cols-3 gap-4 w-full max-w-md justify-center">
               {[1, 2, 3].map((index) => (
-                <label
-                  key={index}
-                  className=" border-2 border-dashed bg-white border-blue-400 flex items-center justify-center cursor-pointer rounded-lg overflow-hidden 
-                  w-32 h-32 sm:w-28 sm:h-28 md:w-36 md:h-36 lg:w-38 lg:h-40"
-                >
-                  {images[index] ? (
-                    <img
-                      src={images[index]}
-                      alt="Uploaded"
-                      className="w-full h-full object-cover"
-                    />
+                <label key={index} className="border-2 border-dashed bg-white border-blue-400 flex items-center justify-center cursor-pointer rounded-lg overflow-hidden w-28 h-28 sm:w-32 sm:h-32">
+                  {previewImages[index] ? (
+                    <img src={previewImages[index]} alt="Uploaded" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-7xl text-blue-500">+</span>
+                    <span className="text-5xl text-blue-500">+</span>
                   )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleImageChange(e, index)}
-                  />
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, index)} />
                 </label>
               ))}
             </div>
 
+            {/* 🔹 ปุ่มล้างรูป */}
             <div className="w-full flex justify-end">
-              <button
-                onClick={handleClearImages}
-                className="bg-red-500 text-white rounded hover:bg-red-600 transition-all
-    px-5 py-3 lg:px-4 lg:py-2 md:px-3 md:py-1 sm:px-1 sm:py-1
-    text-lg lg:text-base md:text-sm sm:text-xs"
-              >
+              <button type="button" onClick={() => { setPreviewImages([]); setFormData({ ...formData, images: [] }); }} className="bg-red-500 text-white rounded hover:bg-red-600 transition-all px-5 py-3">
                 ล้างรูปที่อัปโหลด
               </button>
             </div>
           </div>
+        </div>
 
-          {/* สเปคสินค้า */}
-          <div className="col-span-2">
-            <h3 className="text-xl font-bold mt-6">สเปคสินค้า</h3>
-            {product.specs.map((spec, index) => (
-              <div key={index} className="flex items-center gap-2 mb-2">
-                <input
-                  type="text"
-                  value={spec}
-                  onChange={(e) => handleSpecChange(index, e.target.value)}
-                  placeholder="ระบุรายละเอียดสเปคสินค้า"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
-                />
-                {/* ปุ่มเพิ่ม (+) */}
-                {index === product.specs.length - 1 && (
-                  <button
-                    onClick={addSpecField}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-                  >
-                    +
-                  </button>
-                )}
-                {/* ปุ่มลบ (-) แสดงทุกแถว แต่ต้องมีอย่างน้อย 1 รายการ */}
-                {product.specs.length > 1 && (
-                  <button
-                    onClick={() => removeSpecField(index)}
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg"
-                  >
-                    -
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
 
-          {/* ราคาสินค้า */}
-          <div className="col-span-2 sm:col-span-1">
-            <label className="font-semibold block mb-2">ราคาสินค้า :</label>
-            <div className="relative max-w-xs">
-              {" "}
-              {/* ปรับขนาดให้ไม่กว้างเกิน */}
-              <input
-                type="number"
-                name="price"
-                value={product.price}
-                onChange={handleChange}
-                placeholder="ระบุราคา"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition pr-12"
-              />
-              <span className="absolute right-3 top-3 text-gray-500">บาท</span>
+        {/* 9. คำอธิบายสินค้า */}
+        <div className="mt-6">
+          <label className="font-semibold block mb-2">คำอธิบายสินค้า :</label>
+          <textarea name="itemDescription" value={formData.itemDescription} onChange={handleChange} placeholder="คำอธิบายสินค้า" className="w-full p-3 border rounded-lg min-h-[100px]"></textarea>
+        </div>
+
+        {/* 10. สเปคสินค้า */}
+        <div className="mt-6">
+          <h3 className="text-xl font-bold mb-2">สเปคสินค้า</h3>
+          {formData.specifications.map((spec, index) => (
+            <div key={index} className="flex items-center gap-2 mb-2">
+              <input type="text" name="name" value={spec.name} onChange={(e) => handleSpecificationChange(index, e)} placeholder="ชื่อสเปค" className="w-1/4 p-2 border rounded-lg text-sm h-11" />
+              <input type="text" name="description" value={spec.description} onChange={(e) => handleSpecificationChange(index, e)} placeholder="รายละเอียด" className="w-2/2 p-2 border rounded-lg text-sm h-11" />
+              <button type="button" onClick={() => removeSpecification(index)} className="px-5 py-2 bg-red-500 text-white rounded-lg text-sm">ลบ</button>
             </div>
-          </div>
+          ))}
+          <button type="button" onClick={addSpecification} className="px-4 py-3 bg-blue-500 text-white rounded-lg text-sm">เพิ่มสเปค</button>
+        </div>
 
-          <h3 className="text-xl font-bold mt-6">สถานะสินค้า</h3>
-          <div className="flex flex-wrap gap-4">
-            {[
-              {
-                label: "มีสินค้า",
-                color: "text-green-600 bg-green-100 border-green-400",
-              },
-              {
-                label: "สินค้าหมด",
-                color: "text-red-600 bg-red-100 border-red-400",
-              },
-              {
-                label: "สินค้าใหม่",
-                color: "text-yellow-600 bg-yellow-100 border-yellow-400",
-              },
-              {
-                label: "โปรโมชั่น",
-                color: "text-blue-600 bg-blue-100 border-blue-400",
-              },
-            ].map(({ label, color }) => (
-              <label
-                key={label}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full border ${color} cursor-pointer`}
-              >
-                <input
-                  type="radio"
-                  name="status"
-                  value={label}
-                  checked={product.status === label}
-                  onChange={handleChange}
-                  className="hidden"
-                />
-                <div className="w-4 h-4 border-2 border-gray-400 rounded-full flex items-center justify-center">
-                  {product.status === label && (
-                    <div className="w-2 h-2 bg-blue-600   rounded-full"></div>
-                  )}
-                </div>
-                <span className="font-semibold">{label}</span>
-              </label>
-            ))}
-          </div>
-
-          <div className="flex justify-end mt-6 gap-4">
-            <button className="px-4 py-2 bg-gray-300 rounded">ยกเลิก</button>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded">
-              บันทึก
-            </button>
+        {/* 11. ราคาสินค้า */}
+        <div className="mt-6 w-1/4">
+          <label className="font-semibold block mb-2">ราคาสินค้า :</label>
+          <div className="flex items-center gap-2 ">
+            <input type="number" name="price" value={formData.price} onChange={handleChange} placeholder="ระบุราคา" className="w-full p-2 border rounded-lg text-sm h-11" />
+            <span className="text-gray-600 text-sm">บาท</span>
           </div>
         </div>
+
+        {/* 12. สถานะสินค้า */}
+        <div className="mt-6">
+          <label className="font-semibold block mb-2">สถานะสินค้า :</label>
+          <select name="status" value={formData.status} onChange={handleChange} className="w-full p-3 border rounded-lg">
+            <option value="มีสินค้า">มีสินค้า</option>
+            <option value="สินค้าหมด">สินค้าหมด</option>
+            <option value="สินค้าใหม่">สินค้าใหม่</option>
+            <option value="โปรโมชั่น">โปรโมชั่น</option>
+          </select>
+        </div> 
+
+
+        {/* ปุ่มบันทึก */}
+        <div className="flex justify-end mt-6 gap-4">
+          <button type="reset" className="px-4 py-2 bg-gray-300 rounded">ยกเลิก</button>
+          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">บันทึก</button>
         </div>
-      </AdminLayout>
-    );
-  }
-  
+      </form>
+    </AdminLayout>
+  );
+};
+
+export default AddProductPage;

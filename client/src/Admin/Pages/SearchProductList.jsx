@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { Search, PlusCircle, Trash2 } from "lucide-react";
 import axios from "axios";
 
 

@@ -5,10 +5,10 @@ import LoginPopup from "./Client/Component/Desktop/Login/Login"; // นำเข
 import DashboardPage from "./Admin/Pages/DashboardPage"; // นำเข้าไฟล์ dashboard.jsx
 import AddProductPage from "./Admin/Pages/AddProductPage"; // นำเข้าไฟล์ AddProduct.jsx
 import LoginPage from "./Client/Component/Desktop/Login/Loginpage"; // นำเข้าไฟล์ Loginpage.jsx
-import Test from "./Admin/Pages/uuuu"; // นำเข้าไฟล์ test.jsx
-import Twse from "./Admin/Pages/AddProductPage2"; // นำเข้าไฟล์ Twse.jsx
-import Uuu from "./Admin/Pages/yyuoo"; // นำเข้าไฟล์ uuu.jsx
-import Addpromotion from "./Admin/Pages/AddPromotion"
+import Test from "./Admin/Pages/test"; // นำเข้าไฟล์ test.jsx
+import Twse from "./Admin/Pages/Twse"; // นำเข้าไฟล์ Twse.jsx
+import Uuu from "./Admin/Pages/uuuu"; // นำเข้าไฟล์ uuu.jsx
+import Addpromotion from "./Admin/Pages/AddPromotionPage"
 
 
 function App() {

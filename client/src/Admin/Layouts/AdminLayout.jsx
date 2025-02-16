@@ -8,7 +8,7 @@ export default function AdminLayout({ children }) {
   const toggleSidebar = () => setIsOpen((prev) => !prev);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-300 dark:bg-gray-300">
+    <div className="flex flex-col min-h-screen bg-gray-300 dark:bg-gray-300 w-full">
       {/* ✅ Header ด้านบน */}
       <Header toggleSidebar={toggleSidebar} />
 
@@ -20,8 +20,8 @@ export default function AdminLayout({ children }) {
         </div>
 
         {/* ✅ Main Content */}
-        <main className="flex-1 ml-0 md:ml-64 p-5 overflow-y-auto py-8">
-          <div className="bg-gray-100 p-2 rounded-2xl shadow-lg"> 
+        <main className="flex-2 ml-0 md:ml-64 p-5 overflow-y-auto py-8">
+          <div className="bg-gray-100 p-2 rounded-2xl shadow-lg w-full max-w-auto"> 
             {children} {/* ✅ Render หน้า AddProductPage ที่นี่ */}
           </div>
         </main>
