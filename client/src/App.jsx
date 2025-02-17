@@ -7,7 +7,7 @@ import AddProductPage from "./Admin/Pages/AddProductPage"; // นำเข้า
 import LoginPage from "./Client/Component/Desktop/Login/Loginpage"; // นำเข้าไฟล์ Loginpage.jsx
 import Test from "./Admin/Pages/test"; // นำเข้าไฟล์ test.jsx
 import Twse from "./Admin/Pages/Twse"; // นำเข้าไฟล์ Twse.jsx
-import Uuu from "./Admin/Pages/uuuu"; // นำเข้าไฟล์ uuu.jsx
+import Uuu from "./Admin/Pages/signup"; // นำเข้าไฟล์ uuu.jsx
 import Addpromotion from "./Admin/Pages/AddPromotionPage"
 
 
