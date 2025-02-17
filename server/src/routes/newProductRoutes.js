@@ -6,6 +6,7 @@ const router = express.Router();
 const newProductController = require('../controllers/newProductController');
 
 // เรียกใช้งาน middleware
+router.get('/filter', newProductController.filterProduct);
 const { adminAuth } = require('../middleware/auth');
 
 // เชื่อมต่อเส้นทาง (Path) กับ ตัวควบคุม (Controller)
