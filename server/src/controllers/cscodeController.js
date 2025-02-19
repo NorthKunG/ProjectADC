@@ -71,32 +71,23 @@ const uploadFileJson = async (req, res) => {
 };
 
 // เพิ่มข้อมูล
-const addCSCode = async (req, res) => {
+const newCSCode = async (req, res) => {
     // รับข้อมูลจาก request body
     const { code, description } = req.body;
 
     try {
-        // ตรวจสอบว่ามีการใส่คำอธิบายหรือไม่
-        if (!description) {
-            const description = '-'
-        }
-
         // ตรวจสอบว่ามี CSCode นี้อยู่แล้วหรือไม่
         const existingCSCode = await CSCode.findOne({ code });
-        if (existingCSCode) {
-            return res.status(400).json({ message: "CSCode นี้มีอยู่แล้ว" });
-        }
+        if (existingCSCode) return res.status(400).json({ message: "CSCode นี้มีอยู่แล้ว" });
 
         // สร้าง CSCode ใหม่
-        const addedCSCode = new CSCode({ code, description });
+        const newCSCode = new CSCode({ code, description });
 
         // บันทึก CSCode ใหม่
-        const savedCSCode = await addedCSCode.save();
+        const savedCSCode = await newCSCode.save();
 
         return res.status(200).json({ message: 'เพิ่มข้อมูลใหม่ลงในระบบเรียบร้อยแล้ว', savedCSCode });
-    } catch (error) {
-        return res.status(400).json({ message: error.message });
-    }
+    } catch (error) { return res.status(400).json({ message: error.message }); }
 };
 
 // ดูข้อมูลทั้งหมด
@@ -115,9 +106,67 @@ const getCSCodes = async (req, res) => {
     }
 };
 
+// ดูข้อมูลตาม ID
+const getCSCodeById = async (req, res) => {
+    const { id } = req.params; // รับ ID จาก request params
+
+    try {
+        // ค้นหา CSCode ตาม ID
+        const CSCodeData = await CSCode.findById(id);
+
+        // ตรวจสอบว่าพบข้อมูลหรือไม่
+        if (!CSCodeData) {
+            return res.status(404).json({ message: 'ไม่พบข้อมูล CSCode ที่ต้องการ' });
+        }
+        return res.status(200).json({ CSCodeData });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+// อัพเดตข้อมูล CSCode
+const updateCSCode = async (req, res) => {
+    const { id } = req.params; // รับ ID จาก request params
+    const { code, description } = req.body; // รับข้อมูลจาก request body
+
+    try {
+        // ค้นหาและอัพเดต CSCode ตาม ID
+        const updatedCSCode = await CSCode.findByIdAndUpdate(id, { code, description }, { new: true });
+
+        // ตรวจสอบว่าพบข้อมูลหรือไม่
+        if (!updatedCSCode) {
+            return res.status(404).json({ message: 'ไม่พบข้อมูล CSCode ที่ต้องการอัพเดต' });
+        }
+        return res.status(200).json({ message: 'ข้อมูล CSCode ถูกอัพเดตเรียบร้อยแล้ว', updatedCSCode });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+// ลบข้อมูล CSCode
+const deleteCSCode = async (req, res) => {
+    const { id } = req.params; // รับ ID จาก request params
+
+    try {
+        // ค้นหาข้อมูล CSCode และลบ
+        const deletedCSCode = await CSCode.findByIdAndDelete(id);
+
+        // ตรวจสอบว่าพบข้อมูลหรือไม่
+        if (!deletedCSCode) {
+            return res.status(404).json({ message: 'ไม่พบข้อมูล CSCode ที่ต้องการลบ' });
+        }
+        return res.status(200).json({ message: 'ข้อมูล CSCode ถูกลบเรียบร้อยแล้ว' });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
 // ส่งออก API
 module.exports = {
     uploadFileJson,
-    addCSCode,
-    getCSCodes
+    newCSCode,
+    getCSCodes,
+    getCSCodeById,
+    updateCSCode,
+    deleteCSCode
 }
