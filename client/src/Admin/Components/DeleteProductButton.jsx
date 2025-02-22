@@ -57,8 +57,12 @@ export default function DeleteProductButton({ productId }) {
   };
 
   return (
-    <button onClick={handleDelete} className="text-red-500 hover:text-red-700">
-      <Trash2 size={18} />
+    <button
+      onClick={handleDelete}
+      className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+      title="ลบโปรโมชั่น"
+    >
+      🗑️ ลบ
     </button>
   );
 }

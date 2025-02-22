@@ -1,4 +1,4 @@
-import LogoADD from "../../assets/Image/addProduct.png";
+
 import { useState } from "react";
 import AdminLayout from "../Layouts/AdminLayout";
 import Type from "../Components/Type"

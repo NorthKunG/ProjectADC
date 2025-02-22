@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import AdminLayout from "../Layouts/AdminLayout";
 import StatsCards from "../Components/StatsCards";
 import LatestProductsTable from "../Components/LatestProductsTable";
+import PromotionTable from "../Components/PromotionTable"
+
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -22,6 +24,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
           <StatsCards />
           <LatestProductsTable/>
+          <PromotionTable/>
         </div>
        
     </AdminLayout>
