@@ -96,31 +96,59 @@ const addedPromotion = async (req, res) => {
     });
 };
 
-// แสดงโปรโมชั่นทั้งหมด
+// ✅ แสดงโปรโมชั่นทั้งหมดพร้อมชื่อสินค้า
+// ✅ เรียงลำดับโดยใช้ _id (เวลาที่ฝังอยู่ใน ObjectId)
 const getPromotions = async (req, res) => {
+    const { sort = "latest", page = 1, limit = 10 } = req.query;
+  
+    const sortOrder = sort === "oldest" ? 1 : -1;  // ✅ latest = -1 (ใหม่ไปเก่า), oldest = 1 (เก่าไปใหม่)
+    const skip = (Number(page) - 1) * Number(limit);  // ✅ จำนวนข้อมูลที่ต้องข้าม
+  
     try {
-        // เรียกดูข้อมูลโปรโมชั่นทั้งหมด
-        const promotions = await Promotion.find().populate('items.productId');
-        if (promotions.length === 0) return res.status(500).json({ message: 'ไม่พบโปรโมชั่น' });
-        return res.status(200).json({ count: promotions.length, promotions });
-    } catch (error) { return res.status(500).json({ message: error.message }); }
-};
+      const totalCount = await Promotion.countDocuments(); // ✅ นับจำนวนทั้งหมดในฐานข้อมูล
+  
+      const promotions = await Promotion.find()
+        .sort({ _id: sortOrder })  // ✅ ใช้ _id ในการเรียงลำดับ
+        .skip(skip)                // ✅ ข้ามข้อมูลตามหน้า
+        .limit(Number(limit))      // ✅ จำกัดจำนวนข้อมูลต่อหน้า
+        .populate({
+          path: 'items.productId',
+          ref: 'NewProduct',
+          select: 'itemDescription price images',
+        });
+  
+      if (!promotions.length) {
+        return res.status(404).json({ message: 'ไม่พบโปรโมชั่น' });
+      }
+  
+      return res.status(200).json({
+        count: totalCount,  // ✅ ส่งจำนวนทั้งหมดกลับไปด้วย
+        promotions,
+      });
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  };
+  
 
-// แสดงรายละเอียดโปรโมชั่นโดยใช้ Id
+// ✅ แสดงรายละเอียดโปรโมชั่นตาม ID พร้อมชื่อสินค้า
 const getPromontion = async (req, res) => {
-    // รับข้อมูล Id จาก request params
     const { id } = req.params;
 
     try {
-        // เรียกดูข้อมูลโปรโมชั่น
-        const promotion = await Promotion.findById(id).populate('items.productId');;
-        // ตรวจสอบว่ามีโปรโมชั่นนี้หรือไม่
+        const promotion = await Promotion.findById(id).populate({
+            path: 'items.productId',
+            ref: 'NewProduct', // ✅ ใช้ ref ให้ตรงกับโมเดล NewProduct
+            select: 'itemDescription price images', // ✅ ดึงชื่อสินค้า
+        });
+
         if (!promotion) {
-            return res.status(400).json({ message: 'ไม่พบโปรโมชั่นนี้' });
+            return res.status(404).json({ message: 'ไม่พบโปรโมชั่นนี้' });
         }
+
         return res.status(200).json(promotion);
     } catch (error) {
-        return res.status(400).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 };
 
@@ -139,6 +167,27 @@ const deletePromotion = async (req, res) => {
         return res.status(200).json({ message: 'ลบโปรโมชั่นนี้ออกจากระบบแล้ว', deletePromotion });
     } catch (error) { return res.status(400).json({ message: error.message }); }
 };
+
+// ลบรายการสินค้าโปรโมชั่น
+const removeProductFromPromotion = async (req, res) => {
+    const { id } = req.params; // promotionId
+    const { productId } = req.body;
+  
+    try {
+      const promotion = await Promotion.findById(id);
+      if (!promotion) return res.status(404).json({ message: "ไม่พบโปรโมชั่นนี้" });
+  
+      // ลบสินค้าออกจากโปรโมชั่น
+      promotion.items = promotion.items.filter((item) => item.productId.toString() !== productId);
+  
+      await promotion.save();
+  
+      res.status(200).json({ message: "✅ ลบสินค้าออกจากโปรโมชั่นสำเร็จ", promotion });
+    } catch (error) {
+      res.status(500).json({ message: "❌ ลบสินค้าไม่สำเร็จ", error: error.message });
+    }
+  };
+  
 
 // แก้ไขโปรโมชั่น
 const updatePromotion = async (req, res) => {
@@ -235,5 +284,6 @@ module.exports = {
     getPromontion,
     deletePromotion,
     updatePromotion,
-    addProductToPromotion
+    addProductToPromotion,
+    removeProductFromPromotion,
 }

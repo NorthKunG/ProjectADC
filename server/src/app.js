@@ -49,6 +49,7 @@ app.use('/api/newProducts', newProductRoutes);
 
 // ให้เซิร์ฟเวอร์ serve ไฟล์จากโฟลเดอร์ uploads/products
 app.use('/uploads/products', express.static(path.join(__dirname, 'uploads/products')));
+app.use('/uploads/promotion', express.static(path.join(__dirname, 'uploads/promotion')));
 
 app.use((err, req, res, next) => {
     res.status(err.status || 500).json({

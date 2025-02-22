@@ -17,6 +17,7 @@ router.get("/:id", promotionController.getPromontion);
 router.delete("/:id", promotionController.deletePromotion);
 router.put("/:id", promotionController.updatePromotion);
 router.post("/:id", promotionController.addProductToPromotion);
+router.put("/:id/remove-product", promotionController.removeProductFromPromotion);
 
 // Export a route
 module.exports = router;
