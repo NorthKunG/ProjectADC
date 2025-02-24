@@ -4,17 +4,17 @@ import BrandSlider from "./BrandSlider";
 const images = [
   {
     id: 1,
-    src: "https://scontent.fphs2-1.fna.fbcdn.net/v/t39.30808-6/469571180_578163058127906_3728558406565776001_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=cc71e4&_nc_eui2=AeG2NqSNaBJYYJ2l-Wm_ka-zFpiUxohQ7BkWmJTGiFDsGYZ0CB6DlN-uzq60PQrG3mwvQYzCwtbA1wl4C_qm3FMo&_nc_ohc=PEupjhNFmOUQ7kNvgF5O3PG&_nc_oc=AdicZW_U-DN8PjgiadDbUveYUCIVXpkeEAcojMfotxKDp2qWLATRapRf1QuNKMQTBZWcB0eBC3EZ90glJ2TlVupz&_nc_zt=23&_nc_ht=scontent.fphs2-1.fna&_nc_gid=AXZKbt3pY0pkVIXTEYLlUUt&oh=00_AYBy8b4L1l8AP_Qwq_H9vZyhL8nyQrAE0dQIkPE9hIbuMg&oe=679F2B58",
+    src: "https://scontent.fphs2-1.fna.fbcdn.net/v/t39.30808-6/469571180_578163058127906_3728558406565776001_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=cc71e4&_nc_eui2=AeG2NqSNaBJYYJ2l-Wm_ka-zFpiUxohQ7BkWmJTGiFDsGYZ0CB6DlN-uzq60PQrG3mwvQYzCwtbA1wl4C_qm3FMo&_nc_ohc=G-fNSWbRRDMQ7kNvgGnGj5D&_nc_oc=AdhAolRfedzxirgScIRm9zTKRiMcpJt_iRY3RBATdZnDYUpQt8NzYvJ9r4l5mgAf78EgII7XffQGooiXNph07cXP&_nc_zt=23&_nc_ht=scontent.fphs2-1.fna&_nc_gid=AXBSJZStjDqehziziVYFxy9&oh=00_AYCZVr5ltCIRvAx4IOY0gFzizLm1cB6cOQjUsaRn_o-LvA&oe=67C28B98",
     alt: "Slide 1",
   },
   {
     id: 2,
-    src: "https://scontent.fbkk9-3.fna.fbcdn.net/v/t39.30808-6/453845854_492421013368778_2095123251518765907_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=86c6b0&_nc_eui2=AeEQOeqTACp2b6aY6U64G9mWE1GZYgkgtOcTUZliCSC054BnH6Ccyn2ycy8qHf2QHxXdfWvkx4Gbp8EWFnqodHb7&_nc_ohc=29yuuWoZxgcQ7kNvgH3uBg6&_nc_oc=Adj6QagrdZHmg-2-7ywj0jWOMuADCCUqf-zeHuRj7OqslONJbfUZtxUdbfIy3JKqSDE&_nc_zt=23&_nc_ht=scontent.fbkk9-3.fna&_nc_gid=AmqlvE5ARIHpOvVtZzMQLad&oh=00_AYBBwzHxHzuqn5g1-cxX7LiIeoaCar1gougeAkL6V1Wl2Q&oe=679F84DC",
+    src: "https://scontent.fphs2-1.fna.fbcdn.net/v/t39.30808-6/469571180_578163058127906_3728558406565776001_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=cc71e4&_nc_eui2=AeG2NqSNaBJYYJ2l-Wm_ka-zFpiUxohQ7BkWmJTGiFDsGYZ0CB6DlN-uzq60PQrG3mwvQYzCwtbA1wl4C_qm3FMo&_nc_ohc=G-fNSWbRRDMQ7kNvgGnGj5D&_nc_oc=AdhAolRfedzxirgScIRm9zTKRiMcpJt_iRY3RBATdZnDYUpQt8NzYvJ9r4l5mgAf78EgII7XffQGooiXNph07cXP&_nc_zt=23&_nc_ht=scontent.fphs2-1.fna&_nc_gid=AXBSJZStjDqehziziVYFxy9&oh=00_AYCZVr5ltCIRvAx4IOY0gFzizLm1cB6cOQjUsaRn_o-LvA&oe=67C28B98",
     alt: "Slide 2",
   },
   {
     id: 3,
-    src: "https://scontent.fbkk8-2.fna.fbcdn.net/v/t39.30808-6/475188337_612423941368484_6158204649151793185_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeHYHLzRHEvMFX0IjB6qDXft1aEhsi8nw23VoSGyLyfDbedoo-rJZJihYE7T4R9JbvKdxOZOmKV08ov5PTVfjOZO&_nc_ohc=Z5XylcTNwH8Q7kNvgEpZaTr&_nc_oc=AdiLYHz727pOa2RxXE8pn-_sxzA49D3jdJsHr_Ynn1b7zZ0nhaJUo9ixnFq0D_CAVC0&_nc_zt=23&_nc_ht=scontent.fbkk8-2.fna&_nc_gid=ATQnvQPFPeMDPKTmEH_nQlM&oh=00_AYBLFG4vdIJUu2kdWX7triyV_nASEqSCG0uciPun3Y0qtA&oe=679F6C7E",
+    src: "https://scontent.fphs2-1.fna.fbcdn.net/v/t39.30808-6/469571180_578163058127906_3728558406565776001_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=cc71e4&_nc_eui2=AeG2NqSNaBJYYJ2l-Wm_ka-zFpiUxohQ7BkWmJTGiFDsGYZ0CB6DlN-uzq60PQrG3mwvQYzCwtbA1wl4C_qm3FMo&_nc_ohc=G-fNSWbRRDMQ7kNvgGnGj5D&_nc_oc=AdhAolRfedzxirgScIRm9zTKRiMcpJt_iRY3RBATdZnDYUpQt8NzYvJ9r4l5mgAf78EgII7XffQGooiXNph07cXP&_nc_zt=23&_nc_ht=scontent.fphs2-1.fna&_nc_gid=AXBSJZStjDqehziziVYFxy9&oh=00_AYCZVr5ltCIRvAx4IOY0gFzizLm1cB6cOQjUsaRn_o-LvA&oe=67C28B98",
     alt: "Slide 3",
     caption: "",
   },

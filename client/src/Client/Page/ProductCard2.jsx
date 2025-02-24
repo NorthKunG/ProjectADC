@@ -1,60 +1,140 @@
+import { useState, useEffect } from "react";
 import { Repeat } from "lucide-react";
 import PropTypes from "prop-types";
+import { useNavigate, Link } from "react-router-dom"; // ใช้ Link จาก React Router
 
-export default function ProductCard({ product }) {
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+export default function ProductCard({ product = {} }) {
+  const navigate = useNavigate();
+  const [imageStatus, setImageStatus] = useState("loading");
+
+  const hasImage = product?.images?.length > 0 && product.images[0]?.fileName;
+  const imageUrl = hasImage
+    ? `${BASE_URL}/uploads/products/${product.images[0].fileName}`
+    : null;
+
+  const token = sessionStorage.getItem("token");
+
+  useEffect(() => {
+    if (hasImage) {
+      const timer = setTimeout(() => {
+        if (imageStatus === "loading") setImageStatus("error");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasImage, imageStatus]);
+
   return (
     <div
-      className="p-4 shadow-2xl rounded-xl bg-white border-2 border-gray-100 
-      w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl
-      h-[450px] sm:h-[400px] md:h-[380px] lg:h-[460px] 
-      flex flex-col justify-between">
-      {/* กรอบสินค้า ปรับขนาดให้ Responsive ตามหน้าจอ */}
+      onClick={() => navigate(`/products/${product._id}`)}
+      className="
+        relative p-4 shadow-lg rounded-2xl bg-white border border-gray-200
+        w-full sm:w-[320px] md:w-[380px] lg:w-[420px] xl:w-[460px] 
+        h-[540px] sm:h-[500px] md:h-[520px] lg:h-[590px] xl:h-[560px]
+        flex flex-col justify-between cursor-pointer hover:shadow-2xl 
+        transition-all duration-300
+      "
+    >
+      {/* ✅ แบรนด์สินค้า + แท็ก ICT */}
+      <div className="flex justify-between items-center mb-2">
+        <p className="text-xs sm:text-sm md:text-base text-gray-500 font-medium truncate max-w-[70%]">
+          {product.brand || "ไม่ระบุแบรนด์"}
+        </p>
 
-      {/* แสดงแบรนด์สินค้า */}
-      <p className="text-xs text-gray-500 font-semibold">
-        {product.brand || "ไม่ระบุแบรนด์"}
-      </p>
+        {product.specICT && (
+          <span
+            className="bg-green-200 text-green-700 font-bold text-sm 
+              px-3 py-1 rounded-lg border border-green-500 shadow-md"
+          >
+            ICT
+          </span>
+        )}
+      </div>
 
-      {/* แสดงรูปสินค้า ถ้าไม่มีให้ใช้ default.jpg */}
-      <img
-        src={product.images?.[0]?.fileName ? `http://localhost:3000/uploads/products/${product.images[0].fileName}` : "/default.jpg"} 
-        alt={product.name || "ไม่มีชื่อสินค้า"}
-        className="w-full h-48 
-        sm:h-36  /* ขนาดสำหรับมือถือ */
-        md:h-34  /* ลดความสูงสำหรับ iPad */
-        lg:h-44  /* ขนาดสำหรับ Desktop */
-        object-contain"
-      />
+      {/* ✅ รูปสินค้า */}
+      <div
+        className="w-full h-[220px] sm:h-[240px] md:h-[250px] lg:h-[260px] 
+        flex justify-center items-center rounded-lg overflow-hidden bg-gray-50 border 
+        border-gray-100 mb-4"
+      >
+        {hasImage && imageStatus !== "error" ? (
+          <img
+            src={imageUrl}
+            alt={product.itemDescription || "ไม่มีชื่อสินค้า"}
+            className="
+              max-w-full max-h-full object-contain
+              transition-transform duration-300 ease-in-out
+              hover:scale-120
+            "
+            onLoad={() => setImageStatus("loaded")}
+            onError={() => setImageStatus("error")}
+          />
+        ) : (
+          <p className="text-center text-gray-400 italic">
+            {hasImage ? "ไม่พบรูปสินค้า" : "ไม่มีรูปสินค้า"}
+          </p>
+        )}
+      </div>
 
-      {/* แสดงชื่อสินค้า */}
-      <p className="text-sm font-semibold mt-2 text-center">
+      {/* ✅ ชื่อสินค้า (ปรับขนาดตามหน้าจอ) */}
+      <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-800 text-start line-clamp-3 px-2 mb-6">
         {product.itemDescription || "ไม่มีชื่อสินค้า"}
       </p>
 
-      {/* แสดงราคาสินค้า */}
-      <p className="text-green-600 font-bold text-lg text-center">
-        ฿{product.price ? product.price.toLocaleString() : "0"}
-      </p>
+      {/* ✅ ราคาสินค้า (แสดงขอกราคา ถ้าไม่มี token) */}
+      {token ? (
+        <p className="text-base sm:text-xl md:text-2xl font-bold text-green-600 text-start mb-6 px-4">
+          {product.price != null
+            ? `${product.price.toLocaleString()} บาท`
+            : "ไม่ระบุราคา"}
+        </p>
+      ) : (
+        <div className="flex justify-center items-center mb-6">
+          <Link
+            to="/loginPage" // เปลี่ยนเป็นเส้นทางที่คุณใช้สำหรับหน้า login
+            className="text-blue-500 font-semibold px-6 py-2 transition-all duration-200
+              hover:text-green-600 hover:scale-105"
+          >
+            เข้าสู่ระบบเพื่อดูราคา
+          </Link>
+        </div>
+      )}
 
-      {/* ปุ่มเปรียบเทียบสินค้า */}
+      {/* ✅ ปุ่มเปรียบเทียบ */}
       <button
-        className="w-full mt-2 flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-2"
-        onClick={() => window.location.href = `/compare?product=${product.name}`}
+        className="
+          w-full flex items-center justify-center gap-2 
+          border-t border-gray-300 text-gray-600 font-medium text-base py-2
+          rounded-b-xl hover:bg-gray-100 hover:shadow-inner transition-all duration-200
+        "
+        onClick={(e) => {
+          e.stopPropagation();
+          navigate(
+            `/compare?product=${encodeURIComponent(
+              product.itemDescription || "unknown"
+            )}`
+          );
+        }}
       >
-        <Repeat size={24} /> เปรียบเทียบ {/* เพิ่มขนาดไอคอน */}
+        <Repeat size={20} strokeWidth={1.5} />
+        <span>เปรียบเทียบ</span>
       </button>
     </div>
   );
 }
 
+// ✅ ตรวจสอบ props
 ProductCard.propTypes = {
   product: PropTypes.shape({
-    brand: PropTypes.string, // แบรนด์สินค้า
-    name: PropTypes.string, // ชื่อสินค้า
-    price: PropTypes.number, // ราคาสินค้า
+    _id: PropTypes.string.isRequired,
+    brand: PropTypes.string,
+    itemDescription: PropTypes.string,
+    price: PropTypes.number,
+    specICT: PropTypes.bool,
     images: PropTypes.arrayOf(
       PropTypes.shape({
-        fileName: PropTypes.string, // ไฟล์รูปภาพสินค้า
+        fileName: PropTypes.string,
       })
     ),
   }),

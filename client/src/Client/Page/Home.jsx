@@ -4,7 +4,7 @@ import NavbarMobile from "../Component/Mobile/Navbar-Mobile/NavbarMobile";
 import ImageSlider from "../Component/Desktop/Promotion and BrandSlider/ImageSlider";
 import LatestProducts2 from "./LatestProducts2";
 import LoginPage from "../Component/Desktop/Login/Login"; // ✅ นำเข้า Pop-up Logi
-import LayoutTest from "./Card Layout"
+import LatestPromotions from "./LatestPromotions"
 
 function Home() {
   const [isLoginOpen, setIsLoginOpen] = useState(false); // ✅ ควบคุม Pop-up Login
@@ -17,7 +17,8 @@ function Home() {
       <NavbarMobile />
       <ImageSlider />
       <LatestProducts2/>
-      {/* <LayoutTest /> */}
+      <LatestPromotions/>
+      
 
     </>
   );

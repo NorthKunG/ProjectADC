@@ -24,7 +24,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           ${isOpen ? "translate-x-0" : "-translate-x-64"} md:translate-x-0`}
       >
         <nav className="space-y-7">
-          <Link to="/dashboard" className="flex items-center gap-2 p-2 rounded hover:bg-blue-600">
+          <Link to="/admin/dashboard" className="flex items-center gap-2 p-2 rounded hover:bg-blue-600">
             <Home size={25} /> หน้าแรก
           </Link>
           <Link to="/add-product" className="flex items-center gap-2 p-2 rounded hover:bg-gray-700">

@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
-import { Menu, Bell, Settings, User } from "lucide-react";
+import { Menu,  User } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -71,13 +71,6 @@ export default function Header({ toggleSidebar }) {
 
       {/* ✅ เมนูไอคอนด้านขวา */}
       <div className="flex items-center space-x-4 relative">
-        <button className="hover:text-gray-300 hidden sm:block">
-          <Bell size={24} />
-        </button>
-        <button className="hover:text-gray-300 hidden sm:block">
-          <Settings size={24} />
-        </button>
-
         {/* ✅ User Icon และ Dropdown Menu */}
         <div
           ref={userIconRef}
