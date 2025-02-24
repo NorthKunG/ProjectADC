@@ -23,7 +23,7 @@ const login = async (req, res) => {
         // สร้าง JWT token
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '6h' });
         // ส่ง token กลับให้ผู้ใช้
-        return res.status(200).json({ message: 'เข้าสู่ระบบสำเร็จ', token });
+        return res.status(200).json({ message: 'เข้าสู่ระบบสำเร็จ', token, role: user.role });
     } catch (error) { return res.status(500).json({ message: error.message }); }
 };
 
