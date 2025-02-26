@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PlusCircle, Trash2 } from "lucide-react";
+import {  PlusCircle, Trash2 } from "lucide-react";
 import axios from "axios";
 
 
@@ -10,7 +10,7 @@ const SearchProductList = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [addedProducts, setLocalAddedProducts] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   useEffect(() => {
     if (!token) return;

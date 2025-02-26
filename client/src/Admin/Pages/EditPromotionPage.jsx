@@ -11,7 +11,7 @@ const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 const EditPromotionPage = () => {
   const { promotionId } = useParams();
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   const [promotionName, setPromotionName] = useState("");
   const [promotionPrice, setPromotionPrice] = useState(0);
@@ -73,7 +73,7 @@ const EditPromotionPage = () => {
         title: "✅ แก้ไขโปรโมชั่นสำเร็จ!",
         showConfirmButton: false,
         timer: 1500,
-      }).then(() => navigate("/dashboard"));
+      }).then(() => navigate("/admin/dashboard"));
     } catch (error) {
       console.error("❌ แก้ไขโปรโมชั่นล้มเหลว:", error);
       Swal.fire("❌ แก้ไขโปรโมชั่นไม่สำเร็จ", error.response?.data?.message || "เกิดข้อผิดพลาด");
@@ -171,7 +171,7 @@ const EditPromotionPage = () => {
             {/* ✅ ปุ่มยกเลิก */}
             <button
               type="button"
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/admin/dashboard")}
               className="px-6 py-3 bg-gray-400 text-white rounded-lg text-lg font-semibold hover:bg-gray-500 transition"
             >
               ยกเลิก

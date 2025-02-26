@@ -19,7 +19,7 @@ export default function Header({ toggleSidebar }) {
   };
 
   const handleSignOut = () => {
-    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     navigate("/");
   };
 

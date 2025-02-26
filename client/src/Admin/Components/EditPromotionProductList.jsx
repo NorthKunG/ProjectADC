@@ -8,7 +8,7 @@ const EditPromotionProductList = ({ promotionId }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   // ✅ โหลดข้อมูลสินค้าในโปรโมชั่นเดิม
   useEffect(() => {

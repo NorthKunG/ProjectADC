@@ -8,7 +8,7 @@ import TypePage from "../Components/Type";
 const EditProductPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const token = localStorage.getItem("token") || "";
+  const token = sessionStorage.getItem("token") || "";
 
   const [formData, setFormData] = useState({
     brand: "",
@@ -72,11 +72,21 @@ const EditProductPage = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+  
+    if (name === "specICT") {
+      setFormData((prevData) => ({
+        ...prevData,
+        specICT: checked, // ✅ อัปเดตค่า specICT
+        specifications: checked ? prevData.specifications : [{ name: "", description: "" }], // ✅ ถ้ายกเลิกรีเซ็ต specifications
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: type === "checkbox" ? checked : value,
+      }));
+    }
   };
+  
 
   const handleFileChange = (e, index) => {
     const file = e.target.files[0];
@@ -150,7 +160,7 @@ const EditProductPage = () => {
           showConfirmButton: false,
           timer: 1500,
         }).then(() => {
-          navigate("/dashboard"); // ✅ กลับไปหน้า dashboard หลังบันทึก
+          navigate("/admin/dashboard"); // ✅ กลับไปหน้า dashboard หลังบันทึก
         });
       }
     } catch (error) {
@@ -437,6 +447,7 @@ const EditProductPage = () => {
             เพิ่มสเปค
           </button>
         </div>
+        
 
         {/* 11. ราคาสินค้า */}
         <div className="mt-6 w-1/4">
@@ -473,7 +484,7 @@ const EditProductPage = () => {
         <div className="flex justify-end mt-8 gap-4">
           <button
             type="button"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/admin/dashboard")}
             className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
           >
             ยกเลิก
