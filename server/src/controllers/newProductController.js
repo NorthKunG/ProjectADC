@@ -138,7 +138,7 @@ const updateProduct = async (req, res) => {
             product.price = productData.price !== undefined ? productData.price : product.price;
             product.category = productData.category || product.category;
             product.subcategory = subcategory || product.subcategory;
-            product.specICT = specICT === 'true' ? true : product.specICT;
+            product.specICT = specICT === 'true';
             product.specifications = specifications ? JSON.parse(specifications) : product.specifications;
 
             // บันทึกข้อมูลที่แก้ไขลงในฐานข้อมูล
