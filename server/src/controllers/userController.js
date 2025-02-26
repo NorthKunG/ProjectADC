@@ -10,7 +10,7 @@ const User = require('../models/userModel');
 const getUsers = async (req, res) => {
     try {
         // เรียกข้อมูลผู้ใช้งานทั้งหมด
-        const users = await User.find();
+        const users = await User.find({ role: 'user' });
 
         // ตรวจสอบว่ามีข้อมูลผู้ใช้งานหรือไม่
         if (!users) {
@@ -128,6 +128,44 @@ const resetPassword = async (req, res) => {
         await user.save();
         return res.status(200).json({ message: 'รหัสผ่านของคุณได้รับการรีเซ็ตเรียบร้อยแล้ว' });
     } catch (error) { return res.status(400).json({ message: error.message }); }
+};
+
+const deleteUser = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = User.findByIdAndDelete(id);
+        if (!user) return res.status(400).json({ message: 'ไม่พบผู้ใช้' });
+        return res.status(200).json({ message: 'ลบผู้ใช้เรียบร้อยแล้ว', user });
+    } catch (error) { return res.status(400).json({ message: error.message }); }
+};
+
+const editUser = async (req, res) => {
+    const { id } = req.params;
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: 'ไม่พบผู้ใช้' });
+    // รับข้อมูลจาก request body
+    const { name, companyName, address, phoneNumber, taxNumber } = req.body;
+    try {
+        // อัพเดตข้อมูลโปรไฟล์
+        user.username = name || user.username; // ตรวจสอบค่าที่ได้มา ถ้าไม่มีจะใช้ค่าตามเดิม
+        user.companyName = companyName || user.companyName;
+        user.address = address || user.address;
+        user.phoneNumber = phoneNumber || user.phoneNumber;
+        user.taxNumber = taxNumber || user.taxNumber;
+        // บันทึกข้อมูลที่แก้ไขลงในฐานข้อมูล
+        await user.save();
+        // ส่ง response กลับไปว่าแก้ไขสำเร็จ
+        return res.status(200).json({
+            message: 'อัปเดตโปรไฟล์สำเร็จแล้ว',
+            user: {
+                username: user.username,
+                companyName: user.companyName,
+                address: user.address,
+                phoneNumber: user.phoneNumber,
+                taxNumber: user.taxNumber
+            }
+        });
+    } catch (error) { return res.status(400).json({ message: error.message }); }
 }
 
 // ส่งออกโมดูล
@@ -136,5 +174,7 @@ module.exports = {
     getProfile,
     editProfile,
     forgetPassword,
-    resetPassword
+    resetPassword,
+    deleteUser,
+    editUser
 }

@@ -5,12 +5,9 @@ const cors = require('cors');
 const path = require('path');
 const bodyParser = require('body-parser');
 
-const productRoutes = require('./routes/productRoutes');
-const categoryRoutes = require('./routes/categoryRoutes');
 const authRoutes = require('./routes/authRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const promotionRoutes = require('./routes/promotionRoutes');
-const distributorRoutes = require('./routes/distributorRoutes');
 
 const app = express();
 
@@ -22,18 +19,9 @@ app.use(bodyParser.json());
 // 🔥 ให้เซิร์ฟเวอร์ให้บริการไฟล์จากโฟลเดอร์ `uploads/`
 app.use('/uploads', express.static('uploads'));
 
-app.use('/api/products', productRoutes);
-app.use('/api/categories', categoryRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/carts', cartRoutes);
 app.use('/api/promotions', promotionRoutes);
-app.use('/api/distributors', distributorRoutes);
-
-const subcategoryRoutes = require('./routes/subcategoryRoutes');
-app.use('/subcategories', subcategoryRoutes);
-
-const contactRoutes = require('./routes/contactRoutes');
-app.use('/api/contact', contactRoutes);
 
 const brandRoutes = require('./routes/brandRoutes');
 app.use('/api/brands', brandRoutes);

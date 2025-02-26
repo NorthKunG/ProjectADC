@@ -18,6 +18,8 @@ router.get('/profile', userAuth, userController.getProfile);
 router.put('/profile', userAuth, userController.editProfile);
 router.post('/forgetPassword', userController.forgetPassword);
 router.post('/resetPassword/:token', userController.resetPassword);
+router.delete('/:id', adminAuth, userController.deleteUser);
+router.put('/:id', adminAuth, userController.editUser);
 
 // ส่งออก Module
 module.exports = router;

@@ -1,7 +1,7 @@
-// ✅ 1. เรียกใช้ mongoose
+// เรียกใช้ mongoose
 const mongoose = require('mongoose');
 
-// ✅ 2. สร้าง Schema สำหรับสินค้าในโปรโมชั่น
+// สร้าง Schema สำหรับสินค้าในโปรโมชั่น
 const promotionItemSchema = new mongoose.Schema({
     productId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -15,7 +15,7 @@ const promotionItemSchema = new mongoose.Schema({
     },
 });
 
-// ✅ 3. สร้าง Schema หลักสำหรับโปรโมชั่น
+// สร้าง Schema หลักสำหรับโปรโมชั่น
 const promotionSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -23,13 +23,13 @@ const promotionSchema = new mongoose.Schema({
         trim: true,
     },
     items: {
-        type: [promotionItemSchema],  // ✅ เชื่อมกับ promotionItemSchema
+        type: [promotionItemSchema], 
         validate: [array => array.length > 0, 'Promotion must have at least one item'],
     },
     price: {
         type: Number,
         required: [true, 'Total Price is required'],
-        min: [0, 'Price must be at least 0'],  // ✅ กันราคาติดลบ
+        min: [0, 'Price must be at least 0'],
     },
     description: {
         type: String,
@@ -39,7 +39,7 @@ const promotionSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Promotion poster is required.'],
     },
-}, { timestamps: true });  // ✅ เพิ่ม timestamps (createdAt, updatedAt)
+}, { timestamps: true });
 
-// ✅ 4. ส่งออกโมเดลโปรโมชั่น
-module.exports = mongoose.model('Promotion', promotionSchema);  // ✅ ใช้ชื่อขึ้นต้นตัวใหญ่ตาม convention
+// ส่งออกโมเดลโปรโมชั่น
+module.exports = mongoose.model('Promotion', promotionSchema);  
