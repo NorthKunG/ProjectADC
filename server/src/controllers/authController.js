@@ -63,6 +63,46 @@ const sendOTP = async (email, otp) => {
 };
 
 // ระบบสมัครสมาชิก
+const registerAdmin = async (req, res) => {
+    // รับข้อมูลจาก request body
+    const { name, companyName, password, email, address, phoneNumber, taxNumber } = req.body;
+    try {
+        const missingFields = []; // ตรวจสอบว่ามีการใส่ข้อมูลครบถ้วนหรือไม่
+
+        if (!name) missingFields.push('ชื่อ');
+        if (!companyName) missingFields.push('ชื่อบริษัท');
+        if (!password) missingFields.push('รหัสผ่าน');
+        if (!email) missingFields.push('อีเมล');
+        if (!address) missingFields.push('ที่อยู่');
+        if (!phoneNumber) missingFields.push('หมายเลขโทรศัพท์');
+        if (!taxNumber) missingFields.push('เลขประจำตัวผู้เสียภาษี');
+
+        // ถ้ามีฟิลด์ที่ไม่ได้กรอก ให้ส่ง error กลับ
+        if (missingFields.length > 0) return res.status(400).json({ message: 'ขาดข้อมูลที่จำเป็น', missingFields });
+        const existingUser = await User.findOne({ email }); // ตรวจสอบว่าอีเมลนี้มีผู้ใช้แล้วหรือไม่
+        if (existingUser) return res.status(400).json({ message: 'อีเมลได้รับการลงทะเบียนเรียบร้อยแล้ว' });
+        const { token, otp } = generateOTPToken(email); // สร้าง OTP Token
+        await sendOTP(email, otp); // ส่ง OTP ไปยังอีเมล
+        // สร้าง user ใหม่ในฐานข้อมูล แต่ยังไม่ยืนยัน OTP
+        const newUser = new User({
+            username: name,
+            companyName,
+            password,
+            email,
+            address,
+            phoneNumber,
+            taxNumber,
+            role: 'admin',
+            otp: token,     // บันทึก OTP ลงในฐานข้อมูล
+            isVerified: false, // ผู้ใช้ยังไม่ยืนยัน OTP
+        });
+        // บันทึกข้อมูลผู้ใช่
+        await newUser.save();
+        return res.status(200).json({ message: 'ลงทะเบียนผู้ใช้งานเรียบร้อยแล้ว กรุณาตรวจสอบอีเมลของคุณเพื่อรับรหัส OTP' });
+    } catch (error) { return res.status(400).json({ message: error.message }); }
+};
+
+// ระบบสมัครสมาชิก
 const register = async (req, res) => {
     // รับข้อมูลจาก request body
     const { name, companyName, password, email, address, phoneNumber, taxNumber } = req.body;
@@ -135,4 +175,5 @@ module.exports = {
     login,
     register,
     verifyOTP,
+    registerAdmin
 }
