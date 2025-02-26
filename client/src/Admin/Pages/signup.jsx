@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-import VerifyOTP from "../Components/VerifyOTP";
+import VerifyOTP from "./VerifyOTP";
 
 export default function Signup() {
     const { register, handleSubmit, formState: { errors } } = useForm();

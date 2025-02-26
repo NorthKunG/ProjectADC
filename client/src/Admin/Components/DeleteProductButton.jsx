@@ -1,6 +1,5 @@
 import axios from "axios";
 import Swal from "sweetalert2";
-import { Trash2 } from "lucide-react";
 
 export default function DeleteProductButton({ productId }) {
   const handleDelete = async () => {
@@ -28,7 +27,7 @@ export default function DeleteProductButton({ productId }) {
     if (!confirmDelete.isConfirmed) return;
 
     try {
-      const token = localStorage.getItem("token"); // ดึง Token สำหรับ Authentication
+      const token = sessionStorage.getItem("token"); // ดึง Token สำหรับ Authentication
       const response = await axios.delete(`http://localhost:3000/api/newProducts/${productId}`, {
         headers: { Authorization: `Bearer ${token}` }, // ส่ง Token ไปให้ Backend
       });

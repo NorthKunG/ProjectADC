@@ -8,24 +8,22 @@ export default function AdminLayout({ children }) {
   const toggleSidebar = () => setIsOpen((prev) => !prev);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-300 w-full">
-      {/* ✅ Header */}
+    <div className="flex flex-col min-h-screen bg-gray-300 dark:bg-gray-300 w-full">
+      {/* ✅ Header ด้านบน */}
       <Header toggleSidebar={toggleSidebar} />
 
-      {/* ✅ Layout Sidebar & Main Content */}
+      {/* ✅ Layout ของ Sidebar & Main Content */}
       <div className="flex pt-[80px]">
         {/* ✅ Sidebar */}
-        <aside
-          className={`${
-            isOpen ? "block" : "hidden"
-          } md:block w-64 h-[calc(100vh-80px)] bg-white shadow-lg z-10`}
-        >
+        <div className={`fixed left-0 top-[60px] w-64 h-[calc(100vh-60px)] ${isOpen ? "block" : "hidden"} md:block`}>
           <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
-        </aside>
+        </div>
 
         {/* ✅ Main Content */}
-        <main className="flex-grow p-5 overflow-y-auto bg-gray-100 rounded-2xl shadow-lg">
-          {children} {/* ✅ ตรงนี้จะ render DashboardPage */}
+        <main className="flex-2 ml-0 md:ml-64 p-5 overflow-y-auto py-8">
+          <div className="bg-gray-100 p-2 rounded-2xl shadow-lg w-full max-w-auto"> 
+            {children} {/* ✅ Render หน้า AddProductPage ที่นี่ */}
+          </div>
         </main>
       </div>
     </div>

@@ -9,6 +9,7 @@ import Lightbox from "yet-another-react-lightbox"; // ไลบรารีส�
 import "yet-another-react-lightbox/styles.css"; // สไตล์ของ Lightbox
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails"; // ปลั๊กอินสำหรับแสดงรูปย่อ
 import "yet-another-react-lightbox/plugins/thumbnails.css"; // สไตล์ของรูปย่อ
+import Footer from "../Component/Footer";
 
 // ✅ URL พื้นฐานของ API
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -295,6 +296,7 @@ const ProductPage = () => {
           />
         )}
       </div>
+      <Footer/>
     </div>
   );
 };

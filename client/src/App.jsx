@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./Client/Component/ProtectedRoute";
+import CCTVPage from "./Client/Page/CCTVPage";
 
 // 📄 Client Pages
 import Home from "./Client/Page/Home";
@@ -30,6 +31,7 @@ function App() {
         <Route path="/login-popup" element={<LoginPopup setIsOpen={setIsOpen} />} />
         <Route path="/loginPage" element={<LoginPage />} />
         <Route path="/products/:id" element={<ProductPage />} />
+        <Route path="/cctv" element={<CCTVPage />} />
 
         {/* ✅ Protected User Routes (ต้องมี token + role = "user") */}
         <Route element={<ProtectedRoute roleRequired="user" />}>

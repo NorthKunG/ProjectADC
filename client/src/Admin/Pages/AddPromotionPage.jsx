@@ -2,14 +2,14 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import AdminLayout from "../Layouts/AdminLayout";
-import SearchProductList from "./SearchProductList";
+import SearchProductList from "../Components/SearchProductList";
 import TypePage from "../Components/Type";
 
 const AddPromotionPage = () => {
   const [promotionName, setPromotionName] = useState(""); // ชื่อโปรโมชั่น
   const [promotionPrice, setPromotionPrice] = useState(""); // ราคาของโปรโมชั่น
   const [image, setImage] = useState(null); // เก็บไฟล์รูปภาพ
-  const token = localStorage.getItem("token") || ""; // ดึง token สำหรับ API
+  const token = sessionStorage.getItem("token") || ""; // ดึง token สำหรับ API
   const navigate = useNavigate();
 
   // ✅ อัปโหลดรูปภาพ
@@ -78,7 +78,7 @@ const AddPromotionPage = () => {
       const success = await handleSubmitPromotion();
       if (success) {
         Swal.fire("✅ สำเร็จ!", "บันทึกโปรโมชั่นเรียบร้อยแล้ว", "success").then(() => {
-          navigate("/dashboard");
+          navigate("/admin/dashboard");
         });
       }
     }
@@ -86,7 +86,7 @@ const AddPromotionPage = () => {
 
   // ✅ ยกเลิก → กลับหน้า dashboard ทันที (ไม่มีเช็ค)
   const handleCancel = () => {
-    navigate("/dashboard");
+    navigate("/admin/dashboard");
   };
 
   return (
