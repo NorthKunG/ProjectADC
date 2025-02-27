@@ -27,13 +27,13 @@ export default function NetworkProducts({ onProductDelete }) {
     <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200 flex flex-col justify-between min-w-[200px]">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-gray-100 rounded-lg">
+          <div className="p-1 bg-gray-100 rounded-lg">
             <Wifi size={28} className="text-gray-700" />
           </div>
           <p className="text-md text-gray-500 font-medium">Network</p>
         </div>
         <div className="text-right">
-          <p className="text-gray-500 text-sm">จำนวนสินค้า</p>
+          <p className="text-gray-500 text-sm ">จำนวนสินค้า</p>
           <h3 className="text-3xl font-bold text-green-500">
             {loading ? "..." : error ? "Error" : count}
           </h3>

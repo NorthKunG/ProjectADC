@@ -67,6 +67,10 @@ const LoginPopup = ({ setIsOpen }) => {
     navigate("/");
   };
 
+  const handleSignUp = () => {
+    navigate("/signup"); // เปลี่ยนเส้นทางไปหน้าสมัครสมาชิก
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-black/30 z-50">
       <div className="w-full max-w-md p-6 bg-white bg-opacity-90 backdrop-blur-xl rounded-2xl shadow-2xl relative">
@@ -121,6 +125,17 @@ const LoginPopup = ({ setIsOpen }) => {
             เข้าสู่ระบบ
           </button>
         </form>
+
+        {/* เพิ่มปุ่มสำหรับสมัครสมาชิก */}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">ยังไม่มีบัญชี?</p>
+          <button
+            onClick={handleSignUp}
+            className="text-red-500 hover:text-red-700 text-sm font-semibold mt-2"
+          >
+            สมัครสมาชิก
+          </button>
+        </div>
       </div>
     </div>
   );

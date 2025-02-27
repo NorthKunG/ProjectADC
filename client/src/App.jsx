@@ -2,6 +2,11 @@ import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./Client/Component/ProtectedRoute";
 import CCTVPage from "./Client/Page/CCTVPage";
+import Signup from "./Admin/Pages/signup";
+import "./App.css";
+import PromotionPage from "./Client/Page/PromotionsPage";
+import Promotions from "./Client/Page/PromotionlistPage";
+
 
 // 📄 Client Pages
 import Home from "./Client/Page/Home";
@@ -15,9 +20,16 @@ import AddProductPage from "./Admin/Pages/AddProductPage";
 import Addpromotion from "./Admin/Pages/AddPromotionPage";
 import EditProductPage from "./Admin/Pages/EditProductPage";
 import EditPromotionPage from "./Admin/Pages/EditPromotionPage";
-import Uuu from "./Admin/Pages/signup";
-import Test from "./Admin/Pages/Test";
+import UserDashboard from "./Admin/Pages/UserDashboard"
 import Twse from "./Admin/Pages/Twse";
+import Contact from "./Client/Page/ContactPage";
+import MainLayout from "./Client/Component/MainLayout";
+import ComparePage from "./Client/Page/CompareProductsPage";
+import EditUserPage from "./Admin/Pages/UserEditPage";
+import Network from "./Client/Page/NetworkPage";
+import Solar from "./Client/Page/SolarCellPage";
+
+
 
 function App() {
   const [setIsOpen] = useState(false);
@@ -30,8 +42,17 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login-popup" element={<LoginPopup setIsOpen={setIsOpen} />} />
         <Route path="/loginPage" element={<LoginPage />} />
+        <Route element={<MainLayout />}>
         <Route path="/products/:id" element={<ProductPage />} />
-        <Route path="/cctv" element={<CCTVPage />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/cctv" element={<CCTVPage />} />
+          <Route path="/network" element={<Network />} />
+          <Route path="/promotion-set" element={<Promotions />} />
+          <Route path="/solar-panel" element={<Solar />} />
+          <Route path="/compare" element={<ComparePage />} />
+          <Route path="/promotions/:id" element={<PromotionPage />} />
+          <Route path="/signup" element={<Signup />} />
+        </Route>
 
         {/* ✅ Protected User Routes (ต้องมี token + role = "user") */}
         <Route element={<ProtectedRoute roleRequired="user" />}>
@@ -41,9 +62,8 @@ function App() {
         {/* ✅ Protected Product Routes (ต้องมี token - ไม่จำกัด role) */}
         <Route element={<ProtectedRoute />}>
           {/* <Route path="/products/:id" element={<ProductPage />} /> */}
-          <Route path="/Test" element={<Test />} />
           <Route path="/Twse" element={<Twse />} />
-          <Route path="/uuu" element={<Uuu />} />
+          
         </Route>
 
         {/* ✅ Protected Admin Routes (ต้องมี token + role = "admin") */}
@@ -53,6 +73,9 @@ function App() {
           <Route path="/add-promotion" element={<Addpromotion />} />
           <Route path="/edit-product/:productId" element={<EditProductPage />} />
           <Route path="/edit-promotion/:promotionId" element={<EditPromotionPage />} />
+          <Route path="/UserDashboard" element={<UserDashboard />} />
+          
+          <Route path="/edit-user/:id" element={<EditUserPage />} /> {/* ✅ Route แก้ไข */}
         </Route>
 
       </Routes>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, X } from "lucide-react";
-import LogoADCM from "../../../../assets/Image/Logo01.png";
+import LogoADCM from "../../../assets/Image/Logo01.png";
 import LanguagMobile from "./LanguageDropdown-mobile";
 import _ from "lodash";
 

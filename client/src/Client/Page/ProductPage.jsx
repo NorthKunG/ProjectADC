@@ -1,6 +1,5 @@
 // ✅ นำเข้า Dependencies ที่ใช้ในหน้า ProductPage
-import NavbarDesktop from "../Component/Desktop/Navbar/NavbarDesktop";
-import LoginPage from "../Component/Desktop/Login/Login";
+
 import { useEffect, useState } from "react"; // ใช้จัดการ State และ Lifecycle
 import { useParams, useNavigate } from "react-router-dom"; // ดึงพารามิเตอร์จาก URL และใช้ navigate
 import axios from "axios"; // สำหรับเรียก API
@@ -9,7 +8,7 @@ import Lightbox from "yet-another-react-lightbox"; // ไลบรารีส�
 import "yet-another-react-lightbox/styles.css"; // สไตล์ของ Lightbox
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails"; // ปลั๊กอินสำหรับแสดงรูปย่อ
 import "yet-another-react-lightbox/plugins/thumbnails.css"; // สไตล์ของรูปย่อ
-import Footer from "../Component/Footer";
+
 
 // ✅ URL พื้นฐานของ API
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -50,8 +49,6 @@ const ProductPage = () => {
     }
   };
 
-  // ✅ สร้าง State สำหรับ Pop-up Login
-  const [isLoginOpen, setIsLoginOpen] = useState(false); // ✅ ควบคุม Pop-up Login
 
   useEffect(() => {
     if (id) fetchProduct(); // โหลดข้อมูลเมื่อ id เปลี่ยน
@@ -89,10 +86,6 @@ const ProductPage = () => {
   const fullCategoryName = getFullCategoryName(product.cscode); // ✅ แปลง cscode
   return (
     <div className="min-h-screen bg-gray-100">
-      <NavbarDesktop onLoginClick={() => setIsLoginOpen(true)} />{" "}
-      {/* ✅ ส่ง onLoginClick */}
-      {/* ✅ แสดง Pop-up Login เมื่อ isLoginOpen = true */}
-      {isLoginOpen && <LoginPage setIsOpen={setIsLoginOpen} />}
       {/* ✅ ส่วนที่ 1: รูปภาพ + ข้อมูลสินค้า */}
       <div className="w-full max-w-auto mx-auto p-4 sm:p-6 md:p-8 lg:p-14 bg-white">
         {/* ✅ ส่วนที่ 1: รูปภาพ + ข้อมูลสินค้า */}
@@ -296,7 +289,6 @@ const ProductPage = () => {
           />
         )}
       </div>
-      <Footer/>
     </div>
   );
 };

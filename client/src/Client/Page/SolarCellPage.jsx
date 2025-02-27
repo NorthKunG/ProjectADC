@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import ProductFilter from "../Component/ProductFilter"; // เพิ่มฟิลเตอร์สำหรับกรอก
 import ProductCard from "../Component/ProductCard"; // การ์ดสินค้า
-import cctv from "../../assets/Image/cctv.png"; // รูปภาพประกอบ
+import solar from "../../assets/Image/solar.png"; // รูปภาพประกอบ
 
-export default function CCTVPage() {
+export default function SolarCellPage() {
   const [products, setProducts] = useState([]);
   const [filters, setFilters] = useState({
     specICT: false,
@@ -21,14 +21,14 @@ export default function CCTVPage() {
         `${import.meta.env.VITE_API_URL}/api/newProducts/filter`,
         {
           params: {
-            category: "IOT",
+            category: "Solar Cell", // เปลี่ยนจาก IOT/Network เป็น Solar Cell
             specICT: filters.specICT ? "true" : undefined,
             minPrice: filters.minPrice || undefined,
             maxPrice: filters.maxPrice || undefined,
           },
         }
       );
-      
+
       // ตรวจสอบจำนวนสินค้าจาก products.length หรือใช้ totalCount ถ้ามี
       const productCount = response.data.products?.length || 0;
       setTotalCount(productCount); // อัปเดตจำนวนสินค้า
@@ -57,26 +57,27 @@ export default function CCTVPage() {
       {/* ✅ Header */}
       <div className="text-left mb-8">
         <img
-          src={cctv}
-          alt="CCTV Promotion"
+          src={solar}
+          alt="Solar Cell Promotion"
           className="w-full h-auto mb-6 rounded-lg shadow-md"
         />
         <h1 className="text-3xl font-extrabold text-gray-800">
-          รวมกล้องวงจรปิด ราคาดีที่สุด ครบทุกรูปแบบ
+          รวมแผงโซลาร์เซลล์ ราคาดีที่สุด ครบทุกรูปแบบ
         </h1>
         <p className="text-gray-500 mt-2 text-sm sm:text-base px-6">
           ในยุคปัจจุบัน{" "}
-          <span className="text-red-500 font-bold">กล้องวงจรปิด (CCTV)</span>{" "}
-          ถือเป็นอุปกรณ์สำคัญที่ช่วยเสริมสร้างความปลอดภัยให้กับบ้านหรือธุรกิจของคุณ
-          ไม่ว่าคุณจะต้องการเฝ้าระวังทรัพย์สิน ป้องกันอุบัติเหตุ
-          หรือเพิ่มความสบายใจในชีวิตประจำวัน
-          การเลือกกล้องวงจรปิดที่เหมาะสมกับการใช้งานและงบประมาณเป็นสิ่งสำคัญ
+          <span className="text-red-500 font-bold">แผงโซลาร์เซลล์ (Solar Cell)</span>{" "}
+          ถือเป็นเทคโนโลยีที่ได้รับความนิยมในการผลิตพลังงานจากแสงอาทิตย์
+          ไม่ว่าคุณจะต้องการใช้ในบ้านหรือธุรกิจ แผงโซลาร์เซลล์ช่วยประหยัดค่าไฟฟ้าและเป็นมิตรกับสิ่งแวดล้อม
+          การเลือกแผงโซลาร์เซลล์ที่มีคุณภาพดีและประสิทธิภาพสูงถือเป็นสิ่งสำคัญ
         </p>
         <div className="w-full p-6 bg-white shadow-lg rounded-lg mb-10 mt-6 border border-gray-300">
           <h1 className="text-2xl font-semibold text-gray-700">
-            <span className="font-bold">กล้องวงจรปิด (CCTV)</span>
+            <span className="font-bold">แผงโซลาร์เซลล์ (Solar Cell)</span>
           </h1>
-          <p className="text-gray-500 text-sm mt-2">จำนวน {totalCount} รายการ</p> {/* แสดงจำนวนสินค้าจาก totalCount */}
+          <p className="text-gray-500 text-sm mt-2">
+            จำนวน {totalCount} รายการ
+          </p> {/* แสดงจำนวนสินค้าจาก totalCount */}
         </div>
       </div>
 

@@ -10,6 +10,10 @@ const LoginPage = ({ setIsOpen }) => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
+  const handleSignUp = () => {
+    navigate("/signup"); // เปลี่ยนเส้นทางไปหน้าสมัครสมาชิก
+  };
+
   useEffect(() => {
     const token = sessionStorage.getItem("token");
     const role = sessionStorage.getItem("role");
@@ -66,6 +70,7 @@ const LoginPage = ({ setIsOpen }) => {
       console.error("❌ ข้อผิดพลาด:", error.response?.data?.message || error.message);
       setMessage(error.response?.data?.message || "เข้าสู่ระบบล้มเหลว");
     }
+ 
   };
 
   return (
@@ -115,6 +120,16 @@ const LoginPage = ({ setIsOpen }) => {
             เข้าสู่ระบบ
           </button>
         </form>
+        {/* เพิ่มปุ่มสำหรับสมัครสมาชิก */}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">ยังไม่มีบัญชี?</p>
+          <button
+            onClick={handleSignUp}
+            className="text-red-500 hover:text-red-700 text-sm font-semibold mt-2"
+          >
+            สมัครสมาชิก
+          </button>
+        </div>
       </div>
     </div>
   );

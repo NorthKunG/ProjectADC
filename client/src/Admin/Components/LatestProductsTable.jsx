@@ -10,7 +10,7 @@ export default function LatestProductsTable() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const limit = 20;
+  const limit = 5;
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
@@ -35,24 +35,21 @@ export default function LatestProductsTable() {
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
+    <div className="bg-white shadow-md rounded-lg p-4 sm:p-6 border border-gray-200">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-bold">สินค้าล่าสุด</h3>
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-2 text-gray-400" size={18} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center mb-4">
+        <h3 className="text-lg sm:text-xl font-bold">สินค้าล่าสุด</h3>
+        <div className="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
             <input
               type="text"
               placeholder="ค้นหา..."
-              className="pl-10 pr-4 py-2 border rounded-md focus:ring focus:ring-blue-200 outline-none"
+              className="w-full pl-10 pr-4 py-2 border rounded-md text-sm focus:ring focus:ring-blue-200 outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-gray-100">
-            <Filter size={18} /> กรอง
-          </button>
         </div>
       </div>
 
@@ -67,18 +64,18 @@ export default function LatestProductsTable() {
         <>
           {/* Table */}
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead className="bg-blue-600 text-white">
-                <tr className="text-sm">
-                  <th className="p-4 text-left">#</th>
-                  <th className="p-4 text-left">รูป</th>
-                  <th className="p-4 text-left">แบรนด์</th>
-                  <th className="p-4 text-left">ชื่อสินค้า</th>
-                  <th className="p-4 text-left">หมวดหมู่</th>
-                  <th className="p-4 text-left">specICT</th>
-                  <th className="p-4 text-left">ราคา</th>
-                  <th className="p-4 text-center">แก้ไข</th>
-                  <th className="p-4 text-center">ลบ</th>
+            <table className="w-full border-collapse text-sm">
+              <thead className="bg-blue-600 text-white text-xs sm:text-sm">
+                <tr>
+                  <th className="p-3 text-left whitespace-nowrap">#</th>
+                  <th className="p-3 text-left whitespace-nowrap">รูป</th>
+                  <th className="p-3 text-left whitespace-nowrap">แบรนด์</th>
+                  <th className="p-3 text-left whitespace-nowrap">ชื่อสินค้า</th>
+                  <th className="p-3 text-left whitespace-nowrap">หมวดหมู่</th>
+                  <th className="p-3 text-left whitespace-nowrap">specICT</th>
+                  <th className="p-3 text-left whitespace-nowrap">ราคา</th>
+                  <th className="p-3 text-center whitespace-nowrap">แก้ไข</th>
+                  <th className="p-3 text-center whitespace-nowrap">ลบ</th>
                 </tr>
               </thead>
               <tbody>
@@ -90,22 +87,22 @@ export default function LatestProductsTable() {
                   )
                   .map((product, index) => (
                     <tr key={product._id} className="border-b hover:bg-gray-50">
-                      <td className="p-4">{(page - 1) * limit + index + 1}</td>
-                      <td className="p-4">
+                      <td className="p-3">{(page - 1) * limit + index + 1}</td>
+                      <td className="p-3">
                         {product.images?.length > 0 ? (
                           <img
                             src={`http://localhost:3000/uploads/products/${product.images[0].fileName}`}
                             alt={product.itemDescription}
-                            className="w-12 h-12 object-cover rounded-md"
+                            className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-md"
                           />
                         ) : (
                           <span className="text-gray-400">ไม่มีรูป</span>
                         )}
                       </td>
-                      <td className="p-4">{product.brand || "-"}</td>
-                      <td className="p-4">
+                      <td className="p-3">{product.brand || "-"}</td>
+                      <td className="p-3">
                         <span
-                          className="truncate max-w-[200px] inline-block"
+                          className="truncate max-w-[150px] sm:max-w-[200px] inline-block"
                           title={product.itemDescription}
                         >
                           {product.itemDescription.length > 20
@@ -113,21 +110,19 @@ export default function LatestProductsTable() {
                             : product.itemDescription}
                         </span>
                       </td>
-                      <td className="p-4">{product.category || "-"}</td>
-                      <td className="p-4">
+                      <td className="p-3">{product.category || "-"}</td>
+                      <td className="p-3 text-center">
                         {product.specICT ? (
                           <span className="text-green-600">✔</span>
                         ) : (
                           <span className="text-red-600">✘</span>
                         )}
                       </td>
-                      <td className="p-4">
-                        {product.price ? `${product.price} บาท` : "-"}
-                      </td>
-                      <td className="p-4 text-center">
+                      <td className="p-3">{product.price ? `${product.price} บาท` : "-"}</td>
+                      <td className="p-3 text-center">
                         <EditProductButton productId={product._id} />
                       </td>
-                      <td className="p-4 text-center">
+                      <td className="p-3 text-center">
                         <DeleteProductButton
                           productId={product._id}
                           onDelete={handleDelete}
@@ -140,23 +135,23 @@ export default function LatestProductsTable() {
           </div>
 
           {/* Pagination */}
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-2">
             <button
-              className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
+              className="flex items-center gap-1 px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50 text-sm"
               onClick={() => setPage(page - 1)}
               disabled={page === 1}
             >
-              <ChevronLeft size={18} /> ก่อนหน้า
+              <ChevronLeft size={16} /> ก่อนหน้า
             </button>
-            <span className="text-gray-700">
+            <span className="text-gray-700 text-sm">
               หน้าที่ {page} / {totalPages}
             </span>
             <button
-              className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
+              className="flex items-center gap-1 px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50 text-sm"
               onClick={() => setPage(page + 1)}
               disabled={page === totalPages}
             >
-              ถัดไป <ChevronRight size={18} />
+              ถัดไป <ChevronRight size={16} />
             </button>
           </div>
         </>

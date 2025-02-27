@@ -1,9 +1,10 @@
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Home, PackagePlus, Users, Settings, ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
+  const location = useLocation();
   const [openDropdown, setOpenDropdown] = useState(false);
 
   return (
@@ -24,16 +25,34 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           ${isOpen ? "translate-x-0" : "-translate-x-64"} md:translate-x-0`}
       >
         <nav className="space-y-7">
-          <Link to="/admin/dashboard" className="flex items-center gap-2 p-2 rounded hover:bg-blue-600">
+          <Link
+            to="/admin/dashboard"
+            className={`flex items-center gap-2 p-2 rounded ${
+              location.pathname === "/admin/dashboard"
+                ? "bg-blue-500 text-white"
+                : "bg-white text-black hover:bg-blue-500 hover:text-white active:bg-blue-700 transition-all"
+            }`}
+          >
             <Home size={25} /> หน้าแรก
           </Link>
-          <Link to="/add-product" className="flex items-center gap-2 p-2 rounded hover:bg-gray-700">
+          <Link
+            to="/add-product"
+            className={`flex items-center gap-2 p-2 rounded ${
+              location.pathname === "/add-product"
+                ? "bg-blue-500 text-white"
+                : "bg-white text-black hover:bg-blue-500 hover:text-white active:bg-blue-700 transition-all"
+            }`}
+          >
             <PackagePlus size={20} /> เพิ่มสินค้า
           </Link>
           <div>
             <button
               onClick={() => setOpenDropdown(!openDropdown)}
-              className="flex items-center gap-2 p-2 w-full rounded hover:bg-gray-700"
+              className={`flex items-center gap-2 p-2 w-full rounded ${
+                location.pathname === "/users"
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-black hover:bg-blue-500 hover:text-white active:bg-blue-700 transition-all"
+              }`}
             >
               <Users size={20} /> จัดการผู้ใช้
               <ChevronDown
@@ -42,20 +61,36 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               />
             </button>
             {openDropdown && (
-              <div className="pl-6 space-y-2">
-                <Link to="/Test" className="block p-2 rounded hover:bg-gray-700">
+              <div className="pl-6 space-y-4">
+                <Link
+                  to="/UserDashboard"
+                  className="block p-2 mt-4 rounded bg-white text-black hover:bg-blue-500 hover:text-white active:bg-blue-700 transition-all"
+                >
                   รายชื่อผู้ใช้
                 </Link>
-                <Link to="/Twse" className="block p-2 rounded hover:bg-gray-700">
+                <Link
+                  to="/Twse"
+                  className="block p-2 rounded bg-white text-black hover:bg-blue-500 hover:text-white active:bg-blue-700 transition-all"
+                >
                   เพิ่มผู้ใช้
                 </Link>
-                <Link to="/uuu" className="block p-2 rounded hover:bg-gray-700">
+                <Link
+                  to="/uuu"
+                  className="block p-2 rounded bg-white text-black hover:bg-blue-500 hover:text-white active:bg-blue-700 transition-all"
+                >
                   เพิ่มผู้ใช้5555
                 </Link>
               </div>
             )}
           </div>
-          <Link to="/settings" className="flex items-center gap-2 p-2 rounded hover:bg-gray-700">
+          <Link
+            to="/settings"
+            className={`flex items-center gap-2 p-2 rounded ${
+              location.pathname === "/settings"
+                ? "bg-blue-500 text-white"
+                : "bg-white text-black hover:bg-blue-500 hover:text-white active:bg-blue-700 transition-all"
+            }`}
+          >
             <Settings size={20} /> การตั้งค่า
           </Link>
         </nav>
