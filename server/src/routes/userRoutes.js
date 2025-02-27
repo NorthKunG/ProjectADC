@@ -20,6 +20,7 @@ router.post('/forgetPassword', userController.forgetPassword);
 router.post('/resetPassword/:token', userController.resetPassword);
 router.delete('/:id', adminAuth, userController.deleteUser);
 router.put('/:id', adminAuth, userController.editUser);
+router.get("/:id", userController.getUserById);
 
 // ส่งออก Module
 module.exports = router;

@@ -6,11 +6,11 @@ const nodemailer = require('nodemailer');
 // ดึงโมเดลที่เกี่ยวข้องสินค้าจากโฟลเดอร์ models
 const User = require('../models/userModel');
 
-// ดูข้อมูลผู้ใช้งานทั้งหมด
+// ดูข้อมูลผู้ใช้งานทั้งหมด (แสดงทุก Role: user & admin)
 const getUsers = async (req, res) => {
     try {
-        // เรียกข้อมูลผู้ใช้งานทั้งหมด
-        const users = await User.find({ role: 'user' });
+        // เรียกข้อมูลผู้ใช้งานทั้งหมด (ไม่มีตัวกรอง Role)
+        const users = await User.find();
 
         // ตรวจสอบว่ามีข้อมูลผู้ใช้งานหรือไม่
         if (!users) {
@@ -25,6 +25,19 @@ const getUsers = async (req, res) => {
     }
 };
 
+const getUserById = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: "ไม่พบผู้ใช้" });
+        }
+        return res.status(200).json(user);
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+
 // ดูโปรไฟล์
 const getProfile = async (req, res) => {
     // ใช้ userId จาก decoded token
@@ -37,20 +50,34 @@ const getProfile = async (req, res) => {
 
 // แก้ไขโปรไฟล์
 const editProfile = async (req, res) => {
+
+    console.log("User Role ที่ใช้แก้ไข:", req.userRole);
+    console.log("ค่าที่รับมาจาก Frontend (role):", req.body.role);
+
     // ใช้ userId จาก decoded token
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ message: 'ไม่พบผู้ใช้' });
+
     // รับข้อมูลจาก request body
-    const { name, companyName, address, phoneNumber, taxNumber } = req.body;
+    const { name, companyName, address, phoneNumber, taxNumber, role } = req.body;
+
     try {
         // อัพเดตข้อมูลโปรไฟล์
-        user.username = name || user.username; // ตรวจสอบค่าที่ได้มา ถ้าไม่มีจะใช้ค่าตามเดิม
+        user.username = name || user.username;
         user.companyName = companyName || user.companyName;
         user.address = address || user.address;
         user.phoneNumber = phoneNumber || user.phoneNumber;
         user.taxNumber = taxNumber || user.taxNumber;
+
+        // ✅ อัปเดต role (เฉพาะ Admin เท่านั้นที่เปลี่ยนได้)
+        if (req.userRole === "admin" && role) {
+            user.role = role;
+        }
+        
+
         // บันทึกข้อมูลที่แก้ไขลงในฐานข้อมูล
         await user.save();
+
         // ส่ง response กลับไปว่าแก้ไขสำเร็จ
         return res.status(200).json({
             message: 'อัปเดตโปรไฟล์สำเร็จแล้ว',
@@ -59,11 +86,15 @@ const editProfile = async (req, res) => {
                 companyName: user.companyName,
                 address: user.address,
                 phoneNumber: user.phoneNumber,
-                taxNumber: user.taxNumber
+                taxNumber: user.taxNumber,
+                role: user.role
             }
         });
-    } catch (error) { return res.status(400).json({ message: error.message }); }
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
 };
+
 
 // ส่งอีเมล์สำหรับการรีเซ็ตรหัสผ่าน
 const sendResetPasswordEmail = async (email, resetToken) => {
@@ -133,40 +164,60 @@ const resetPassword = async (req, res) => {
 const deleteUser = async (req, res) => {
     const { id } = req.params;
     try {
-        const user = User.findByIdAndDelete(id);
-        if (!user) return res.status(400).json({ message: 'ไม่พบผู้ใช้' });
-        return res.status(200).json({ message: 'ลบผู้ใช้เรียบร้อยแล้ว', user });
-    } catch (error) { return res.status(400).json({ message: error.message }); }
+        console.log("🛠️ กำลังลบผู้ใช้ ID:", id); // ✅ Debug ID
+
+        const user = await User.findByIdAndDelete(id); // ✅ เพิ่ม await
+        if (!user) {
+            console.log("❌ ไม่พบผู้ใช้ในระบบ");
+            return res.status(404).json({ message: "ไม่พบผู้ใช้" }); // ✅ เปลี่ยนเป็น 404 Not Found
+        }
+
+        console.log("✅ ผู้ใช้ถูกลบเรียบร้อยแล้ว");
+        return res.status(200).json({ message: "ลบผู้ใช้เรียบร้อยแล้ว" });
+    } catch (error) {
+        console.error("❌ Delete User Error:", error.message);
+        return res.status(500).json({ message: "เกิดข้อผิดพลาดในการลบผู้ใช้" });
+    }
 };
 
 const editUser = async (req, res) => {
     const { id } = req.params;
-    const user = await User.findById(id);
-    if (!user) return res.status(404).json({ message: 'ไม่พบผู้ใช้' });
-    // รับข้อมูลจาก request body
-    const { name, companyName, address, phoneNumber, taxNumber } = req.body;
     try {
-        // อัพเดตข้อมูลโปรไฟล์
-        user.username = name || user.username; // ตรวจสอบค่าที่ได้มา ถ้าไม่มีจะใช้ค่าตามเดิม
+        const user = await User.findById(id); // ✅ เพิ่ม await
+        if (!user) return res.status(404).json({ message: "ไม่พบผู้ใช้" });
+
+        // รับข้อมูลจาก request body
+        const { companyName, address, phoneNumber, taxNumber, role } = req.body;
+
+        // ✅ อัปเดตข้อมูลที่อนุญาตให้แก้ไข
         user.companyName = companyName || user.companyName;
         user.address = address || user.address;
         user.phoneNumber = phoneNumber || user.phoneNumber;
         user.taxNumber = taxNumber || user.taxNumber;
-        // บันทึกข้อมูลที่แก้ไขลงในฐานข้อมูล
-        await user.save();
-        // ส่ง response กลับไปว่าแก้ไขสำเร็จ
+
+        // ✅ อัปเดต role (เฉพาะ Admin เท่านั้นที่เปลี่ยนได้)
+        if (req.userRole === "admin" && role) {
+            user.role = role;
+        }
+
+        await user.save(); // ✅ บันทึกข้อมูล
+
         return res.status(200).json({
-            message: 'อัปเดตโปรไฟล์สำเร็จแล้ว',
+            message: "อัปเดตโปรไฟล์สำเร็จแล้ว",
             user: {
                 username: user.username,
                 companyName: user.companyName,
                 address: user.address,
                 phoneNumber: user.phoneNumber,
-                taxNumber: user.taxNumber
+                taxNumber: user.taxNumber,
+                role: user.role, // ✅ ส่ง role กลับไปด้วย
             }
         });
-    } catch (error) { return res.status(400).json({ message: error.message }); }
-}
+    } catch (error) {
+        console.error("❌ Edit User Error:", error.message);
+        return res.status(500).json({ message: "เกิดข้อผิดพลาดในการแก้ไขผู้ใช้" });
+    }
+};
 
 // ส่งออกโมดูล
 module.exports = {
@@ -176,5 +227,6 @@ module.exports = {
     forgetPassword,
     resetPassword,
     deleteUser,
+    getUserById,
     editUser
 }

@@ -99,7 +99,7 @@ const addedPromotion = async (req, res) => {
 // ✅ แสดงโปรโมชั่นทั้งหมดพร้อมชื่อสินค้า
 // ✅ เรียงลำดับโดยใช้ _id (เวลาที่ฝังอยู่ใน ObjectId)
 const getPromotions = async (req, res) => {
-    const { sort = "latest", page = 1, limit = 10 } = req.query;
+    const { sort = "latest", page = 1, limit = 99 } = req.query;
   
     const sortOrder = sort === "oldest" ? 1 : -1;  // ✅ latest = -1 (ใหม่ไปเก่า), oldest = 1 (เก่าไปใหม่)
     const skip = (Number(page) - 1) * Number(limit);  // ✅ จำนวนข้อมูลที่ต้องข้าม
