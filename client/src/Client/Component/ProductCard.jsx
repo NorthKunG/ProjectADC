@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Repeat } from "lucide-react";
 import PropTypes from "prop-types";
-import { useNavigate, Link } from "react-router-dom"; // ใช้ Link จาก React Router
+import { useNavigate, Link } from "react-router-dom";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -25,16 +25,24 @@ export default function ProductCard({ product = {} }) {
     }
   }, [hasImage, imageStatus]);
 
+  const handleCompareClick = (e) => {
+    e.stopPropagation(); // Prevent triggering the card click event
+    let selectedProducts = JSON.parse(sessionStorage.getItem('selectedProducts') || '[]');
+    if (!selectedProducts.find(p => p._id === product._id)) {
+      selectedProducts.push(product);
+      sessionStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
+    }
+    navigate('/compare');
+  };
+
   return (
     <div
       onClick={() => navigate(`/products/${product._id}`)}
-      className="
-        relative p-4 shadow-lg rounded-2xl bg-white border border-gray-200
-        w-full sm:w-[320px] md:w-[380px] lg:w-[420px] xl:w-[460px] 
+      className="relative p-4 shadow-lg rounded-2xl bg-white border border-gray-200
+        w-full sm:w-[320px] md:w-[380px] lg:w-[420px] xl:w-[420px] 
         h-[540px] sm:h-[500px] md:h-[520px] lg:h-[590px] xl:h-[560px]
         flex flex-col justify-between cursor-pointer hover:shadow-2xl 
-        transition-all duration-300
-      "
+        transition-all duration-300"
     >
       {/* ✅ แบรนด์สินค้า + แท็ก ICT */}
       <div className="flex justify-between items-center mb-2">
@@ -53,8 +61,7 @@ export default function ProductCard({ product = {} }) {
       </div>
 
       {/* ✅ รูปสินค้า */}
-      <div
-        className="w-full h-[220px] sm:h-[240px] md:h-[250px] lg:h-[260px] 
+      <div className="w-full h-[220px] sm:h-[240px] md:h-[250px] lg:h-[260px] 
         flex justify-center items-center rounded-lg overflow-hidden bg-gray-50 border 
         border-gray-100 mb-4"
       >
@@ -62,11 +69,9 @@ export default function ProductCard({ product = {} }) {
           <img
             src={imageUrl}
             alt={product.itemDescription || "ไม่มีชื่อสินค้า"}
-            className="
-              max-w-full max-h-full object-contain
+            className="max-w-full max-h-full object-contain
               transition-transform duration-300 ease-in-out
-              hover:scale-120
-            "
+              hover:scale-120"
             onLoad={() => setImageStatus("loaded")}
             onError={() => setImageStatus("error")}
           />
@@ -77,12 +82,12 @@ export default function ProductCard({ product = {} }) {
         )}
       </div>
 
-      {/* ✅ ชื่อสินค้า (ปรับขนาดตามหน้าจอ) */}
+      {/* ✅ ชื่อสินค้า */}
       <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-800 text-start line-clamp-3 px-2 mb-6">
         {product.itemDescription || "ไม่มีชื่อสินค้า"}
       </p>
 
-      {/* ✅ ราคาสินค้า (แสดงขอกราคา ถ้าไม่มี token) */}
+      {/* ✅ ราคาสินค้า */}
       {token ? (
         <p className="text-base sm:text-xl md:text-2xl font-bold text-green-600 text-start mb-6 px-4">
           {product.price != null
@@ -92,7 +97,7 @@ export default function ProductCard({ product = {} }) {
       ) : (
         <div className="flex justify-center items-center mb-6">
           <Link
-            to="/loginPage" // เปลี่ยนเป็นเส้นทางที่คุณใช้สำหรับหน้า login
+            to="/loginPage" 
             className="text-blue-500 font-semibold px-6 py-2 transition-all duration-200
               hover:text-green-600 hover:scale-105"
           >
@@ -103,19 +108,10 @@ export default function ProductCard({ product = {} }) {
 
       {/* ✅ ปุ่มเปรียบเทียบ */}
       <button
-        className="
-          w-full flex items-center justify-center gap-2 
+        className="w-full flex items-center justify-center gap-2 
           border-t border-gray-300 text-gray-600 font-medium text-base py-2
-          rounded-b-xl hover:bg-gray-100 hover:shadow-inner transition-all duration-200
-        "
-        onClick={(e) => {
-          e.stopPropagation();
-          navigate(
-            `/compare?product=${encodeURIComponent(
-              product.itemDescription || "unknown"
-            )}`
-          );
-        }}
+          rounded-b-xl hover:bg-gray-100 hover:shadow-inner transition-all duration-200"
+        onClick={handleCompareClick}
       >
         <Repeat size={20} strokeWidth={1.5} />
         <span>เปรียบเทียบ</span>
