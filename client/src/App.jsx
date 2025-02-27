@@ -6,6 +6,7 @@ import Signup from "./Admin/Pages/signup";
 import "./App.css";
 import PromotionPage from "./Client/Page/PromotionsPage";
 import Promotions from "./Client/Page/PromotionlistPage";
+import About from "./Client/Page/AboutUs";
 
 
 // 📄 Client Pages
@@ -42,6 +43,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login-popup" element={<LoginPopup setIsOpen={setIsOpen} />} />
         <Route path="/loginPage" element={<LoginPage />} />
+        <Route path="/signup" element={<Signup />} />
         <Route element={<MainLayout />}>
         <Route path="/products/:id" element={<ProductPage />} />
           <Route path="/contact" element={<Contact />} />
@@ -51,7 +53,7 @@ function App() {
           <Route path="/solar-panel" element={<Solar />} />
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/promotions/:id" element={<PromotionPage />} />
-          <Route path="/signup" element={<Signup />} />
+          <Route path="/about" element={<About />} />
         </Route>
 
         {/* ✅ Protected User Routes (ต้องมี token + role = "user") */}
@@ -74,7 +76,6 @@ function App() {
           <Route path="/edit-product/:productId" element={<EditProductPage />} />
           <Route path="/edit-promotion/:promotionId" element={<EditPromotionPage />} />
           <Route path="/UserDashboard" element={<UserDashboard />} />
-          
           <Route path="/edit-user/:id" element={<EditUserPage />} /> {/* ✅ Route แก้ไข */}
         </Route>
 

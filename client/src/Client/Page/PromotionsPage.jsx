@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ProductCard from "../Component/ProductCard"; // ✅ นำเข้า ProductCard
+import ChatButton from "../Component/ChatButton";
 
 const PromotionPage = () => {
   const { id } = useParams();
@@ -155,6 +156,7 @@ const PromotionPage = () => {
           )}
         </div>
       </div>
+      <ChatButton/>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import axios from "axios";
 import ProductFilter from "../Component/ProductFilter"; // เพิ่มฟิลเตอร์สำหรับกรอก
 import ProductCard from "../Component/ProductCard"; // การ์ดสินค้า
 import cctv from "../../assets/Image/cctv.png"; // รูปภาพประกอบ
+import ChatButton from "../Component/ChatButton";
 
 export default function CCTVPage() {
   const [products, setProducts] = useState([]);
@@ -109,6 +110,7 @@ export default function CCTVPage() {
           )}
         </section>
       </div>
+      <ChatButton />
     </div>
   );
 }

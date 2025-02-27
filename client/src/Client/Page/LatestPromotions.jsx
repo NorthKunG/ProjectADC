@@ -1,6 +1,7 @@
 import PromotionsCard from "../Component/PromotionsCard";
 import Promotion from "../../assets/Image/Promotion.png"; 
 
+
 const LayoutPromotion = () => {
   return (
        <div className="bg-white p-6 rounded-lg w-full mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20">

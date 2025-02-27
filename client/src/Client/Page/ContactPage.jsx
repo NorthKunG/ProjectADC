@@ -1,7 +1,5 @@
-
 import QRcode from "../../assets/Image/QRcod.png";
-
-
+import ChatButton from "../Component/ChatButton";
 
 const ContactPage = () => {
   return (
@@ -19,8 +17,12 @@ const ContactPage = () => {
               alt="QR Code"
               className="w-60 h-60 sm:w-72 sm:h-72 lg:w-80 lg:h-80 object-cover rounded-lg"
             />
-            <p className="mt-4 text-lg sm:text-xl font-semibold">Add line chat bot</p>
-            <p className="text-gray-600 text-sm sm:text-base">แชทไลน์บอทตอบคำถามอัตโนมัติ</p>
+            <p className="mt-4 text-lg sm:text-xl font-semibold">
+              Add line chat bot
+            </p>
+            <p className="text-gray-600 text-sm sm:text-base">
+              แชทไลน์บอทตอบคำถามอัตโนมัติ
+            </p>
           </div>
 
           {/* ส่วนข้อมูลติดต่อ */}
@@ -48,8 +50,13 @@ const ContactPage = () => {
                   phone: "089-359-6459",
                 },
               ].map((contact, index) => (
-                <div key={index} className="text-left border-b pb-3 sm:pb-4 last:border-none">
-                  <h3 className="font-semibold text-base sm:text-lg">{contact.title}</h3>
+                <div
+                  key={index}
+                  className="text-left border-b pb-3 sm:pb-4 last:border-none"
+                >
+                  <h3 className="font-semibold text-base sm:text-lg">
+                    {contact.title}
+                  </h3>
                   <p className="text-sm sm:text-base">
                     ● อีเมล:{" "}
                     <a
@@ -60,7 +67,8 @@ const ContactPage = () => {
                     </a>
                   </p>
                   <p className="text-sm sm:text-base">
-                    ● <span className="font-semibold">โทรศัพท์</span>: {contact.phone}
+                    ● <span className="font-semibold">โทรศัพท์</span>:{" "}
+                    {contact.phone}
                   </p>
                 </div>
               ))}
@@ -68,7 +76,7 @@ const ContactPage = () => {
           </div>
         </div>
       </div>
-
+      <ChatButton />
     </div>
   );
 };

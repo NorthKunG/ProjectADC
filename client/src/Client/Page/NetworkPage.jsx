@@ -3,6 +3,7 @@ import axios from "axios";
 import ProductFilter from "../Component/ProductFilter"; // เพิ่มฟิลเตอร์สำหรับกรอก
 import ProductCard from "../Component/ProductCard"; // การ์ดสินค้า
 import network from "../../assets/Image/Network .png"; // รูปภาพประกอบ
+import ChatButton from "../Component/ChatButton";
 
 export default function NetworkPage() {
   const [products, setProducts] = useState([]);
@@ -109,6 +110,7 @@ export default function NetworkPage() {
           )}
         </section>
       </div>
+        <ChatButton />
     </div>
   );
 }

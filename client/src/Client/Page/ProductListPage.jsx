@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ProductFilter from "../Component/ProductFilter";
-import ProductCard from "../Component/ProductCard"; // ใช้ไฟล์ที่คุณมีอยู่แล้ว
+import ProductCard from "./ProductCard2"; // ใช้ไฟล์ที่คุณมีอยู่แล้ว
+import ChatButton from "../Component/ChatButton";
 
 const ProductListPage = () => {
   const [products, setProducts] = useState([]);        // ✅ เก็บข้อมูลสินค้า
@@ -47,7 +48,7 @@ const ProductListPage = () => {
           <p className="text-center text-red-500">ไม่มีสินค้าตรงกับเงื่อนไข</p>
         )}
       </div>
-      
+      <ChatButton/>
     </div>
   );
 };

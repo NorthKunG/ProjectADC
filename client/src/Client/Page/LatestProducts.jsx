@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import ProductCard from "../Component/ProductCard";
 import newIcon from "../../assets/Image/New.png"; 
 
+
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function LatestProducts() {

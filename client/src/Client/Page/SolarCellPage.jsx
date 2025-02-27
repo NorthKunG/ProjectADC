@@ -3,6 +3,7 @@ import axios from "axios";
 import ProductFilter from "../Component/ProductFilter"; // เพิ่มฟิลเตอร์สำหรับกรอก
 import ProductCard from "../Component/ProductCard"; // การ์ดสินค้า
 import solar from "../../assets/Image/solar.png"; // รูปภาพประกอบ
+import ChatButton from "../Component/ChatButton";
 
 export default function SolarCellPage() {
   const [products, setProducts] = useState([]);
@@ -110,6 +111,8 @@ export default function SolarCellPage() {
           )}
         </section>
       </div>
+      <ChatButton/>
     </div>
+    
   );
 }

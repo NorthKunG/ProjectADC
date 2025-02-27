@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import CompareTable from './ComparisonTable';
+import { useState, useEffect } from 'react';
+import CompareTable from '../Component/ComparisonTable';
 import { useNavigate } from 'react-router-dom';
+import ChatButton from "../Component/ChatButton";
 
 export default function ComparePage() {
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -41,6 +42,7 @@ export default function ComparePage() {
       ) : (
         <p>ยังไม่มีการเลือกสินค้าที่จะเปรียบเทียบ</p>
       )}
+      <ChatButton/>
     </div>
   );
 }

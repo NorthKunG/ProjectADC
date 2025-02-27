@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import PromotionsCard from "../Component/PromotionsCard"; // นำเข้า PromotionsCard ที่เราแก้ไข
+import PromotionsCard from "../Component/PromotionsCard"; // ใช้ PromotionsCard ที่เราแก้ไข
 import headerImage from "../../assets/Image/promotions.png"; // ใช้รูปภาพสำหรับ header ของหน้า
+import ChatButton from "../Component/ChatButton";
 
-export default function PromotionsListPage() {
-  const [promotions, setPromotions] = useState([]); // เก็บข้อมูลโปรโมชั่นทั้งหมด
-  const [loading, setLoading] = useState(true);     // สถานะการโหลดข้อมูล
-  const [totalCount, setTotalCount] = useState(0);  // จำนวนโปรโมชั่นทั้งหมด
+const LayoutPromotion = () => {
+  const [promotions, setPromotions] = useState([]); // เก็บข้อมูลโปรโมชั่น
+  const [loading, setLoading] = useState(true);    // สถานะการโหลดข้อมูล
+  const [totalPromotions, setTotalPromotions] = useState(0); // จำนวนโปรโมชั่นทั้งหมด
 
   // ฟังก์ชันดึงข้อมูลโปรโมชั่นทั้งหมด
   useEffect(() => {
@@ -14,11 +15,11 @@ export default function PromotionsListPage() {
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/promotions`);
         setPromotions(response.data.promotions); // เก็บข้อมูลโปรโมชั่นทั้งหมด
-        setTotalCount(response.data.totalCount); // เก็บจำนวนโปรโมชั่นทั้งหมด
+        setTotalPromotions(response.data.promotions.length); // เก็บจำนวนโปรโมชั่นทั้งหมด
       } catch (error) {
         console.error("❌ เกิดข้อผิดพลาดในการดึงข้อมูลโปรโมชั่น:", error);
         setPromotions([]); // ถ้าเกิดข้อผิดพลาดให้ล้างข้อมูลโปรโมชั่น
-        setTotalCount(0); // ถ้าเกิดข้อผิดพลาดให้จำนวนโปรโมชั่นเป็น 0
+        setTotalPromotions(0); // ถ้าเกิดข้อผิดพลาดให้จำนวนโปรโมชั่นเป็น 0
       } finally {
         setLoading(false); // หยุดการโหลด
       }
@@ -28,7 +29,7 @@ export default function PromotionsListPage() {
   }, []); // ใช้ [] เพื่อให้เรียกแค่ครั้งเดียวเมื่อโหลดหน้า
 
   return (
-    <div className="py-10 bg-gray-50 px-4 sm:px-6 lg:px-8">
+    <div className="bg-white p-6 rounded-lg w-full mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20">
       {/* Header */}
       <div className="text-left mb-8">
         <img
@@ -45,31 +46,24 @@ export default function PromotionsListPage() {
 
         {/* จำนวนโปรโมชั่น */}
         <div className="w-full p-6 bg-white shadow-lg rounded-lg mb-10 mt-6 border border-gray-300">
-          <h1 className="text-2xl font-semibold text-gray-700">โปรโมชั่นทั้งหมด</h1>
-          <p className="text-gray-500 text-sm mt-2">จำนวน {totalCount} รายการ</p>
+          <h1 className="text-2xl font-semibold text-gray-700">จำนวนโปรโมชั่นทั้งหมด</h1>
+          <p className="text-gray-500 text-sm mt-2">จำนวน {totalPromotions} รายการ</p>
         </div>
       </div>
 
-      {/* แสดงโปรโมชั่นทั้งหมด */}
-      <div className="flex flex-col lg:flex-row gap-6">
-        <section className="w-full lg:w-3/4 xl:w-4/5">
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <p className="text-blue-500 font-medium text-lg animate-pulse">
-                ⏳ กำลังโหลดโปรโมชั่น...
-              </p>
-            </div>
-          ) : promotions.length > 0 ? (
-            <PromotionsCard promotions={promotions} limit={totalCount} />  
-          ) : (
-            <div className="flex justify-center items-center h-64">
-              <p className="text-red-500 font-semibold text-lg">
-                ไม่มีโปรโมชั่นในขณะนี้
-              </p>
-            </div>
-          )}
-        </section>
-      </div>
+      {/* แสดงรายการโปรโมชั่นทั้งหมด */}
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <p className="text-blue-500 font-medium text-lg animate-pulse">
+            ⏳ กำลังโหลดโปรโมชั่น...
+          </p>
+        </div>
+      ) : (
+        <PromotionsCard limit={99} />  
+      )}
+      <ChatButton/>
     </div>
   );
-}
+};
+
+export default LayoutPromotion;
