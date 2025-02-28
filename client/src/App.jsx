@@ -22,7 +22,6 @@ import Addpromotion from "./Admin/Pages/AddPromotionPage";
 import EditProductPage from "./Admin/Pages/EditProductPage";
 import EditPromotionPage from "./Admin/Pages/EditPromotionPage";
 import UserDashboard from "./Admin/Pages/UserDashboard"
-import Twse from "./Admin/Pages/Twse";
 import Contact from "./Client/Page/ContactPage";
 import MainLayout from "./Client/Component/MainLayout";
 import ComparePage from "./Client/Page/CompareProductsPage";
@@ -63,9 +62,7 @@ function App() {
 
         {/* ✅ Protected Product Routes (ต้องมี token - ไม่จำกัด role) */}
         <Route element={<ProtectedRoute />}>
-          {/* <Route path="/products/:id" element={<ProductPage />} /> */}
-          <Route path="/Twse" element={<Twse />} />
-          
+    
         </Route>
 
         {/* ✅ Protected Admin Routes (ต้องมี token + role = "admin") */}

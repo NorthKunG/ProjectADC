@@ -17,9 +17,10 @@ const PromotionPage = () => {
         const response = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/promotions/${id}`
         );
-        setPromotion(response.data || {});
+        setPromotion(response.data || null);
       } catch (error) {
         console.error("🚫 ไม่สามารถโหลดข้อมูลโปรโมชั่น:", error);
+        setPromotion(null);
       } finally {
         setLoading(false);
       }
@@ -30,9 +31,7 @@ const PromotionPage = () => {
   }, [id]);
 
   if (loading) return <div className="text-center mt-10">กำลังโหลด...</div>;
-
-  if (!promotion || Object.keys(promotion).length === 0)
-    return <div className="text-center mt-10 text-red-500">ไม่พบโปรโมชั่น</div>;
+  if (!promotion) return <div className="text-center mt-10 text-red-500">ไม่พบโปรโมชั่น</div>;
 
   return (
     <div className="w-full bg-gray-50 py-8 px-4 md:px-12">
@@ -43,11 +42,10 @@ const PromotionPage = () => {
           <div className="w-full flex justify-center bg-gray-100">
             {promotion.poster ? (
               <img
-                src={`${import.meta.env.VITE_API_URL}/uploads/promotion/${
-                  promotion.poster
-                }`}
+                src={`${import.meta.env.VITE_API_URL}/uploads/promotion/${promotion.poster}`}
                 alt={promotion.name || "โปรโมชั่น"}
                 className="w-full h-auto max-h-[500px] object-cover rounded-lg"
+                loading="lazy"
               />
             ) : (
               <div className="w-full h-[500px] flex items-center justify-center text-gray-500">
@@ -58,12 +56,10 @@ const PromotionPage = () => {
 
           {/* ✅ รายละเอียดโปรโมชั่น */}
           <div className="p-6 flex flex-col justify-between">
-            {/* ชื่อโปรโมชั่น */}
             <h1 className="text-4xl font-bold text-gray-800">
               {promotion.name || "ไม่มีชื่อโปรโมชั่น"}
             </h1>
 
-            {/* รายชื่อรายการสินค้า */}
             <div className="mt-6">
               <h2 className="text-xl font-semibold text-gray-700 mb-2">
                 รายการสินค้าในโปรโมชั่น
@@ -71,9 +67,8 @@ const PromotionPage = () => {
               {promotion.items?.length > 0 ? (
                 <ul className="list-disc pl-6 space-y-2 text-gray-700 text-lg list-inside">
                   {promotion.items.map((item, index) => (
-                    <li key={index} className="truncate">
-                      {item.productId?.itemDescription ||
-                        "ไม่มีรายละเอียดสินค้า"}
+                    <li key={item.productId?._id || index} className="truncate">
+                      {item.productId?.itemDescription || "ไม่มีรายละเอียดสินค้า"}
                     </li>
                   ))}
                 </ul>
@@ -85,7 +80,7 @@ const PromotionPage = () => {
             {/* ✅ แสดงราคา หรือให้เข้าสู่ระบบ */}
             {token ? (
               <p className="text-green-600 font-bold text-4xl mt-6">
-                ฿{promotion.price ? promotion.price.toLocaleString() : "N/A"}
+                ฿{promotion.price?.toLocaleString() ?? "N/A"}
               </p>
             ) : (
               <button
@@ -96,36 +91,18 @@ const PromotionPage = () => {
               </button>
             )}
 
-            {/* ปุ่ม รับใบเสนอราคา */}
+            {/* ✅ ปุ่ม ขอใบเสนอราคา (ไปที่ LINE) */}
             <div className="mt-6">
-              <button
-                onClick={() => alert("✅ ส่งคำขอใบเสนอราคา!")}
-                className="w-full py-4 bg-gradient-to-r from-green-400 to-green-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 hover:shadow-lg transition"
+              <a
+                href="https://line.me/R/ti/p/@021nijcx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center py-4 text-white text-lg font-semibold rounded-lg 
+                  bg-gradient-to-r from-green-500 to-green-700 shadow-md 
+                  hover:scale-105 hover:shadow-lg transition duration-300 transform hover:-translate-y-1"
               >
-                รับใบเสนอราคา
-              </button>
-            </div>
-
-            {/* ปุ่ม เปรียบเทียบ & แชร์ */}
-            <div className="flex gap-4 mt-6">
-              {/* เปรียบเทียบ */}
-              <button
-                onClick={() => alert("🔎 ฟีเจอร์เปรียบเทียบกำลังมาเร็วๆ นี้!")}
-                className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-md hover:scale-105 hover:shadow-lg transition"
-              >
-                เปรียบเทียบ
-              </button>
-
-              {/* แชร์ */}
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  alert("✅ ลิงก์ถูกคัดลอกแล้ว!");
-                }}
-                className="w-full py-4 bg-gradient-to-r from-gray-500 to-gray-700 text-white font-semibold rounded-lg shadow-md hover:scale-105 hover:shadow-lg transition"
-              >
-                แชร์
-              </button>
+                📄ขอใบเสนอ
+              </a>
             </div>
           </div>
         </div>
@@ -137,16 +114,11 @@ const PromotionPage = () => {
           สินค้าที่ร่วมโปรโมชั่น
         </h2>
 
-        {/* กำหนดให้สินค้าแสดงในแนวนอนและสามารถเลื่อนได้ */}
         <div className="flex overflow-x-auto space-x-4 p-4">
           {promotion.items?.length > 0 ? (
-            promotion.items.map((item) => (
-              <div key={item.productId?._id} className="flex-shrink-0">
-                <ProductCard
-                  key={item.productId?._id}
-                  product={item.productId}
-                />{" "}
-                {/* ใช้ ProductCard */}
+            promotion.items.map((item, index) => (
+              <div key={item.productId?._id || index} className="flex-shrink-0">
+                <ProductCard product={item.productId} />
               </div>
             ))
           ) : (
@@ -156,7 +128,7 @@ const PromotionPage = () => {
           )}
         </div>
       </div>
-      <ChatButton/>
+      <ChatButton />
     </div>
   );
 };

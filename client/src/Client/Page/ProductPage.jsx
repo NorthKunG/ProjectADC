@@ -3,13 +3,12 @@
 import { useEffect, useState } from "react"; // ใช้จัดการ State และ Lifecycle
 import { useParams, useNavigate } from "react-router-dom"; // ดึงพารามิเตอร์จาก URL และใช้ navigate
 import axios from "axios"; // สำหรับเรียก API
-import { ChevronLeft, ChevronRight, FileText } from "lucide-react"; // ไอคอนสำหรับ UI
+import { ChevronLeft, ChevronRight, FileText, Repeat } from "lucide-react"; // ไอคอนสำหรับ UI
 import Lightbox from "yet-another-react-lightbox"; // ไลบรารีสำหรับดูภาพแบบเต็มจอ
 import "yet-another-react-lightbox/styles.css"; // สไตล์ของ Lightbox
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails"; // ปลั๊กอินสำหรับแสดงรูปย่อ
 import "yet-another-react-lightbox/plugins/thumbnails.css"; // สไตล์ของรูปย่อ
 import ChatButton from "../Component/ChatButton";
-
 
 // ✅ URL พื้นฐานของ API
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -50,7 +49,6 @@ const ProductPage = () => {
     }
   };
 
-
   useEffect(() => {
     if (id) fetchProduct(); // โหลดข้อมูลเมื่อ id เปลี่ยน
   }, [id]);
@@ -70,6 +68,21 @@ const ProductPage = () => {
       </div>
     );
   }
+
+  const handleCompareClick = (e) => {
+    e.stopPropagation(); // Prevent triggering the card click event
+    let selectedProducts = JSON.parse(
+      sessionStorage.getItem("selectedProducts") || "[]"
+    );
+    if (!selectedProducts.find((p) => p._id === product._id)) {
+      selectedProducts.push(product);
+      sessionStorage.setItem(
+        "selectedProducts",
+        JSON.stringify(selectedProducts)
+      );
+    }
+    navigate("/compare");
+  };
 
   // ✅ สร้าง array รูปภาพ
   const images =
@@ -208,27 +221,25 @@ const ProductPage = () => {
 
             {/* ✅ ปุ่มควบคุม (แสดงตลอด) */}
             <div className="w-full flex flex-col gap-4 mt-6">
-              {/* ✅ ปุ่มรับใบเสนอราคา (ตรวจสอบ token ก่อนทำงาน) */}
+              {/* ✅ ปุ่มรับใบเสนอราคา (เปิด LINE ทันที) */}
               <button
                 onClick={() => {
-                  token
-                    ? alert("✅ ส่งคำขอใบเสนอราคา!")
-                    : navigate("/loginPage");
+                  window.open("https://line.me/R/ti/p/@021nijcx", "_blank");
                 }}
-                className="w-full py-4 bg-gradient-to-r from-green-400 to-green-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 hover:shadow-lg transition flex justify-center items-center gap-2"
+                className="w-full py-4 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-md 
+    hover:scale-105 hover:shadow-xl transition duration-300 transform hover:-translate-y-1 flex justify-center items-center gap-2 text-xl"
               >
-                <FileText size={20} /> รับใบเสนอราคา
+                <FileText size={28} /> รับใบเสนอราคา
               </button>
 
               {/* ✅ ปุ่มเปรียบเทียบ & แชร์ */}
               <div className="w-full flex gap-4">
                 <button
-                  onClick={() =>
-                    alert("🔎 ฟีเจอร์เปรียบเทียบกำลังมาเร็วๆ นี้!")
-                  }
-                  className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-md hover:scale-105 hover:shadow-lg transition flex justify-center items-center gap-2"
+                  onClick={handleCompareClick} // ✅ เพิ่มฟังก์ชันเปรียบเทียบ
+                  className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-md hover:scale-105 hover:shadow-lg transition flex justify-center items-center gap-2 text-xl"
                 >
-                  <i className="fas fa-exchange-alt"></i> เปรียบเทียบ
+                  <Repeat size={30} strokeWidth={1.5} />
+                  <span>เปรียบเทียบ</span>
                 </button>
 
                 <button
