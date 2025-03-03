@@ -28,6 +28,10 @@ import ComparePage from "./Client/Page/CompareProductsPage";
 import EditUserPage from "./Admin/Pages/UserEditPage";
 import Network from "./Client/Page/NetworkPage";
 import Solar from "./Client/Page/SolarCellPage";
+import AddBrandPage from "./Admin/Pages/AddBrandPage";
+import EditBrandPage from "./Admin/Pages/EditBrandPage";
+import AddCSCodePage from "./Admin/Pages/AddCSCodePage";
+import EditCSCodePage from "./Admin/Pages/EditCSCodePage";
 
 
 
@@ -74,6 +78,12 @@ function App() {
           <Route path="/edit-promotion/:promotionId" element={<EditPromotionPage />} />
           <Route path="/UserDashboard" element={<UserDashboard />} />
           <Route path="/edit-user/:id" element={<EditUserPage />} /> {/* ✅ Route แก้ไข */}
+          <Route path="/add-brand" element={<AddBrandPage />} />
+          <Route path="/edit-brand/:id" element={<EditBrandPage />} />
+          <Route path="/add-cscode" element={<AddCSCodePage />} />
+          <Route path="/edit-cscode/:id" element={<EditCSCodePage />} />
+          
+
         </Route>
 
       </Routes>

@@ -16,7 +16,7 @@ const MENU_SECTION_3 = [
 export default function MenuDropdown() {
   return (
     <div className="bg-gray-100 p-3 shadow-md hidden md:block">
-      <div className="container mx-auto flex items-center justify-between gap-2 lg:gap-4">
+      <div className="mx-auto w-full flex items-center justify-between gap-2 lg:gap-4 xl:px-20">
         
         {/* ✅ Section 1 - หน้าแรก */}
         <div className="flex items-center gap-2">

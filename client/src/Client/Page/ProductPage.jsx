@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"; // ใช้จัดการ State และ Lifecycle
 import { useParams, useNavigate } from "react-router-dom"; // ดึงพารามิเตอร์จาก URL และใช้ navigate
 import axios from "axios"; // สำหรับเรียก API
-import { ChevronLeft, ChevronRight, FileText, Repeat } from "lucide-react"; // ไอคอนสำหรับ UI
+import { ChevronLeft, ChevronRight, FileText, Repeat, Share } from "lucide-react"; // ไอคอนสำหรับ UI
 import Lightbox from "yet-another-react-lightbox"; // ไลบรารีสำหรับดูภาพแบบเต็มจอ
 import "yet-another-react-lightbox/styles.css"; // สไตล์ของ Lightbox
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails"; // ปลั๊กอินสำหรับแสดงรูปย่อ
@@ -249,7 +249,7 @@ const ProductPage = () => {
                   }}
                   className="w-full py-4 bg-gradient-to-r from-gray-500 to-gray-700 text-white font-semibold rounded-lg shadow-md hover:scale-105 hover:shadow-lg transition flex justify-center items-center gap-2"
                 >
-                  <i className="fas fa-share-alt"></i> แชร์
+                  <Share  size={30} ></Share> แชร์
                 </button>
               </div>
             </div>

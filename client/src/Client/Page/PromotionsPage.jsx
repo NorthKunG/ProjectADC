@@ -18,6 +18,9 @@ const PromotionPage = () => {
           `${import.meta.env.VITE_API_URL}/api/promotions/${id}`
         );
         setPromotion(response.data || null);
+
+        // ✅ ตรวจสอบข้อมูลสินค้าภายในโปรโมชั่น
+        console.log("🚀 Promotion Items:", response.data?.items);
       } catch (error) {
         console.error("🚫 ไม่สามารถโหลดข้อมูลโปรโมชั่น:", error);
         setPromotion(null);
@@ -116,11 +119,13 @@ const PromotionPage = () => {
 
         <div className="flex overflow-x-auto space-x-4 p-4">
           {promotion.items?.length > 0 ? (
-            promotion.items.map((item, index) => (
-              <div key={item.productId?._id || index} className="flex-shrink-0">
-                <ProductCard product={item.productId} />
-              </div>
-            ))
+            promotion.items
+              .filter(item => item.productId) // ✅ กรองเฉพาะสินค้าที่มีค่า productId
+              .map((item, index) => (
+                <div key={item.productId?._id || index} className="flex-shrink-0">
+                  <ProductCard product={item.productId} />
+                </div>
+              ))
           ) : (
             <p className="text-center text-gray-500 col-span-full">
               ไม่มีสินค้าในโปรโมชั่นนี้

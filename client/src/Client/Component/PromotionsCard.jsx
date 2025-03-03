@@ -15,6 +15,9 @@ const PromotionsCard = ({ limit = 4 }) => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/promotions`);
         setPromotions(response.data.promotions.slice(0, limit));
+
+        // ✅ ตรวจสอบข้อมูล API
+        console.log("🚀 Promotions Data:", response.data.promotions);
       } catch (error) {
         console.error("❌ เกิดข้อผิดพลาดในการดึงข้อมูลโปรโมชั่น:", error);
       } finally {
@@ -34,7 +37,7 @@ const PromotionsCard = ({ limit = 4 }) => {
     return <div className="text-center mt-10 text-lg font-medium">กำลังโหลดข้อมูล...</div>;
   }
 
-  if (promotions.length === 0) {
+  if (!promotions || promotions.length === 0) {
     return <div className="text-center mt-10 text-red-500">ไม่มีโปรโมชั่นในขณะนี้</div>;
   }
 
@@ -66,18 +69,21 @@ const PromotionsCard = ({ limit = 4 }) => {
             <div className="p-4 flex flex-col flex-grow">
               {/* ชื่อโปรโมชั่น */}
               <h2 className="text-lg sm:text-xl font-bold text-gray-800 leading-snug mb-2 truncate">
-                {promotion.name}
+                {promotion.name || "ไม่มีชื่อโปรโมชั่น"}
               </h2>
 
               {/* รายการสินค้าในโปรโมชั่น */}
               <div className="flex-grow overflow-y-auto bg-gray-50 rounded-lg p-2">
                 {Array.isArray(promotion.items) && promotion.items.length > 0 ? (
                   <ul className="list-disc pl-5 space-y-1 max-h-44 overflow-y-auto text-sm sm:text-base">
-                    {promotion.items.slice(0, 5).map((item) => (
-                      <li key={item.productId?._id} className="truncate text-gray-700">
-                        {item.productId?.itemDescription || "ไม่มีรายละเอียดสินค้า"}
-                      </li>
-                    ))}
+                    {promotion.items
+                      .filter((item) => item.productId) // ✅ กรองสินค้าที่ productId เป็น null ออก
+                      .slice(0, 5)
+                      .map((item) => (
+                        <li key={item.productId._id} className="truncate text-gray-700">
+                          {item.productId.itemDescription || "ไม่มีรายละเอียดสินค้า"}
+                        </li>
+                      ))}
                     {promotion.items.length > 5 && (
                       <li className="text-blue-500">...ดูเพิ่มเติม</li>
                     )}
@@ -90,7 +96,7 @@ const PromotionsCard = ({ limit = 4 }) => {
               {/* ✅ แสดงราคาโปรโมชั่น */}
               {token ? (
                 <p className="text-green-600 text-lg sm:text-xl font-bold mt-3 text-center">
-                  ฿{promotion.price ? promotion.price.toLocaleString() : "N/A"}
+                  ฿{promotion.price ? promotion.price.toLocaleString() : "ไม่ระบุราคา"}
                 </p>
               ) : (
                 <div className="flex justify-center items-center mb-6">

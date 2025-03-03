@@ -105,7 +105,7 @@ const NavbarDesktop = ({ onLoginClick }) => {
     <>
       <Banners />
       <nav className="bg-gradient-to-r from-[#63a6dd] via-[#63a6dd] to-[#00C999] p-4 hidden md:block shadow-md relative">
-        <div className="container mx-auto flex items-center justify-between gap-4">
+        <div className=" w-full mx-auto flex items-center justify-between gap-4 xl:px-20">
           <Link to="/Home" className="flex items-center gap-2 text-white">
             <img
               src={LogoADCM}

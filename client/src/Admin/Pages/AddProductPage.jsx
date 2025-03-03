@@ -168,43 +168,63 @@ const AddProductPage = () => {
       >
         <h2 className="text-2xl font-bold mb-4">ข้อมูลสินค้า</h2>
         <div className="grid grid-cols-2 gap-4">
-          {/* 1. แบรนด์ */}
-          <div>
-            <label className="font-semibold block mb-2">แบรนด์ :</label>
-            <select
-              name="brand"
-              value={formData.brand}
-              onChange={handleChange}
-              className="w-full p-3 border rounded-lg"
-              required
-            >
-              <option value="">เลือกแบรนด์</option>
-              {brands.map((b) => (
-                <option key={b.id} value={b.name}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* 1. แบรนด์ */}
+      <div>
+        <label className="font-semibold block mb-2">แบรนด์ :</label>
+        <div className="flex">
+          <select
+            name="brand"
+            value={formData.brand}
+            onChange={handleChange}
+            className="w-full p-3 border rounded-lg"
+            required
+          >
+            <option value="">เลือกแบรนด์</option>
+            {brands.map((b) => (
+              <option key={b.id} value={b.name}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+          {/* 🔥 ปุ่มเพิ่มแบรนด์ */}
+          <button
+            type="button"
+            onClick={() => navigate("/add-brand")}
+            className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+          >
+            +
+          </button>
+        </div>
+      </div>
 
-          {/* 2. CSCode */}
-          <div>
-            <label className="font-semibold block mb-2">CSCode :</label>
-            <select
-              name="cscode"
-              value={formData.cscode}
-              onChange={handleChange}
-              className="w-full p-3 border rounded-lg"
-              required
-            >
-              <option value="">เลือก CSCode</option>
-              {cscodes.map((c) => (
-                <option key={c.id} value={c.code}>
-                  {c.description} ({c.code})
-                </option>
-              ))}
-            </select>
-          </div>
+         {/* 2. CSCode */}
+      <div>
+        <label className="font-semibold block mb-2">CSCode :</label>
+        <div className="flex">
+          <select
+            name="cscode"
+            value={formData.cscode}
+            onChange={handleChange}
+            className="w-full p-3 border rounded-lg"
+            required
+          >
+            <option value="">เลือก CSCode</option>
+            {cscodes.map((c) => (
+              <option key={c.id} value={c.code}>
+                {c.description} ({c.code})
+              </option>
+            ))}
+          </select>
+          {/* 🔥 ปุ่มเพิ่ม CSCode */}
+          <button
+            type="button"
+            onClick={() => navigate("/add-cscode")}
+            className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+          >
+            +
+          </button>
+        </div>
+      </div>
 
           {/* 3. หมวดหมู่ */}
           <div>

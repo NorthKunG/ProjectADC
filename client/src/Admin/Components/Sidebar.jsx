@@ -33,7 +33,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               "flex items-center gap-2 p-2 rounded transition-all",
               location.pathname === "/admin/dashboard"
                 ? "bg-blue-500 text-white"
-                : "bg-white text-black hover:bg-blue-500 hover:text-white active:bg-blue-700"
+                : "bg-white text-black hover:bg-gray-500 hover:text-white active:bg-blue-700"
             )}
           >
             <Home size={25} /> หน้าแรก
@@ -46,7 +46,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               "flex items-center gap-2 p-2 rounded transition-all",
               location.pathname === "/add-product"
                 ? "bg-blue-500 text-white"
-                : "bg-white text-black hover:bg-blue-500 hover:text-white active:bg-blue-700"
+                : "bg-white text-black hover:bg-gray-500 hover:text-white active:bg-blue-700"
             )}
           >
             <PackagePlus size={20} /> เพิ่มสินค้า
@@ -59,10 +59,23 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               "flex items-center gap-2 p-2 rounded transition-all",
               location.pathname === "/UserDashboard"
                 ? "bg-blue-500 text-white"
-                : "bg-white text-black hover:bg-blue-500 hover:text-white active:bg-blue-700"
+                : "bg-white text-black hover:bg-gray-500 hover:text-white active:bg-blue-700"
             )}
           >
             <Users size={20} /> จัดการผู้ใช้
+          </Link>
+            
+          {/* 🔹 การตั้งค่า (ลิงก์ตรง) */}
+          <Link
+            to="/add-brand"
+            className={clsx(
+              "flex items-center gap-2 p-2 rounded transition-all",
+              location.pathname === "/UserDashboard"
+                ? "bg-blue-500 text-white"
+                : "bg-white text-black hover:bg-gray-500 hover:text-white active:bg-blue-700"
+            )}
+          >
+            <Users size={20} /> การตั้งค่า
           </Link>
         </nav>
       </div>

@@ -40,11 +40,14 @@ export default function PromotionTable() {
   return (
     <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6">
       {/* Header */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center mb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
+        {/* ชื่อหัวข้อ */}
         <h3 className="text-lg sm:text-2xl font-bold">📢 รายการโปรโมชั่น</h3>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <div className="relative w-full sm:w-64">
+        {/* กล่องค้นหาและตัวกรอง (Responsive) */}
+        <div className="flex flex-col sm:flex-row lg:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto lg:justify-end">
+          {/* ช่องค้นหา */}
+          <div className="relative w-full sm:w-64 lg:w-64">
             <Search className="absolute left-3 top-3 text-gray-400" size={18} />
             <input
               type="text"
@@ -55,11 +58,12 @@ export default function PromotionTable() {
             />
           </div>
 
+          {/* ตัวกรองเรียงลำดับ */}
           <select
             value={sortOrder}
             onChange={(e) => {
               setSortOrder(e.target.value); // ✅ เปลี่ยนการเรียง
-              setPage(1);                  // ✅ รีเซ็ตไปหน้าแรกเมื่อเปลี่ยนการเรียง
+              setPage(1); // ✅ รีเซ็ตไปหน้าแรกเมื่อเปลี่ยนการเรียง
             }}
             className="px-3 py-2 border rounded-md text-sm focus:ring focus:ring-blue-200"
           >
@@ -80,7 +84,9 @@ export default function PromotionTable() {
                 <tr>
                   <th className="p-3 text-left whitespace-nowrap">#</th>
                   <th className="p-3 text-left whitespace-nowrap">รูป</th>
-                  <th className="p-3 text-left whitespace-nowrap">ชื่อโปรโมชั่น</th>
+                  <th className="p-3 text-left whitespace-nowrap">
+                    ชื่อโปรโมชั่น
+                  </th>
                   <th className="p-3 text-left whitespace-nowrap">สินค้า</th>
                   <th className="p-3 text-left whitespace-nowrap">ราคา</th>
                   <th className="p-3 text-center whitespace-nowrap">แก้ไข</th>
@@ -90,10 +96,15 @@ export default function PromotionTable() {
               <tbody>
                 {promotions
                   .filter((promotion) =>
-                    promotion.name.toLowerCase().includes(searchTerm.toLowerCase())
+                    promotion.name
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase())
                   )
                   .map((promotion, index) => (
-                    <tr key={promotion._id} className="border-b hover:bg-gray-50">
+                    <tr
+                      key={promotion._id}
+                      className="border-b hover:bg-gray-50"
+                    >
                       <td className="p-3">{startItem + index}</td>
                       <td className="p-3">
                         <img
@@ -102,7 +113,10 @@ export default function PromotionTable() {
                           className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-md"
                         />
                       </td>
-                      <td className="p-3 font-medium max-w-[150px] sm:max-w-[200px] truncate" title={promotion.name}>
+                      <td
+                        className="p-3 font-medium max-w-[150px] sm:max-w-[200px] truncate"
+                        title={promotion.name}
+                      >
                         {promotion.name}
                       </td>
                       <td className="p-3 max-w-[200px] sm:max-w-[300px]">
@@ -111,16 +125,26 @@ export default function PromotionTable() {
                             <div
                               key={idx}
                               className="text-xs sm:text-sm truncate"
-                              title={`${item?.productId?.itemDescription ?? "ไม่มีชื่อสินค้า"} (${item.quantity} ชิ้น)`}
+                              title={`${
+                                item?.productId?.itemDescription ??
+                                "ไม่มีชื่อสินค้า"
+                              } (${item.quantity} ชิ้น)`}
                             >
-                              - {item?.productId?.itemDescription ?? "ไม่มีชื่อสินค้า"} ({item.quantity} ชิ้น)
+                              -{" "}
+                              {item?.productId?.itemDescription ??
+                                "ไม่มีชื่อสินค้า"}{" "}
+                              ({item.quantity} ชิ้น)
                             </div>
                           ))
                         ) : (
-                          <span className="text-gray-400 text-xs">ไม่มีสินค้าในโปรโมชั่น</span>
+                          <span className="text-gray-400 text-xs">
+                            ไม่มีสินค้าในโปรโมชั่น
+                          </span>
                         )}
                         {promotion.items.length > 3 && (
-                          <div className="text-gray-500 text-xs">...ดูเพิ่มเติม</div>
+                          <div className="text-gray-500 text-xs">
+                            ...ดูเพิ่มเติม
+                          </div>
                         )}
                       </td>
                       <td className="p-3 text-blue-600 font-semibold">
@@ -130,7 +154,10 @@ export default function PromotionTable() {
                         <EditPromotion promotionId={promotion._id} />
                       </td>
                       <td className="p-3 text-center">
-                        <DeletePromotion promotionId={promotion._id} fetchPromotions={fetchPromotions} />
+                        <DeletePromotion
+                          promotionId={promotion._id}
+                          fetchPromotions={fetchPromotions}
+                        />
                       </td>
                     </tr>
                   ))}
@@ -158,7 +185,9 @@ export default function PromotionTable() {
                   key={idx}
                   onClick={() => setPage(idx + 1)}
                   className={`px-3 py-1 rounded-md text-sm ${
-                    page === idx + 1 ? "bg-blue-600 text-white" : "bg-gray-100 hover:bg-gray-200"
+                    page === idx + 1
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 hover:bg-gray-200"
                   }`}
                 >
                   {idx + 1}
@@ -167,7 +196,9 @@ export default function PromotionTable() {
 
               <button
                 className="flex items-center gap-1 px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50 text-sm"
-                onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={page === totalPages}
               >
                 ถัดไป <ChevronRight size={16} />

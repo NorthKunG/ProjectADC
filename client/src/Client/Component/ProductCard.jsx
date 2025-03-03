@@ -9,6 +9,15 @@ export default function ProductCard({ product = {} }) {
   const navigate = useNavigate();
   const [imageStatus, setImageStatus] = useState("loading");
 
+  // ✅ เช็คก่อนว่า product มีค่าหรือไม่
+  if (!product || Object.keys(product).length === 0) {
+    return (
+      <div className="p-4 bg-gray-100 text-gray-500 rounded-lg shadow-md text-center">
+        ไม่มีข้อมูลสินค้า
+      </div>
+    );
+  }
+
   const hasImage = product?.images?.length > 0 && product.images[0]?.fileName;
   const imageUrl = hasImage
     ? `${BASE_URL}/uploads/products/${product.images[0].fileName}`
@@ -27,12 +36,12 @@ export default function ProductCard({ product = {} }) {
 
   const handleCompareClick = (e) => {
     e.stopPropagation(); // Prevent triggering the card click event
-    let selectedProducts = JSON.parse(sessionStorage.getItem('selectedProducts') || '[]');
-    if (!selectedProducts.find(p => p._id === product._id)) {
+    let selectedProducts = JSON.parse(sessionStorage.getItem("selectedProducts") || "[]");
+    if (!selectedProducts.find((p) => p._id === product._id)) {
       selectedProducts.push(product);
-      sessionStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
+      sessionStorage.setItem("selectedProducts", JSON.stringify(selectedProducts));
     }
-    navigate('/compare');
+    navigate("/compare");
   };
 
   return (
@@ -123,7 +132,7 @@ export default function ProductCard({ product = {} }) {
 // ✅ ตรวจสอบ props
 ProductCard.propTypes = {
   product: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
+    _id: PropTypes.string,
     brand: PropTypes.string,
     itemDescription: PropTypes.string,
     price: PropTypes.number,

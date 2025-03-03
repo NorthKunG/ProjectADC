@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Filter, ChevronLeft, ChevronRight, Check, X } from "lucide-react";
 import DeleteProductButton from "../Components/DeleteProductButton";
 import EditProductButton from "../Components/EditProductButton";
 
@@ -41,7 +41,10 @@ export default function LatestProductsTable() {
         <h3 className="text-lg sm:text-xl font-bold">สินค้าล่าสุด</h3>
         <div className="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2">
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+            <Search
+              className="absolute left-3 top-2.5 text-gray-400"
+              size={18}
+            />
             <input
               type="text"
               placeholder="ค้นหา..."
@@ -67,12 +70,14 @@ export default function LatestProductsTable() {
             <table className="w-full border-collapse text-sm">
               <thead className="bg-blue-600 text-white text-xs sm:text-sm">
                 <tr>
-                  <th className="p-3 text-left whitespace-nowrap">#</th>
+                  <th className="p-3 text-left whitespace-nowrap">ลำดับ</th>
                   <th className="p-3 text-left whitespace-nowrap">รูป</th>
                   <th className="p-3 text-left whitespace-nowrap">แบรนด์</th>
-                  <th className="p-3 text-left whitespace-nowrap">ชื่อสินค้า</th>
+                  <th className="p-3 text-left whitespace-nowrap">
+                    ชื่อสินค้า
+                  </th>
                   <th className="p-3 text-left whitespace-nowrap">หมวดหมู่</th>
-                  <th className="p-3 text-left whitespace-nowrap">specICT</th>
+                  <th className="p-3 text-left whitespace-nowrap">มาตฐาน ICT</th>
                   <th className="p-3 text-left whitespace-nowrap">ราคา</th>
                   <th className="p-3 text-center whitespace-nowrap">แก้ไข</th>
                   <th className="p-3 text-center whitespace-nowrap">ลบ</th>
@@ -113,12 +118,14 @@ export default function LatestProductsTable() {
                       <td className="p-3">{product.category || "-"}</td>
                       <td className="p-3 text-center">
                         {product.specICT ? (
-                          <span className="text-green-600">✔</span>
+                          <Check className="text-green-600" size={25} />
                         ) : (
-                          <span className="text-red-600">✘</span>
+                          <X className="text-red-600" size={25} />
                         )}
                       </td>
-                      <td className="p-3">{product.price ? `${product.price} บาท` : "-"}</td>
+                      <td className="p-3">
+                        {product.price ? `${product.price} บาท` : "-"}
+                      </td>
                       <td className="p-3 text-center">
                         <EditProductButton productId={product._id} />
                       </td>
