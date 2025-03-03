@@ -72,23 +72,29 @@ const uploadFileJson = async (req, res) => {
 
 // เพิ่มข้อมูล
 const newCSCode = async (req, res) => {
-    // รับข้อมูลจาก request body
     const { code, description } = req.body;
 
+    if (!code || !description) {
+        return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
+    }
+
     try {
-        // ตรวจสอบว่ามี CSCode นี้อยู่แล้วหรือไม่
-        const existingCSCode = await CSCode.findOne({ code });
-        if (existingCSCode) return res.status(400).json({ message: "CSCode นี้มีอยู่แล้ว" });
+        const trimmedCode = code.trim();
+        const existingCSCode = await CSCode.findOne({ code: trimmedCode });
 
-        // สร้าง CSCode ใหม่
-        const newCSCode = new CSCode({ code, description });
+        if (existingCSCode) {
+            return res.status(409).json({ message: "CSCode นี้มีอยู่แล้ว" });
+        }
 
-        // บันทึก CSCode ใหม่
+        const newCSCode = new CSCode({ code: trimmedCode, description: description.trim() });
         const savedCSCode = await newCSCode.save();
 
-        return res.status(200).json({ message: 'เพิ่มข้อมูลใหม่ลงในระบบเรียบร้อยแล้ว', savedCSCode });
-    } catch (error) { return res.status(400).json({ message: error.message }); }
+        return res.status(201).json({ message: "เพิ่มข้อมูลสำเร็จ", savedCSCode });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
 };
+
 
 // ดูข้อมูลทั้งหมด
 const getCSCodes = async (req, res) => {

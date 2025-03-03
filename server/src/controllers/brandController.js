@@ -29,20 +29,27 @@ const getBrandById = async (req, res) => {
     } catch (error) { return res.status(400).json({ message: error.message }); }
 };
 
-// เพิ่มข้อมูลแบรนด์
+// 🔹 เพิ่มข้อมูลแบรนด์สินค้า (✅ แก้ไขให้ถูกต้อง)
 const newBrand = async (req, res) => {
-    // รับ name จาก body
     const { name } = req.body;
+
     try {
-        // ค้นหาชื่อแบรนด์
-        const brand = await Brand.find(name);
-        if (brand) return res.status(400).json({ message: 'แบรนด์นี้มีอยู่ในระบบแล้ว' });
-        // สร้างแบรนใหม่
-        const newBrand = new Brand(name);
-        // บันทึกข้อมูล
-        const saveBrand = await newBrand.save();
-        return res.status(200).json({ message: 'สร้างแบรนด์ใหม่เรียบร้อย', saveBrand });
-    } catch (error) { return res.status(400).json({ message: error.message }); }
+        // ✅ ตรวจสอบแบรนด์ว่ามีอยู่แล้วหรือไม่ (ใช้ findOne() แทน find())
+        const existingBrand = await Brand.findOne({ name });
+        if (existingBrand) {
+            return res.status(400).json({ message: 'แบรนด์นี้มีอยู่ในระบบแล้ว' });
+        }
+
+        // ✅ สร้างแบรนด์ใหม่ (ต้องใช้ Object)
+        const newBrand = new Brand({ name });
+
+        // ✅ บันทึกข้อมูลลง Database
+        await newBrand.save();
+
+        return res.status(201).json({ message: 'สร้างแบรนด์ใหม่เรียบร้อย', newBrand });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
 };
 
 // แก้ไขแบรนด์สินค้า
